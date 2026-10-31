@@ -366,3 +366,44 @@ body,
   gap: 6px;
   margin-top: 6px;
 }
+
+#hud .panel-save {
+  left: 264px;
+  width: 300px;
+}
+
+.save-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.create-status {
+  min-height: 20px;
+  margin: 0;
+  color: #ff8a7a;
+  text-align: center;
+}
+
+.create-continue {
+  padding: 12px;
+  font: inherit;
+  font-weight: 600;
+  color: #17140f;
+  cursor: pointer;
+  background: #f0cf7a;
+  border: 0;
+  border-radius: 6px;
+}
+
+.create-import {
+  justify-self: center;
+  padding: 4px 12px;
+  font: inherit;
+  color: #c9bea6;
+  cursor: pointer;
+  background: none;
+  border: 1px solid #6b5630;
+  border-radius: 6px;
+}
+

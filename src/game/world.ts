@@ -21,6 +21,7 @@ import {
 import { cellDistance, Grid, sameCell } from './grid';
 import { findPath } from './pathfinding';
 import { Rng } from './rng';
+import { SAVE_VERSION, type SaveData } from '../save/saveData';
 import { needsTarget, skillArea } from './skills';
 
 export const TICK_SECONDS = 0.05;
@@ -162,6 +163,7 @@ export class World {
   readonly monsters: Monster[] = [];
   readonly summons: Summon[] = [];
   readonly items: GroundItem[] = [];
+  readonly mapId: string;
   time = 0;
 
   private readonly rng: Rng;
@@ -181,6 +183,7 @@ export class World {
     const classDef = config.classes[classId];
     if (!map || !classDef) throw new Error(`未知的地图或职业：${mapId} ${classId}`);
 
+    this.mapId = mapId;
     this.grid = new Grid(map);
     this.rng = new Rng(seed);
     this.startCell = map.playerStart;
@@ -224,6 +227,74 @@ export class World {
       });
     }
     this.drainEvents();
+  }
+
+  /** 从存档恢复世界，怪物和地面物品按地图重新生成。 */
+  static fromSave(config: GameConfig, save: SaveData, seed: number): World {
+    const { player } = save;
+    const world = new World(config, save.mapId, player.classId, seed, player.name);
+    world.restore(save);
+    return world;
+  }
+
+  toSave(savedAt: number): SaveData {
+    const { player } = this;
+    return structuredClone({
+      version: SAVE_VERSION,
+      savedAt,
+      mapId: this.mapId,
+      time: this.time,
+      nextId: this.nextId,
+      player: {
+        name: player.name,
+        classId: player.def.id,
+        level: player.level,
+        exp: player.exp,
+        gold: player.gold,
+        hp: player.hp,
+        mp: player.mp,
+        cell: player.cell,
+        bag: player.bag,
+        equipBag: player.equipBag,
+        equipment: player.equipment,
+        skills: player.skills,
+        hotbar: player.hotbar,
+      },
+    });
+  }
+
+  private restore(save: SaveData): void {
+    const { items, skills } = this.config;
+    const data = structuredClone(save.player);
+    const player = this.player;
+    const known = (equipment: Equipment) => !!items[equipment.itemId];
+
+    this.time = save.time;
+    this.nextId = Math.max(this.nextId, save.nextId);
+    player.level = data.level;
+    player.exp = data.exp;
+    player.gold = data.gold;
+    player.bag = Object.fromEntries(Object.entries(data.bag).filter(([id]) => items[id]));
+    player.equipBag = data.equipBag.filter(known);
+    player.equipment = Object.fromEntries(
+      Object.entries(data.equipment).filter(([, equipment]) => known(equipment)),
+    );
+    player.skills = data.skills.filter((id) => skills[id]);
+    player.hotbar = data.hotbar.map((entry) => {
+      const exists = entry?.kind === 'skill' ? skills[entry.id] : entry && items[entry.id];
+      return exists ? entry : null;
+    });
+    this.applyStats();
+    this.learnSkills();
+    this.drainEvents();
+
+    const alive = data.hp > 0;
+    player.hp = alive ? Math.min(data.hp, player.stats.maxHp) : player.stats.maxHp;
+    player.mp = alive ? Math.min(data.mp, player.stats.maxMp) : player.stats.maxMp;
+    const preferred = alive ? data.cell : this.startCell;
+    const cell = this.grid.nearest(preferred, (c) => this.isFree(c, player)) ?? this.startCell;
+    player.cell = { ...cell };
+    player.pos = { ...cell };
   }
 
   get expToNext(): number | null {

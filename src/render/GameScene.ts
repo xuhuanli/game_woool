@@ -12,6 +12,7 @@ import {
   type Vec,
   type World,
 } from '../game/world';
+import type { AutoSaver } from '../save/autoSaver';
 import type { Hud } from '../ui/hud';
 import type { Panels } from '../ui/panels';
 import { directionRow, TILE_H, TILE_W, toCell, toScreen } from './iso';
@@ -52,6 +53,7 @@ export class GameScene extends Phaser.Scene {
     private readonly world: World,
     private readonly hud: Hud,
     private readonly panels: Panels,
+    private readonly saver: AutoSaver,
   ) {
     super('game');
   }
@@ -92,7 +94,11 @@ export class GameScene extends Phaser.Scene {
       this.accumulator -= stepMs;
     }
 
-    for (const event of this.world.drainEvents()) this.handleEvent(event);
+    for (const event of this.world.drainEvents()) {
+      this.handleEvent(event);
+      this.saver.notify(event);
+    }
+    this.saver.update(delta / 1000);
 
     const alpha = this.accumulator / stepMs;
     for (const view of this.unitViews.values()) this.syncUnit(view, alpha);
