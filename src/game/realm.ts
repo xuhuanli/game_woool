@@ -13,6 +13,12 @@ export function realmName(realms: RealmDef[], level: number): string {
   return `${realm.name}${PHASES.at(Math.floor((step * PHASES.length) / span))}`;
 }
 
+/** 突破成功率：每次失败累加，最高 100%。 */
+export function breakthroughChance(realm: RealmDef, fails: number): number {
+  const { chance, failBonus } = realm.breakthrough ?? { chance: 0, failBonus: 0 };
+  return Math.min(1, chance + failBonus * fails);
+}
+
 /** 当前等级已到境界上限且尚未突破时，返回这个境界。 */
 export function pendingBreakthrough(
   realms: RealmDef[],

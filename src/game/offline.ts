@@ -4,12 +4,16 @@ import type { CombatStats, GameConfig, MapDef } from './config';
 export const OFFLINE_MAX_SECONDS = 8 * 3600;
 export const OFFLINE_EFFICIENCY = 0.5;
 export const OFFLINE_MIN_SECONDS = 60;
+export const OFFLINE_MAX_EQUIPMENT = 10;
 /** 每杀一只怪在路上和拾取花的时间 */
-const TRAVEL_SECONDS = 3;
+const TRAVEL_SECONDS = 1.5;
 
 export interface IncomeRates {
   expPerSecond: number;
   goldPerSecond: number;
+  killsPerSecond: number;
+  /** 每杀一只怪平均掉落的法器件数，按物品分开 */
+  equipmentPerKill: Record<string, number>;
 }
 
 function average(range: { min: number; max: number }): number {
@@ -28,6 +32,7 @@ export function estimateIncome(
   let exp = 0;
   let gold = 0;
   let kills = 0;
+  const equipment: Record<string, number> = {};
   for (const spawn of map.spawns) {
     const monster = config.monsters[spawn.monster];
     if (!monster || monster.boss) continue;
@@ -38,10 +43,21 @@ export function estimateIncome(
     exp += monster.exp;
     kills += 1;
     for (const entry of config.drops[monster.dropTable] ?? []) {
-      if (entry.item !== 'gold') continue;
-      gold += entry.chance * average({ min: entry.min ?? 1, max: entry.max ?? 1 });
+      if (entry.item === 'gold') {
+        gold += entry.chance * average({ min: entry.min ?? 1, max: entry.max ?? 1 });
+      } else if (config.items[entry.item]?.kind === 'equip') {
+        equipment[entry.item] = (equipment[entry.item] ?? 0) + entry.chance;
+      }
     }
   }
-  if (kills === 0) return { expPerSecond: 0, goldPerSecond: 0 };
-  return { expPerSecond: exp / seconds, goldPerSecond: gold / seconds };
+  if (kills === 0) {
+    return { expPerSecond: 0, goldPerSecond: 0, killsPerSecond: 0, equipmentPerKill: {} };
+  }
+  for (const item of Object.keys(equipment)) equipment[item]! /= kills;
+  return {
+    expPerSecond: exp / seconds,
+    goldPerSecond: gold / seconds,
+    killsPerSecond: kills / seconds,
+    equipmentPerKill: equipment,
+  };
 }

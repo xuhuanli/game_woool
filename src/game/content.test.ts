@@ -1,19 +1,15 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { CONFIG_FILES, validateConfig, type GameConfig } from './config';
+import { validateConfig, type GameConfig } from './config';
+import type { Equipment } from './equipment';
 import { Grid } from './grid';
 import { findPath } from './pathfinding';
 import { questStatus } from './quests';
-import { realmName } from './realm';
+import { loadConfigFromDisk } from './testConfig';
+import { breakthroughChance, realmName } from './realm';
 import { Rng } from './rng';
 import { TICK_SECONDS, World, type GameEvent } from './world';
 
-const config = Object.fromEntries(
-  CONFIG_FILES.map((name) => [
-    name,
-    JSON.parse(readFileSync(`public/data/${name}.json`, 'utf8')) as unknown,
-  ]),
-) as unknown as GameConfig;
+const config = await loadConfigFromDisk();
 
 const npc = (id: string) => config.npcs[id]!;
 const town = () => new World(config, 'huangfeng-valley', 'body', 1);
@@ -373,6 +369,26 @@ describe('境界突破', () => {
     expect(player.realmPassed).toEqual([]);
     expect(player.bag).toEqual({});
     expect(player.exp).toBe(world.expToNext);
+    expect(player.breakthroughFails.qi).toBe(1);
+  });
+
+  it('失败后虚弱 10 分钟，属性降低 20%，到时恢复', () => {
+    const { world, player } = capped();
+    Object.assign(world, { rng: new Rng(seedFor(false)) });
+    stock(world);
+    give(world, 999999);
+    world.attemptBreakthrough();
+    const weakened = player.stats.maxHp;
+    run(world, 601);
+    expect(weakened).toBe(Math.floor(player.stats.maxHp * 0.8));
+    expect(player.weakUntil).toBe(0);
+  });
+
+  it('失败累积成功率，3 次后必定成功', () => {
+    const realm = config.realms[0]!;
+    expect(breakthroughChance(realm, 0)).toBeCloseTo(0.6);
+    expect(breakthroughChance(realm, 1)).toBeCloseTo(0.75);
+    expect(breakthroughChance(realm, 3)).toBe(1);
   });
 
   it('突破记录写入存档', () => {
@@ -385,46 +401,72 @@ describe('境界突破', () => {
 
 describe('死亡掉装', () => {
   const sword = { uid: 900, itemId: 'rusty-sword', grade: 'top', affixes: [], luck: 2 };
-  const alwaysDrop: GameConfig = {
+  const withDeath = (patch: Partial<GameConfig['affixes']['death']>): GameConfig => ({
     ...config,
-    affixes: { ...config.affixes, death: { dropChance: 1, pickupSeconds: 60 } },
-  };
-  const dying = (setup: GameConfig = alwaysDrop) => {
-    const world = new World(setup, 'starter-field', 'body', 1);
+    affixes: { ...config.affixes, death: { ...config.affixes.death, ...patch } },
+  });
+  const alwaysDrop = withDeath({ dropChance: 1, autoDropChance: 1, pickupSeconds: 60 });
+
+  const killPlayer = (world: World) => {
     const { player } = world;
-    player.equipment.weapon = structuredClone(sword);
     player.hp = 1;
-    const monster = world.monsters[0]!;
+    const monster = world.monsters.find((candidate) => candidate.hp > 0)!;
     monster.cell = { x: player.cell.x + 1, y: player.cell.y };
     monster.pos = { ...monster.cell };
     monster.home = { ...monster.cell };
+    monster.mode = 'idle';
     monster.stats = { ...monster.stats, accuracy: 1e9, attack: { min: 50, max: 50 } };
     run(world, 10, () => player.hp === 0);
+  };
+  const dying = (setup: GameConfig = alwaysDrop, level = 11) => {
+    const world = new World(setup, 'starter-field', 'body', 1);
+    world.player.level = level;
+    world.player.equipment.weapon = structuredClone(sword);
+    killPlayer(world);
     return world;
   };
 
-  it('死亡时按概率掉身上法器，属性随之下降，背包不掉', () => {
+  it('死亡时掉 1 件身上法器，背包不掉', () => {
     const world = new World(alwaysDrop, 'starter-field', 'body', 1);
+    world.player.level = 11;
     world.player.equipBag.push({ ...sword, uid: 901 });
     world.player.equipment.weapon = structuredClone(sword);
-    world.player.hp = 1;
-    const monster = world.monsters[0]!;
-    monster.cell = { x: world.player.cell.x + 1, y: world.player.cell.y };
-    monster.pos = { ...monster.cell };
-    monster.home = { ...monster.cell };
-    monster.stats = { ...monster.stats, accuracy: 1e9, attack: { min: 50, max: 50 } };
-    run(world, 10, () => world.player.hp === 0);
-    expect(world.player.equipment.weapon).toBeUndefined();
+    world.player.equipment.armor = { ...sword, uid: 902, itemId: 'cloth-robe' };
+    killPlayer(world);
+    expect(Object.keys(world.player.equipment)).toHaveLength(1);
     expect(world.player.equipBag).toHaveLength(1);
-    expect(world.items.map((item) => item.equipment?.uid)).toContain(900);
     expect(world.deathDrops).toHaveLength(1);
   });
 
   it('掉落概率为 0 时不掉', () => {
-    const noDrop = { ...alwaysDrop, affixes: { ...alwaysDrop.affixes, death: { dropChance: 0, pickupSeconds: 60 } } };
-    const world = dying(noDrop);
+    const world = dying(withDeath({ dropChance: 0 }));
+    expect(world.player.equipment.weapon?.uid).toBe(900);
+  });
+
+  it('10 级及以下不掉装', () => {
+    const world = dying(alwaysDrop, 10);
     expect(world.player.equipment.weapon?.uid).toBe(900);
     expect(world.deathDrops).toEqual([]);
+  });
+
+  it('死后 5 分钟内再死不掉装', () => {
+    const world = new World(alwaysDrop, 'starter-field', 'body', 1);
+    world.player.level = 11;
+    world.player.equipment.weapon = structuredClone(sword);
+    world.player.lastDeathAt = world.time;
+    killPlayer(world);
+    expect(world.player.equipment.weapon?.uid).toBe(900);
+  });
+
+  it('挂机时使用减半的掉装概率', () => {
+    const noAuto = withDeath({ dropChance: 1, autoDropChance: 0 });
+    const world = new World(noAuto, 'starter-field', 'body', 1);
+    world.player.level = 11;
+    world.player.auto.enabled = true;
+    world.player.auto.recallBelow = 0;
+    world.player.equipment.weapon = structuredClone(sword);
+    killPlayer(world);
+    expect(world.player.equipment.weapon?.uid).toBe(900);
   });
 
   it('复活回城后掉落还在，回到原地能捡回', () => {
@@ -456,6 +498,201 @@ describe('死亡掉装', () => {
     expect(loaded.deathDrops).toHaveLength(1);
     expect(loaded.deathDrops[0]?.item.equipment?.uid).toBe(900);
     expect(loaded.deathDrops[0]?.item.expiresAt).toBe(world.deathDrops[0]?.item.expiresAt);
+  });
+});
+
+describe('拾取', () => {
+  const spawnAt = (world: World, itemId: string, x: number, y: number, equipment: Equipment | null = null, amount = 1) =>
+    (world as unknown as {
+      spawnItem(def: unknown, amount: number, equipment: unknown, cell: unknown): World['items'][number];
+    }).spawnItem(config.items[itemId], amount, equipment, {
+      x: world.player.cell.x + x,
+      y: world.player.cell.y + y,
+    });
+  const blade = (uid: number, grade: string): Equipment => ({ uid, itemId: 'rusty-sword', grade, affixes: [], luck: 0 });
+  const quiet = () => {
+    const world = new World(config, 'huangfeng-valley', 'body', 1);
+    world.player.cell = { x: 12, y: 14 };
+    world.player.pos = { x: 12, y: 14 };
+    return world;
+  };
+
+  it('6 格内的灵石自动飞来，更远的不会', () => {
+    const world = quiet();
+    spawnAt(world, 'gold', 6, 0, null, 10);
+    spawnAt(world, 'gold', 7, 0, null, 99);
+    run(world, 0.2);
+    expect(world.player.gold).toBe(10);
+    expect(world.items).toHaveLength(1);
+  });
+
+  it('2 格内的丹药自动拾取，3 格不会', () => {
+    const world = quiet();
+    spawnAt(world, 'small-potion', 2, 0);
+    spawnAt(world, 'small-mana', 3, 0);
+    run(world, 0.2);
+    expect(world.player.bag).toEqual({ 'small-potion': 1 });
+  });
+
+  it('出招时也能吸灵石', () => {
+    const world = quiet();
+    world.player.windupLeft = 5;
+    spawnAt(world, 'gold', 3, 0, null, 4);
+    run(world, 0.2);
+    expect(world.player.gold).toBe(4);
+  });
+
+  it('法器不会自动拾取', () => {
+    const world = quiet();
+    spawnAt(world, 'rusty-sword', 1, 0, blade(800, 'top'));
+    run(world, 0.5);
+    expect(world.items).toHaveLength(1);
+  });
+
+  it('空格捡起范围内达到品阶线的法器', () => {
+    const world = quiet();
+    world.player.auto.minGrade = 'mid';
+    spawnAt(world, 'rusty-sword', 4, 0, blade(800, 'high'));
+    spawnAt(world, 'rusty-sword', 5, 0, blade(801, 'low'));
+    spawnAt(world, 'rusty-sword', 7, 0, blade(802, 'top'));
+    world.pickupNearbyEquipment();
+    expect(world.player.equipment.weapon?.uid).toBe(800);
+    expect(world.items.map((item) => item.equipment?.uid).sort()).toEqual([801, 802]);
+  });
+
+  it('空格不捡自己丢弃的法器，但可以手动点', () => {
+    const world = quiet();
+    world.player.equipment.weapon = blade(1, 'low');
+    world.player.equipBag.push(blade(800, 'top'));
+    world.discard(800);
+    world.pickupNearbyEquipment();
+    expect(world.items).toHaveLength(1);
+    world.pickup(world.items[0]!);
+    run(world, 2, () => world.items.length === 0);
+    expect(world.player.equipBag.map((equipment) => equipment.uid)).toEqual([800]);
+  });
+
+  it('背包满时空格不捡', () => {
+    const world = quiet();
+    world.player.equipment.weapon = blade(1, 'low');
+    for (let uid = 0; uid < config.affixes.bagCapacity; uid++) world.player.equipBag.push(blade(1000 + uid, 'low'));
+    spawnAt(world, 'rusty-sword', 1, 0, blade(800, 'top'));
+    world.pickupNearbyEquipment();
+    expect(world.items).toHaveLength(1);
+  });
+});
+
+describe('怪物技能', () => {
+  const lair = () => {
+    const world = new World(config, 'taina-mountain', 'body', 1);
+    const boss = world.monsters.find((monster) => monster.def.boss)!;
+    for (const monster of world.monsters) {
+      if (monster !== boss) {
+        monster.hp = 0;
+        monster.respawnLeft = 9999;
+      }
+    }
+    const { player } = world;
+    player.stats = { ...player.stats, maxHp: 5000, evasion: 0 };
+    player.hp = 5000;
+    const cell = { x: boss.cell.x + 2, y: boss.cell.y };
+    player.cell = { ...cell };
+    player.pos = { ...cell };
+    return { world, boss, player };
+  };
+
+  it('前摇时地面预警，站着不动会被命中', () => {
+    const { world, player } = lair();
+    const events: GameEvent[] = [];
+    run(world, 4, () => {
+      events.push(...world.drainEvents());
+      return player.hp < 5000;
+    });
+    const warning = events.find((event) => event.type === 'telegraph');
+    expect(warning).toBeDefined();
+    expect(player.hp).toBeLessThan(5000);
+  });
+
+  it('前摇期间走出范围就能躲开', () => {
+    const { world, boss, player } = lair();
+    run(world, 2, () => boss.windupLeft > 0);
+    expect(boss.windupLeft).toBeGreaterThan(0);
+    const safe = { x: boss.cell.x + 5, y: boss.cell.y + 3 };
+    player.cell = { ...safe };
+    player.pos = { ...safe };
+    run(world, 1.2);
+    expect(player.hp).toBe(5000);
+  });
+
+  it('生命低于阈值进入狂暴，脱战后复原', () => {
+    const { world, boss, player } = lair();
+    const attack = boss.stats.attack.max;
+    (world as unknown as { dealDamage(a: unknown, b: unknown, c: number, d: boolean): void }).dealDamage(player, boss, 400, false);
+    expect(boss.phase).toBe(1);
+    expect(boss.stats.attack.max).toBeGreaterThan(attack);
+    boss.mode = 'return';
+    boss.path = [];
+    run(world, 0.5);
+    expect(boss.phase).toBe(0);
+    expect(boss.stats.attack.max).toBe(attack);
+    expect(boss.hp).toBe(boss.stats.maxHp);
+  });
+});
+
+describe('剧情开关', () => {
+  const withStory = (): GameConfig => ({
+    ...config,
+    npcs: {
+      ...config.npcs,
+      hidden: { ...config.npcs['guide-senior']!, id: 'hidden', x: 3, y: 12, requires: 'join-sect' },
+      early: { ...config.npcs['guide-senior']!, id: 'early', x: 3, y: 13, hiddenAfter: 'join-sect' },
+    },
+    quests: {
+      ...config.quests,
+      'join-sect': {
+        ...config.quests['join-sect']!,
+        rewards: {
+          ...config.quests['join-sect']!.rewards,
+          teleport: { map: 'starter-field', x: 5, y: 5 },
+        },
+      },
+    },
+  });
+
+  it('任务完成后 NPC 出现或消失，并传送到下一章', () => {
+    const world = new World(withStory(), 'huangfeng-valley', 'body', 1);
+    expect(world.npcs.map((npc) => npc.id)).toContain('early');
+    expect(world.npcs.map((npc) => npc.id)).not.toContain('hidden');
+    world.player.quests.active.push({ id: 'join-sect', counts: [1] });
+    world.turnInQuest('join-sect');
+    expect(world.mapId).toBe('starter-field');
+    expect(world.player.cell).toEqual({ x: 5, y: 5 });
+    world.moveTo(world.portals[0]!);
+    run(world, 10, () => world.mapId === 'huangfeng-valley');
+    expect(world.npcs.map((npc) => npc.id)).toContain('hidden');
+    expect(world.npcs.map((npc) => npc.id)).not.toContain('early');
+  });
+
+  it('未解锁的传送点走上去不会切图', () => {
+    const locked = structuredClone(config);
+    locked.maps['huangfeng-valley']!.portals![0]!.requires = 'join-sect';
+    const world = new World(locked, 'huangfeng-valley', 'body', 1);
+    world.moveTo(world.portals[0]!);
+    run(world, 12);
+    expect(world.mapId).toBe('huangfeng-valley');
+  });
+});
+
+describe('Tiled 地图', () => {
+  it('彩霞山能从 Tiled 文件解析', () => {
+    const map = config.maps['starter-field']!;
+    expect(map.width).toBe(32);
+    expect(map.spawns).toHaveLength(11);
+    expect(map.portals).toHaveLength(2);
+    expect(map.playerStart).toEqual({ x: 5, y: 5 });
+    expect(map.ground).toHaveLength(32 * 32);
+    expect(new Grid(map).isWalkable({ x: 0, y: 0 })).toBe(false);
+    expect(new Grid(map).isWalkable({ x: 5, y: 5 })).toBe(true);
   });
 });
 
@@ -586,12 +823,27 @@ describe('闭关', () => {
     expect(ten).toEqual(eight);
   });
 
-  it('只给经验和灵石，不给法器，不会死亡', () => {
-    const world = fielded();
+  it('产出普通法器，不出极品，单次最多 10 件，不会死亡', () => {
+    const generous: GameConfig = structuredClone(config);
+    for (const entry of generous.drops['ash-rat']!) entry.chance = 1;
+    const world = new World(generous, 'starter-field', 'body', 1);
     world.player.hp = 1;
-    world.settleOffline(0, 8 * hour);
-    expect(world.player.equipBag).toEqual([]);
+    const report = world.settleOffline(0, 8 * hour)!;
+    expect(report.equipment.length + report.soldCount).toBe(10);
+    expect(world.player.equipBag.every((equipment) => equipment.grade !== 'top')).toBe(true);
     expect(world.player.hp).toBeGreaterThan(0);
+  });
+
+  it('背包放不下的法器换成灵石', () => {
+    const generous: GameConfig = structuredClone(config);
+    for (const entry of generous.drops['ash-rat']!) entry.chance = 1;
+    const world = new World(generous, 'starter-field', 'body', 1);
+    for (let uid = 0; uid < config.affixes.bagCapacity; uid++) {
+      world.player.equipBag.push({ uid: 5000 + uid, itemId: 'cloth-robe', grade: 'low', affixes: [], luck: 0 });
+    }
+    const report = world.settleOffline(0, 8 * hour)!;
+    expect(report.equipment).toEqual([]);
+    expect(report.soldCount).toBe(10);
   });
 
   it('到境界上限时经验封顶', () => {

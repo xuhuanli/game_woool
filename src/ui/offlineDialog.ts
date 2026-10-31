@@ -15,12 +15,23 @@ export function showOfflineReport(report: OfflineReport): void {
   duration.textContent = `闭关 ${hours} 小时 ${minutes} 分钟`;
   const rewards = document.createElement('div');
   rewards.textContent = `获得经验 ${report.exp}，灵石 ${report.gold}`;
+  const lines = [rewards];
+  if (report.equipment.length > 0) {
+    const equipment = document.createElement('div');
+    equipment.textContent = `收入背包：${report.equipment.join('、')}`;
+    lines.push(equipment);
+  }
+  if (report.soldCount > 0) {
+    const sold = document.createElement('div');
+    sold.textContent = `背包已满，${report.soldCount} 件法器换成了灵石`;
+    lines.push(sold);
+  }
   const close = document.createElement('button');
   close.className = 'detail-action';
   close.textContent = '出关';
   close.addEventListener('click', () => overlay.remove());
 
-  box.append(title, duration, rewards, close);
+  box.append(title, duration, ...lines, close);
   overlay.append(box);
   document.body.append(overlay);
 }

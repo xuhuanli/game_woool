@@ -1,17 +1,11 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vitest';
-import { CONFIG_FILES, type GameConfig } from '../game/config';
+import { loadConfigFromDisk } from '../game/testConfig';
 import { World, type GameEvent } from '../game/world';
 import { AutoSaver } from './autoSaver';
 import { migrateSave, parseSave, SAVE_VERSION, SaveError, type SaveData } from './saveData';
 import type { SaveStore } from './saveStore';
 
-const config = Object.fromEntries(
-  CONFIG_FILES.map((name) => [
-    name,
-    JSON.parse(readFileSync(`public/data/${name}.json`, 'utf8')) as unknown,
-  ]),
-) as unknown as GameConfig;
+const config = await loadConfigFromDisk();
 
 const newWorld = () => new World(config, 'starter-field', 'spirit', 1, '南宫婉');
 
@@ -140,6 +134,9 @@ describe('版本迁移', () => {
     const {
       quests: _quests,
       realmPassed: _realm,
+      breakthroughFails: _fails,
+      weakUntil: _weak,
+      lastDeathAt: _death,
       auto: _auto,
       lastFieldMap: _field,
       ...player

@@ -54,7 +54,7 @@ export class Inventory {
     const replaced = player.equipment[slot];
     if (replaced) player.equipBag.push(replaced);
     player.equipment[slot] = equipment;
-    refreshStats(this.player, this.config);
+    refreshStats(this.player, this.config, this.now());
     this.emit({ type: 'equipped', equipment });
   }
 
@@ -68,7 +68,7 @@ export class Inventory {
     }
     delete player.equipment[slot];
     player.equipBag.push(equipment);
-    refreshStats(this.player, this.config);
+    refreshStats(this.player, this.config, this.now());
   }
 
   /** 祭炼武器：消耗祭炼石和灵石，成功加幸运，失败掉幸运。 */
@@ -100,7 +100,7 @@ export class Inventory {
     equipment.luck = success
       ? equipment.luck + 1
       : Math.max(0, equipment.luck - refine.failLoss);
-    refreshStats(this.player, this.config);
+    refreshStats(this.player, this.config, this.now());
     this.emit({ type: 'refined', equipment, success });
   }
 

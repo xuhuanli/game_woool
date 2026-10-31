@@ -2,9 +2,8 @@
  * 数值模拟：用真实游戏逻辑无界面地挂机，输出各职业的升级耗时和产出。
  * 用法：npm run sim
  */
-import { readFileSync } from 'node:fs';
-import { CONFIG_FILES, type GameConfig } from '../src/game/config';
 import { estimateIncome, OFFLINE_EFFICIENCY } from '../src/game/offline';
+import { loadConfigFromDisk } from '../src/game/testConfig';
 import { TICK_SECONDS, World } from '../src/game/world';
 
 const MAX_HOURS = 12;
@@ -14,9 +13,7 @@ const FIELD_LEVEL = 6;
 const POTIONS_PER_TRIP = 10;
 const POTION_ID = 'small-potion';
 
-const config = Object.fromEntries(
-  CONFIG_FILES.map((name) => [name, JSON.parse(readFileSync(`public/data/${name}.json`, 'utf8'))]),
-) as unknown as GameConfig;
+const config = await loadConfigFromDisk();
 
 interface Result {
   classId: string;

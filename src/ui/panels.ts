@@ -8,7 +8,7 @@ import {
   type EquipSlot,
   type Equipment,
 } from '../game/equipment';
-import { pendingBreakthrough, realmName } from '../game/realm';
+import { breakthroughChance, pendingBreakthrough, realmName } from '../game/realm';
 import type { World } from '../game/world';
 
 const STAT_NAMES: Record<Exclude<BonusStat, 'primary'>, string> = {
@@ -75,6 +75,7 @@ export class Panels {
       player.level,
       player.exp,
       player.realmPassed,
+      player.breakthroughFails,
       player.gold,
       this.selection,
       this.character.hidden,
@@ -156,7 +157,11 @@ export class Panels {
     const full = expToNext !== null && player.exp >= expToNext;
     box.append(
       el('div', full ? '' : 'detail-missing', full ? '修为已圆满' : '修为尚未圆满'),
-      el('div', 'detail-hint', `成功率 ${Math.round(realm.breakthrough.chance * 100)}%，失败会消耗材料`),
+      el(
+        'div',
+        'detail-hint',
+        `成功率 ${Math.round(breakthroughChance(realm, player.breakthroughFails[realm.id] ?? 0) * 100)}%，失败消耗材料并虚弱 10 分钟`,
+      ),
       this.action('突破', () => this.world.attemptBreakthrough()),
     );
     return box;

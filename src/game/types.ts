@@ -3,6 +3,7 @@ import type {
   ClassDef,
   CombatStats,
   DamageStat,
+  AbilityDef,
   ItemDef,
   MonsterDef,
   NpcDef,
@@ -29,6 +30,8 @@ export interface StatusEffect {
 interface PendingAction {
   target: Unit | null;
   skill: SkillDef | null;
+  ability?: AbilityDef;
+  cells?: Cell[];
 }
 
 export interface Unit {
@@ -62,6 +65,9 @@ export interface Monster extends Unit {
   spawnKey: string;
   mode: 'idle' | 'chase' | 'return';
   target: Unit | null;
+  abilityCooldowns: Record<string, number>;
+  /** 已进入的 Boss 阶段数 */
+  phase: number;
   wanderLeft: number;
   respawnLeft: number;
 }
@@ -107,6 +113,11 @@ export interface Player extends Unit {
   quests: QuestState;
   /** 已完成突破的境界 */
   realmPassed: string[];
+  /** 各境界的突破失败次数 */
+  breakthroughFails: Record<string, number>;
+  /** 突破失败后的虚弱状态，属性降低 */
+  weakUntil: number;
+  lastDeathAt: number;
   auto: AutoSettings;
   /** 闭关收益按最后到过的野外地图计算 */
   lastFieldMap: string | null;
@@ -124,12 +135,18 @@ export interface GroundItem {
   equipment: Equipment | null;
   cell: Cell;
   expiresAt: number;
+  /** 玩家丢弃的法器，一键拾取时跳过 */
+  discarded?: boolean;
 }
 
 export interface OfflineReport {
   seconds: number;
   exp: number;
   gold: number;
+  /** 收进背包的法器名称 */
+  equipment: string[];
+  /** 背包放不下、换成灵石的法器件数 */
+  soldCount: number;
 }
 
 /** 死亡掉落的法器，切图后仍然保留，限时内可以回去捡。 */
@@ -149,15 +166,18 @@ export type GameEvent =
   | { type: 'respawn'; unit: Unit }
   | { type: 'itemDropped'; item: GroundItem }
   | { type: 'itemRemoved'; item: GroundItem }
-  | { type: 'pickedUp'; item: GroundItem }
+  | { type: 'pickedUp'; item: GroundItem; magnet: boolean }
   | { type: 'equipped'; equipment: Equipment }
   | { type: 'refined'; equipment: Equipment; success: boolean }
+  | { type: 'weakChanged' }
   | { type: 'heal'; amount: number }
   | { type: 'mana'; amount: number }
   | { type: 'expGained'; amount: number }
   | { type: 'levelUp'; level: number }
   | { type: 'breakthrough'; realm: string; success: boolean }
   | { type: 'deathDrop'; name: string }
+  | { type: 'telegraph'; name: string; cells: Cell[]; seconds: number; color: string }
+  | { type: 'npcsChanged' }
   | { type: 'mapChanged' }
   | { type: 'npcOpened'; npc: NpcDef }
   | { type: 'questAccepted'; name: string }

@@ -178,6 +178,37 @@
       "fur": "#2f6b6b",
       "head": "#3f8f8f",
       "scale": 2.2
-    }
+    },
+    "abilities": [
+      {
+        "id": "tail-sweep",
+        "name": "蛟尾横扫",
+        "cooldown": 8,
+        "windup": 1.1,
+        "color": "#ff5040",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.4
+      },
+      {
+        "id": "water-lance",
+        "name": "水箭",
+        "cooldown": 11,
+        "windup": 0.9,
+        "color": "#5aa0ff",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.2
+      }
+    ],
+    "phases": [
+      {
+        "hpBelow": 0.4,
+        "attackMultiplier": 1.4,
+        "message": "铁甲蛟陷入狂暴"
+      }
+    ]
   }
 }

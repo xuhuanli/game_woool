@@ -97,7 +97,8 @@ export class Hud {
 
   private updateQuests(world: World): void {
     const { player } = world;
-    const dropClock = world.deathDrops.length > 0 ? Math.floor(world.time) : 0;
+    const timed = world.deathDrops.length > 0 || player.weakUntil > 0;
+    const dropClock = timed ? Math.floor(world.time) : 0;
     const signature = JSON.stringify([player.quests, player.level, player.bag, dropClock]);
     if (signature === this.questSignature) return;
     this.questSignature = signature;
@@ -118,9 +119,13 @@ export class Hud {
       );
       if (next) lines.push(`可接：${next.name}（${this.config.npcs[next.giver]?.name}）`);
     }
+    const clockUntil = (time: number) => {
+      const left = Math.max(0, Math.ceil(time - world.time));
+      return `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+    };
+    if (player.weakUntil > 0) lines.push(`虚弱：属性降低，剩 ${clockUntil(player.weakUntil)}`);
     for (const { mapId, item } of world.deathDrops) {
-      const left = Math.max(0, Math.ceil(item.expiresAt - world.time));
-      const clock = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+      const clock = clockUntil(item.expiresAt);
       const name = item.equipment ? equipmentName(item.equipment, this.config) : item.def.name;
       lines.push(`遗落 ${name}：${this.config.maps[mapId]?.name} 剩 ${clock}`);
     }

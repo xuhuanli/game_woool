@@ -33,6 +33,9 @@ const UI_DEPTH = 1_000_000;
 const TARGET_RADIUS = 34;
 const TARGET_CENTER_OFFSET = 20;
 const HOVER_TINT = 0xffc0a0;
+const DIRT_COLOR = 0x7a6a4a;
+const GOLD_MERGE_MS = 1000;
+const FLY_MS = 260;
 
 interface UnitView {
   unit: Unit;
@@ -61,6 +64,7 @@ export class GameScene extends Phaser.Scene {
   private accumulator = 0;
   private holding = false;
   private holdTimer = 0;
+  private pendingGold = 0;
   private hovered: UnitView | null = null;
   private tileCursor!: Phaser.GameObjects.Graphics;
 
@@ -108,6 +112,8 @@ export class GameScene extends Phaser.Scene {
       keyboard.on(`keydown-${digit}`, () => this.useSlot(slot));
     });
     this.hud.onSlot = (slot) => this.useSlot(slot);
+    keyboard.addCapture('SPACE');
+    keyboard.on('keydown-SPACE', () => this.world.pickupNearbyEquipment());
 
     this.hud.log(`来到${this.world.map.name}`);
   }
@@ -163,14 +169,17 @@ export class GameScene extends Phaser.Scene {
 
   private drawGround(): void {
     const { grid } = this.world;
-    const safe = this.world.map.safe;
-    const palette = safe ? [0x5d6650, 0x59624c, 0x626b55] : [0x4a5a34, 0x46552f, 0x4f6038];
+    const { safe, ground: tiles } = this.world.map;
+    const palette = safe
+      ? [0x5d6650, 0x59624c, 0x626b55, DIRT_COLOR]
+      : [0x4a5a34, 0x46552f, 0x4f6038, DIRT_COLOR];
     const ground = this.add.graphics().setDepth(0);
     this.mapObjects.push(ground);
     for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
         const { x: sx, y: sy } = toScreen({ x, y });
-        ground.fillStyle(palette[(x * 7 + y * 13) % 3]!, 1);
+        const tile = tiles?.[y * grid.width + x];
+        ground.fillStyle(palette[tile ? tile - 1 : (x * 7 + y * 13) % 3] ?? DIRT_COLOR, 1);
         ground.fillPoints(diamond(sx, sy), true);
         const isNpc = this.world.npcs.some((npc) => npc.x === x && npc.y === y);
         if (!grid.isWalkable({ x, y }) && !isNpc) {
@@ -400,9 +409,14 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'pickedUp': {
         const { def, amount } = event.item;
-        const name = this.itemLabel(event.item);
-        this.hud.log(def.kind === 'gold' ? `获得 ${amount} 灵石` : `拾取 ${name}`, 'gain');
-        this.floatText(this.world.player, `+${def.kind === 'gold' ? amount : name}`, '#f0cf7a', 15);
+        if (event.magnet) this.flyToPlayer(event.item);
+        if (def.kind === 'gold') {
+          this.addGold(amount);
+        } else {
+          const name = this.itemLabel(event.item);
+          this.hud.log(`拾取 ${name}`, 'gain');
+          this.floatText(this.world.player, `+${name}`, '#f0cf7a', 15);
+        }
         break;
       }
       case 'equipped':
@@ -424,6 +438,16 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'deathDrop':
         this.hud.log(`${event.name} 掉在了原地，限时可捡回`, 'bad');
+        break;
+      case 'telegraph':
+        this.showTelegraph(event.cells, event.seconds, event.color);
+        this.hud.log(event.name, 'bad');
+        break;
+      case 'npcsChanged':
+        this.buildMap();
+        break;
+      case 'weakChanged':
+        this.hud.log(this.world.player.weakUntil > 0 ? '突破失败，身体虚弱' : '虚弱已消退');
         break;
       case 'mapChanged':
         this.buildMap();
@@ -589,6 +613,50 @@ export class GameScene extends Phaser.Scene {
     view.sprite.destroy();
     view.label.destroy();
     this.itemViews.delete(item);
+  }
+
+  /** 1 秒内吸到的灵石合并成一条提示。 */
+  private addGold(amount: number): void {
+    if (this.pendingGold === 0) {
+      this.time.delayedCall(GOLD_MERGE_MS, () => {
+        this.hud.log(`+${this.pendingGold} 灵石`, 'gain');
+        this.floatText(this.world.player, `+${this.pendingGold}`, '#f0cf7a', 15);
+        this.pendingGold = 0;
+      });
+    }
+    this.pendingGold += amount;
+  }
+
+  private flyToPlayer(item: GroundItem): void {
+    const from = toScreen(item.cell);
+    const sprite = this.add.image(from.x, from.y, `item-${item.def.kind}`).setDepth(UI_DEPTH - 3);
+    const target = this.unitViews.get(this.world.player)!.sprite;
+    this.tweens.add({
+      targets: sprite,
+      x: target.x,
+      y: target.y - 24,
+      scale: 0.6,
+      duration: FLY_MS,
+      ease: 'Quad.easeIn',
+      onComplete: () => sprite.destroy(),
+    });
+  }
+
+  /** Boss 技能的地面预警，颜色越来越实，时间到时消失。 */
+  private showTelegraph(cells: Cell[], seconds: number, color: string): void {
+    const tint = Phaser.Display.Color.HexStringToColor(color).color;
+    const zone = this.add.graphics().setDepth(2).setAlpha(0.25);
+    zone.fillStyle(tint, 1);
+    for (const cell of cells) {
+      const { x, y } = toScreen(cell);
+      zone.fillPoints(diamond(x, y), true);
+    }
+    this.tweens.add({
+      targets: zone,
+      alpha: 0.75,
+      duration: seconds * 1000,
+      onComplete: () => zone.destroy(),
+    });
   }
 
   private showBreakthrough(realm: string, success: boolean): void {

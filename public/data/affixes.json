@@ -101,7 +101,10 @@
   "bagCapacity": 40,
   "sellRatio": 0.3,
   "death": {
-    "dropChance": 0.1,
-    "pickupSeconds": 600
+    "dropChance": 0.3,
+    "autoDropChance": 0.15,
+    "pickupSeconds": 1800,
+    "safeLevel": 10,
+    "graceSeconds": 300
   }
 }

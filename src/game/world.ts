@@ -1,6 +1,7 @@
 import { AutoPlay, defaultAutoSettings } from './autoPlay';
 import { rollAttack, type AttackOptions } from './combat';
 import type {
+  AbilityDef,
   Cell,
   CombatStats,
   DamageStat,
@@ -18,12 +19,13 @@ import { Inventory } from './inventory';
 import {
   estimateIncome,
   OFFLINE_EFFICIENCY,
+  OFFLINE_MAX_EQUIPMENT,
   OFFLINE_MAX_SECONDS,
   OFFLINE_MIN_SECONDS,
 } from './offline';
 import { findPath } from './pathfinding';
 import { emptyQuestState, questStatus, recordObjective } from './quests';
-import { pendingBreakthrough } from './realm';
+import { breakthroughChance, pendingBreakthrough } from './realm';
 import { Rng } from './rng';
 import { SAVE_VERSION, type SaveData } from '../save/saveData';
 import { needsTarget, skillArea } from './skills';
@@ -56,6 +58,7 @@ const WANDER_MIN_SECONDS = 2;
 const WANDER_MAX_SECONDS = 6;
 const SUMMON_FOLLOW_DISTANCE = 2;
 const SUMMON_TELEPORT_DISTANCE = 12;
+const NOTICE_SECONDS = 3;
 const TALK_RANGE = 2;
 const INTERACT_RANGE = 4;
 
@@ -75,6 +78,7 @@ export class World {
 
   private readonly rng: Rng;
   private nextId = 1;
+  private portalNoticeAt = -Infinity;
   private events: GameEvent[] = [];
 
   constructor(
@@ -109,6 +113,9 @@ export class World {
       equipment: {},
       quests: emptyQuestState(),
       realmPassed: [],
+      breakthroughFails: {},
+      weakUntil: 0,
+      lastDeathAt: -Infinity,
       auto: defaultAutoSettings(),
       lastFieldMap: null,
       skills: [],
@@ -137,7 +144,16 @@ export class World {
   }
 
   get npcs(): NpcDef[] {
-    return Object.values(this.config.npcs).filter((npc) => npc.map === this.mapId);
+    return Object.values(this.config.npcs).filter(
+      (npc) =>
+        npc.map === this.mapId &&
+        (!npc.requires || this.questDone(npc.requires)) &&
+        (!npc.hiddenAfter || !this.questDone(npc.hiddenAfter)),
+    );
+  }
+
+  questDone(questId: string): boolean {
+    return this.player.quests.completed.includes(questId);
   }
 
   get portals(): PortalDef[] {
@@ -168,6 +184,8 @@ export class World {
         spawnKey,
         mode: 'idle',
         target: null,
+        abilityCooldowns: {},
+        phase: 0,
         wanderLeft: this.rng.next() * WANDER_MAX_SECONDS,
         respawnLeft: 0,
       };
@@ -239,6 +257,9 @@ export class World {
         hotbar: player.hotbar,
         quests: player.quests,
         realmPassed: player.realmPassed,
+        breakthroughFails: player.breakthroughFails,
+        weakUntil: player.weakUntil,
+        lastDeathAt: Number.isFinite(player.lastDeathAt) ? player.lastDeathAt : null,
         auto: player.auto,
         lastFieldMap: player.lastFieldMap,
       },
@@ -281,6 +302,9 @@ export class World {
       completed: data.quests.completed,
     };
     player.realmPassed = data.realmPassed;
+    player.breakthroughFails = data.breakthroughFails;
+    player.weakUntil = data.weakUntil;
+    player.lastDeathAt = data.lastDeathAt ?? -Infinity;
     player.auto = { ...data.auto, enabled: false };
     player.lastFieldMap = data.lastFieldMap ?? player.lastFieldMap;
     player.skills = data.skills.filter((id) => skills[id]);
@@ -288,7 +312,7 @@ export class World {
       const exists = entry?.kind === 'skill' ? skills[entry.id] : entry && items[entry.id];
       return exists ? entry : null;
     });
-    refreshStats(this.player, this.config);
+    refreshStats(this.player, this.config, this.time);
     this.learnSkills();
     this.drainEvents();
 
@@ -354,18 +378,51 @@ export class World {
     const mapId = player.lastFieldMap ?? Object.values(this.config.maps).find((map) => !map.safe)?.id;
     const map = mapId ? this.config.maps[mapId] : undefined;
     if (!map) return null;
-    const { expPerSecond, goldPerSecond } = estimateIncome(
+    const income = estimateIncome(
       this.config,
       map,
       player.stats,
       player.def.primaryStat,
       player.attackInterval,
     );
+    const { expPerSecond, goldPerSecond } = income;
     const exp = Math.floor(expPerSecond * seconds * OFFLINE_EFFICIENCY);
-    const gold = Math.floor(goldPerSecond * seconds * OFFLINE_EFFICIENCY);
+    let gold = Math.floor(goldPerSecond * seconds * OFFLINE_EFFICIENCY);
+    const kills = income.killsPerSecond * seconds * OFFLINE_EFFICIENCY;
+    const { equipment, soldGold, soldCount } = this.rollOfflineEquipment(kills, income.equipmentPerKill);
+    gold += soldGold;
     player.gold += gold;
     this.gainExp(exp);
-    return { seconds, exp, gold };
+    return { seconds, exp, gold, equipment, soldCount };
+  }
+
+  /** 闭关只出普通法器，不出极品和 Boss 掉落，放不下的换成灵石。 */
+  private rollOfflineEquipment(kills: number, perKill: Record<string, number>) {
+    const { affixes, items } = this.config;
+    const ordinary = { ...affixes, grades: affixes.grades.slice(0, -1) };
+    const entries = Object.entries(perKill);
+    const totalPerKill = entries.reduce((sum, [, chance]) => sum + chance, 0);
+    const expected = kills * totalPerKill;
+    const count = Math.min(OFFLINE_MAX_EQUIPMENT, Math.floor(expected + this.rng.next()));
+
+    const equipment: string[] = [];
+    let soldGold = 0;
+    let soldCount = 0;
+    for (let i = 0; i < count; i++) {
+      let roll = this.rng.next() * totalPerKill;
+      const itemId = entries.find(([, chance]) => (roll -= chance) < 0)?.[0] ?? entries.at(-1)?.[0];
+      const item = itemId ? items[itemId] : undefined;
+      if (!item) continue;
+      const rolled = rollEquipment(item, ordinary, this.rng, this.nextId++);
+      if (this.inventory.bagIsFull()) {
+        soldGold += this.sellPrice(rolled);
+        soldCount += 1;
+      } else {
+        this.player.equipBag.push(rolled);
+        equipment.push(equipmentName(rolled, this.config));
+      }
+    }
+    return { equipment, soldGold, soldCount };
   }
 
   useHotbar(slot: number, target: Monster | null = null): void {
@@ -407,7 +464,7 @@ export class World {
     const cell = this.grid.nearest(player.cell, (c) => this.canDropAt(c) && !sameCell(c, player.cell));
     if (!player.hp || !equipment || !item || !cell) return;
     player.equipBag.splice(player.equipBag.indexOf(equipment), 1);
-    this.spawnItem(item, 1, equipment, cell);
+    this.spawnItem(item, 1, equipment, cell).discarded = true;
   }
 
   // ---- NPC、商店、任务 ----
@@ -473,6 +530,10 @@ export class World {
     const option = npc.travel?.[index];
     const player = this.player;
     if (!option || !this.isNear(npc)) return;
+    if (option.requires && !this.questDone(option.requires)) {
+      this.emit({ type: 'message', text: '这条路还没有打通' });
+      return;
+    }
     if ((option.level ?? 1) > player.level) {
       this.emit({ type: 'message', text: `需要等级 ${option.level}` });
       return;
@@ -527,6 +588,11 @@ export class World {
       }
     }
     this.gainExp(quest.rewards.exp);
+
+    this.grid = new Grid(this.map, this.npcs);
+    this.emit({ type: 'npcsChanged' });
+    const { teleport } = quest.rewards;
+    if (teleport) this.changeMap(teleport.map, teleport);
   }
 
   /** 尝试突破：消耗丹药和材料，成功后继续升级，失败不掉等级。 */
@@ -550,8 +616,16 @@ export class World {
     for (const { item, count } of realm.breakthrough.requires) {
       for (let i = 0; i < count; i++) this.inventory.removeFromBag(item);
     }
-    const success = this.rng.chance(realm.breakthrough.chance);
-    if (success) player.realmPassed.push(realm.id);
+    const fails = player.breakthroughFails[realm.id] ?? 0;
+    const success = this.rng.chance(breakthroughChance(realm, fails));
+    if (success) {
+      player.realmPassed.push(realm.id);
+    } else {
+      player.breakthroughFails[realm.id] = fails + 1;
+      player.weakUntil = this.time + this.config.game.weakSeconds;
+      refreshStats(player, this.config, this.time);
+      this.emit({ type: 'weakChanged' });
+    }
     this.emit({ type: 'breakthrough', realm: realm.name, success });
     if (success) this.gainExp(0);
   }
@@ -581,6 +655,12 @@ export class World {
       return;
     }
 
+    if (player.weakUntil > 0 && player.weakUntil <= this.time) {
+      player.weakUntil = 0;
+      refreshStats(player, this.config, this.time);
+      this.emit({ type: 'weakChanged' });
+    }
+    this.attractItems();
     this.tickRegen(dt);
     this.tickEffects(player, dt);
     for (const [skillId, left] of Object.entries(player.skillCooldowns)) {
@@ -622,7 +702,12 @@ export class World {
     if (!this.isStepping(player)) {
       this.collectItemsAt(player.cell);
       const portal = this.portals.find((candidate) => sameCell(candidate, player.cell));
-      if (portal) {
+      if (portal && portal.requires && !this.questDone(portal.requires)) {
+        if (this.time - this.portalNoticeAt >= NOTICE_SECONDS) {
+          this.portalNoticeAt = this.time;
+          this.emit({ type: 'message', text: `${portal.name}还去不了` });
+        }
+      } else if (portal) {
         this.changeMap(portal.toMap, { x: portal.toX, y: portal.toY });
         return;
       }
@@ -644,6 +729,9 @@ export class World {
       return;
     }
     this.tickEffects(monster, dt);
+    for (const [id, left] of Object.entries(monster.abilityCooldowns)) {
+      monster.abilityCooldowns[id] = Math.max(0, left - dt);
+    }
     if (!monster.hp || this.tickAttackTimers(monster, dt)) return;
 
     const fromHome = cellDistance(monster.cell, monster.home);
@@ -664,12 +752,11 @@ export class World {
     }
 
     if (monster.mode === 'chase' && monster.target) {
-      this.pursueAndAttack(monster, monster.target, dt);
+      if (!this.tryAbility(monster, monster.target)) this.pursueAndAttack(monster, monster.target, dt);
     } else if (monster.mode === 'return') {
       if (monster.path.length === 0 && !this.isStepping(monster)) {
         monster.mode = 'idle';
-        monster.hp = monster.stats.maxHp;
-        monster.effects = [];
+        this.resetMonster(monster);
       }
     } else {
       this.tickWander(monster, dt);
@@ -762,7 +849,8 @@ export class World {
 
     const pending = unit.pending;
     unit.pending = null;
-    if (pending?.skill) this.applySkill(unit, pending.skill, pending.target);
+    if (pending?.ability) this.resolveAbility(unit, pending.ability, pending.cells ?? []);
+    else if (pending?.skill) this.applySkill(unit, pending.skill, pending.target);
     else if (pending?.target?.hp) this.resolveHit(unit, pending.target);
     return false;
   }
@@ -789,6 +877,64 @@ export class World {
       unit.facing = direction(unit.cell, target.cell);
       this.emit({ type: 'attackStart', unit, target, color: null });
     });
+  }
+
+  /** 有技能可用时开始前摇，并在地面预警。 */
+  private tryAbility(monster: Monster, target: Unit): boolean {
+    if (this.isStepping(monster)) return false;
+    const distance = cellDistance(monster.cell, target.cell);
+    const ability = monster.def.abilities?.find(
+      (candidate) =>
+        distance <= candidate.range && (monster.abilityCooldowns[candidate.id] ?? 0) <= 0,
+    );
+    if (!ability) return false;
+    const cells = abilityArea(ability, monster.cell, target.cell);
+    monster.abilityCooldowns[ability.id] = ability.cooldown;
+    monster.windupLeft = ability.windup;
+    monster.pending = { target, skill: null, ability, cells };
+    monster.facing = direction(monster.cell, target.cell);
+    monster.path = [];
+    this.emit({ type: 'attackStart', unit: monster, target: null, color: null });
+    this.emit({
+      type: 'telegraph',
+      name: ability.name,
+      cells,
+      seconds: ability.windup,
+      color: ability.color,
+    });
+    return true;
+  }
+
+  private resolveAbility(caster: Unit, ability: AbilityDef, cells: Cell[]): void {
+    for (const unit of [this.player, ...this.summons]) {
+      if (unit.hp > 0 && cells.some((cell) => sameCell(cell, unit.cell))) {
+        this.resolveHit(caster, unit, { stat: 'attack', multiplier: ability.multiplier });
+      }
+    }
+  }
+
+  private resetMonster(monster: Monster): void {
+    monster.stats = monster.def.stats;
+    monster.hp = monster.stats.maxHp;
+    monster.effects = [];
+    monster.phase = 0;
+    monster.abilityCooldowns = {};
+  }
+
+  /** 生命降到阈值时进入下一阶段，攻击力提高。 */
+  private checkPhase(monster: Monster): void {
+    const next = monster.def.phases?.[monster.phase];
+    if (!next || monster.hp / monster.stats.maxHp >= next.hpBelow) return;
+    monster.phase += 1;
+    const { attack } = monster.stats;
+    monster.stats = {
+      ...monster.stats,
+      attack: {
+        min: Math.round(attack.min * next.attackMultiplier),
+        max: Math.round(attack.max * next.attackMultiplier),
+      },
+    };
+    this.emit({ type: 'message', text: next.message });
   }
 
   private startCast(unit: Player, skill: SkillDef, target: Unit | null): void {
@@ -927,7 +1073,11 @@ export class World {
 
     if (target === this.player) this.player.lastHurtAt = this.time;
     this.aggro(target, source);
-    if (target.hp > 0) return;
+    if (target.hp > 0) {
+      const monster = this.monsters.find((candidate) => candidate === target);
+      if (monster) this.checkPhase(monster);
+      return;
+    }
 
     if (target === this.player) this.killPlayer();
     else if (this.monsters.includes(target as Monster)) this.killMonster(target as Monster);
@@ -941,21 +1091,27 @@ export class World {
     monster.target = source;
   }
 
+  /** 死亡时按概率随机掉 1 件身上的法器，低等级和短时间内连死不掉。 */
   private dropWornEquipment(): void {
     const player = this.player;
-    const { dropChance, pickupSeconds } = this.config.affixes.death;
-    for (const slot of EQUIP_SLOTS) {
-      const equipment = player.equipment[slot];
-      const def = equipment && this.config.items[equipment.itemId];
-      if (!equipment || !def || !this.rng.chance(dropChance)) continue;
-      const cell = this.grid.nearest(player.cell, (c) => this.canDropAt(c));
-      if (!cell) continue;
-      delete player.equipment[slot];
-      const item = this.spawnItem(def, 1, equipment, cell, pickupSeconds);
-      this.deathDrops.push({ mapId: this.mapId, item });
-      this.emit({ type: 'deathDrop', name: equipmentName(equipment, this.config) });
-    }
-    refreshStats(player, this.config);
+    const { dropChance, autoDropChance, pickupSeconds, safeLevel, graceSeconds } =
+      this.config.affixes.death;
+    const inGrace = this.time - player.lastDeathAt < graceSeconds;
+    const chance = player.auto.enabled ? autoDropChance : dropChance;
+    player.lastDeathAt = this.time;
+    if (player.level <= safeLevel || inGrace || !this.rng.chance(chance)) return;
+
+    const worn = EQUIP_SLOTS.filter((slot) => player.equipment[slot]);
+    const slot = worn.at(this.rng.int(0, worn.length - 1));
+    const equipment = slot && player.equipment[slot];
+    const def = equipment && this.config.items[equipment.itemId];
+    const cell = this.grid.nearest(player.cell, (c) => this.canDropAt(c));
+    if (!slot || !equipment || !def || !cell) return;
+    delete player.equipment[slot];
+    const item = this.spawnItem(def, 1, equipment, cell, pickupSeconds);
+    this.deathDrops.push({ mapId: this.mapId, item });
+    this.emit({ type: 'deathDrop', name: equipmentName(equipment, this.config) });
+    refreshStats(player, this.config, this.time);
   }
 
   private killPlayer(): void {
@@ -1023,7 +1179,7 @@ export class World {
     }
     monster.cell = { ...cell };
     monster.pos = { ...cell };
-    monster.hp = monster.stats.maxHp;
+    this.resetMonster(monster);
     monster.mode = 'idle';
     this.emit({ type: 'respawn', unit: monster });
   }
@@ -1079,7 +1235,7 @@ export class World {
       }
       player.exp -= needed;
       player.level += 1;
-      refreshStats(this.player, this.config);
+      refreshStats(this.player, this.config, this.time);
       player.hp = player.stats.maxHp;
       player.mp = player.stats.maxMp;
       this.emit({ type: 'levelUp', level: player.level });
@@ -1101,13 +1257,50 @@ export class World {
     }
   }
 
+  /** 灵石和丹药材料不用走到格子上：出招时也生效，物品飞向角色。 */
+  private attractItems(): void {
+    const { player } = this;
+    const { goldRadius, itemRadius } = this.config.game.pickup;
+    for (const item of [...this.items]) {
+      if (item.equipment) continue;
+      const radius = item.def.kind === 'gold' ? goldRadius : itemRadius;
+      if (cellDistance(player.cell, item.cell) > radius) continue;
+      this.removeItem(item);
+      this.emit({ type: 'pickedUp', item, magnet: true });
+      this.takeStack(item);
+    }
+  }
+
+  private takeStack(item: GroundItem): void {
+    if (item.def.kind === 'gold') this.player.gold += item.amount;
+    else this.inventory.addToBag(item.def.id, item.amount);
+  }
+
+  /** 一键捡起范围内达到品阶线的法器，不捡玩家自己丢弃的。死亡掉落不受品阶线限制。 */
+  pickupNearbyEquipment(): void {
+    const { player, config } = this;
+    if (!player.hp) return;
+    const { grades } = config.affixes;
+    const lowest = grades.findIndex((grade) => grade.id === player.auto.minGrade);
+    const nearby = this.items.filter((item) => {
+      if (!item.equipment || item.discarded) return false;
+      if (cellDistance(player.cell, item.cell) > config.game.pickup.equipmentRadius) return false;
+      const isDeathDrop = this.deathDrops.some((drop) => drop.item === item);
+      return isDeathDrop || grades.findIndex((g) => g.id === item.equipment?.grade) >= lowest;
+    });
+    for (const item of nearby) {
+      if (!this.inventory.takeEquipment(item.equipment!)) return;
+      this.removeItem(item);
+      this.emit({ type: 'pickedUp', item, magnet: true });
+    }
+  }
+
   private collectItemsAt(cell: Cell): void {
     for (const item of this.items.filter((candidate) => sameCell(candidate.cell, cell))) {
       if (item.equipment && !this.inventory.takeEquipment(item.equipment)) continue;
       this.removeItem(item);
-      this.emit({ type: 'pickedUp', item });
-      if (item.def.kind === 'gold') this.player.gold += item.amount;
-      else if (!item.equipment) this.inventory.addToBag(item.def.id, item.amount);
+      this.emit({ type: 'pickedUp', item, magnet: false });
+      if (!item.equipment) this.takeStack(item);
     }
   }
 
@@ -1251,6 +1444,23 @@ export class World {
   private emit(event: GameEvent): void {
     this.events.push(event);
   }
+}
+
+function abilityArea(ability: AbilityDef, origin: Cell, target: Cell): Cell[] {
+  const { shape, size } = ability;
+  if (shape === 'line') {
+    const dir = direction(origin, target);
+    return Array.from({ length: size }, (_, i) => ({
+      x: origin.x + dir.x * (i + 1),
+      y: origin.y + dir.y * (i + 1),
+    }));
+  }
+  const center = shape === 'around' ? origin : target;
+  const cells: Cell[] = [];
+  for (let y = center.y - size; y <= center.y + size; y++) {
+    for (let x = center.x - size; x <= center.x + size; x++) cells.push({ x, y });
+  }
+  return cells;
 }
 
 function direction(from: Cell, to: Cell): Vec {

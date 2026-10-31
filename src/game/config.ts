@@ -79,7 +79,32 @@ export interface RealmDef {
   maxLevel: number;
   stages: 'layers' | 'phases';
   /** 进入下一境界的条件，最高境界没有 */
-  breakthrough?: { chance: number; requires: { item: string; count: number }[] };
+  breakthrough?: {
+    chance: number;
+    /** 每次失败后累加的成功率 */
+    failBonus: number;
+    requires: { item: string; count: number }[];
+  };
+}
+
+/** 怪物技能：前摇时地面预警，只命中还站在范围内的目标。 */
+export interface AbilityDef {
+  id: string;
+  name: string;
+  cooldown: number;
+  windup: number;
+  color: string;
+  /** 目标进入这个距离才会释放 */
+  range: number;
+  shape: 'around' | 'target' | 'line';
+  size: number;
+  multiplier: number;
+}
+
+export interface PhaseDef {
+  hpBelow: number;
+  attackMultiplier: number;
+  message: string;
 }
 
 export interface MonsterDef {
@@ -96,6 +121,8 @@ export interface MonsterDef {
   respawnSeconds: number;
   dropTable: string;
   boss?: boolean;
+  abilities?: AbilityDef[];
+  phases?: PhaseDef[];
   look: { fur: string; head: string; scale: number };
 }
 
@@ -155,7 +182,16 @@ export interface AffixConfig {
   refine: RefineConfig;
   bagCapacity: number;
   sellRatio: number;
-  death: { dropChance: number; pickupSeconds: number };
+  death: {
+    dropChance: number;
+    /** 挂机时的掉装概率 */
+    autoDropChance: number;
+    pickupSeconds: number;
+    /** 这个等级及以下不掉装 */
+    safeLevel: number;
+    /** 死亡后这段时间内再死不掉装 */
+    graceSeconds: number;
+  };
 }
 
 export interface DropEntry {
@@ -172,12 +208,18 @@ export interface PortalDef {
   toMap: string;
   toX: number;
   toY: number;
+  /** 完成这个任务后才能通过 */
+  requires?: string;
 }
 
 export interface MapDef {
   id: string;
   name: string;
   safe?: boolean;
+  /** Tiled 地图文件，尺寸、地形和物件都从文件读取 */
+  tiled?: string;
+  /** 地形编号，来自 Tiled 的 ground 图层 */
+  ground?: number[];
   width: number;
   height: number;
   playerStart: Cell;
@@ -195,6 +237,7 @@ export interface TravelOption {
   y: number;
   cost: number;
   level?: number;
+  requires?: string;
 }
 
 export interface NpcDef {
@@ -205,6 +248,10 @@ export interface NpcDef {
   y: number;
   color: string;
   greeting: string;
+  /** 完成这个任务后才出现 */
+  requires?: string;
+  /** 完成这个任务后消失 */
+  hiddenAfter?: string;
   shop?: string[];
   travel?: TravelOption[];
 }
@@ -226,12 +273,27 @@ export interface QuestDef {
   prev?: string;
   summary: string;
   objectives: QuestObjective[];
-  rewards: { exp: number; gold: number; items: { item: string; count: number }[] };
+  rewards: {
+    exp: number;
+    gold: number;
+    items: { item: string; count: number }[];
+    /** 章节结束时把玩家送到下一章 */
+    teleport?: { map: string; x: number; y: number };
+  };
   offer: string;
   finish: string;
 }
 
+export interface GameSettings {
+  startMap: string;
+  /** 突破失败后属性降低的比例 */
+  weakFactor: number;
+  weakSeconds: number;
+  pickup: { goldRadius: number; itemRadius: number; equipmentRadius: number };
+}
+
 export interface GameConfig {
+  game: GameSettings;
   classes: Record<string, ClassDef>;
   levels: { expToNext: number[] };
   realms: RealmDef[];
@@ -247,6 +309,7 @@ export interface GameConfig {
 }
 
 export const CONFIG_FILES = [
+  'game',
   'classes',
   'levels',
   'realms',

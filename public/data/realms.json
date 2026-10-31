@@ -3,20 +3,23 @@
     "id": "qi", "name": "练气", "minLevel": 1, "maxLevel": 13, "stages": "layers",
     "breakthrough": {
       "chance": 0.6,
+      "failBonus": 0.15,
       "requires": [{ "item": "foundation-pill", "count": 1 }, { "item": "serpent-scale", "count": 3 }]
     }
   },
   {
     "id": "foundation", "name": "筑基", "minLevel": 14, "maxLevel": 26, "stages": "phases",
     "breakthrough": {
-      "chance": 0.45,
+      "chance": 0.4,
+      "failBonus": 0.15,
       "requires": [{ "item": "core-pill", "count": 1 }]
     }
   },
   {
     "id": "core", "name": "结丹", "minLevel": 27, "maxLevel": 34, "stages": "phases",
     "breakthrough": {
-      "chance": 0.3,
+      "chance": 0.25,
+      "failBonus": 0.15,
       "requires": [{ "item": "nascent-pill", "count": 1 }]
     }
   },

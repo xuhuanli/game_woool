@@ -3,7 +3,7 @@ import type { EquipSlot, Equipment } from '../game/equipment';
 import type { QuestState } from '../game/quests';
 import type { AutoSettings, HotbarEntry } from '../game/world';
 
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 export interface SavedPlayer {
   name: string;
@@ -21,6 +21,9 @@ export interface SavedPlayer {
   hotbar: (HotbarEntry | null)[];
   quests: QuestState;
   realmPassed: string[];
+  breakthroughFails: Record<string, number>;
+  weakUntil: number;
+  lastDeathAt: number | null;
   auto: AutoSettings;
   lastFieldMap: string | null;
 }
@@ -69,6 +72,15 @@ export const MIGRATIONS: Migrations = {
       ...(save.player as object),
       auto: { enabled: false, minGrade: 'low', potionBelow: 0.5, recallBelow: 0.2 },
       lastFieldMap: null,
+    },
+  }),
+  4: (save) => ({
+    ...save,
+    player: {
+      ...(save.player as object),
+      breakthroughFails: {},
+      weakUntil: 0,
+      lastDeathAt: null,
     },
   }),
 };

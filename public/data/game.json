@@ -1,0 +1,10 @@
+{
+  "startMap": "huangfeng-valley",
+  "weakFactor": 0.2,
+  "weakSeconds": 600,
+  "pickup": {
+    "goldRadius": 6,
+    "itemRadius": 2,
+    "equipmentRadius": 6
+  }
+}

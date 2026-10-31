@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
-import { CONFIG_FILES, validateConfig, type GameConfig } from './game/config';
+import { validateConfig, type GameConfig } from './game/config';
+import { assembleConfig } from './game/configLoader';
 import { World } from './game/world';
 import { GameScene } from './render/GameScene';
 import type { SpriteManifest, SpriteManifests } from './render/placeholders';
@@ -16,15 +17,16 @@ import './ui/hud.css';
 
 const BAKED_SPRITES = ['body'];
 
-async function loadConfig(): Promise<GameConfig> {
-  const entries = await Promise.all(
-    CONFIG_FILES.map(async (name) => {
-      const response = await fetch(`${import.meta.env.BASE_URL}data/${name}.json`);
-      if (!response.ok) throw new Error(`无法读取配置表 ${name}`);
-      return [name, await response.json()] as const;
-    }),
+function loadConfig(): Promise<GameConfig> {
+  const readJson = async <T>(path: string): Promise<T> => {
+    const response = await fetch(`${import.meta.env.BASE_URL}${path}`);
+    if (!response.ok) throw new Error(`无法读取 ${path}`);
+    return (await response.json()) as T;
+  };
+  return assembleConfig(
+    (name) => readJson(`data/${name}.json`),
+    (file) => readJson(`maps/${file}`),
   );
-  return Object.fromEntries(entries) as unknown as GameConfig;
 }
 
 /** 读取已烘焙的精灵表说明，没有的角色继续用占位图。 */
@@ -48,7 +50,7 @@ const seed = Date.now();
 const world =
   start.kind === 'continue'
     ? World.fromSave(config, start.save, seed)
-    : new World(config, 'huangfeng-valley', start.classId, seed, start.name);
+    : new World(config, config.game.startMap, start.classId, seed, start.name);
 
 const report = start.kind === 'continue' ? world.settleOffline(start.save.savedAt, Date.now()) : null;
 

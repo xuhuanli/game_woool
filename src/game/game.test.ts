@@ -1,8 +1,6 @@
-import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { rollAttack } from './combat';
 import {
-  CONFIG_FILES,
   validateConfig,
   type AffixConfig,
   type CombatStats,
@@ -11,17 +9,13 @@ import {
 } from './config';
 import { equipmentName, rollEquipment, type Equipment } from './equipment';
 import { Grid } from './grid';
+import { loadConfigFromDisk } from './testConfig';
 import { findPath } from './pathfinding';
 import { realmName } from './realm';
 import { Rng } from './rng';
 import { TICK_SECONDS, World, type GameEvent, type Monster } from './world';
 
-const realConfig = Object.fromEntries(
-  CONFIG_FILES.map((name) => [
-    name,
-    JSON.parse(readFileSync(`public/data/${name}.json`, 'utf8')) as unknown,
-  ]),
-) as unknown as GameConfig;
+const realConfig = await loadConfigFromDisk();
 
 /** 只有下品的品阶表，让法器属性固定。 */
 const plainGrades: AffixConfig = {
