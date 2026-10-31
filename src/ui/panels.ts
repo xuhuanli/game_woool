@@ -8,7 +8,7 @@ import {
   type EquipSlot,
   type Equipment,
 } from '../game/equipment';
-import { realmName } from '../game/realm';
+import { pendingBreakthrough, realmName } from '../game/realm';
 import type { World } from '../game/world';
 
 const STAT_NAMES: Record<Exclude<BonusStat, 'primary'>, string> = {
@@ -73,6 +73,8 @@ export class Panels {
       player.bag,
       player.stats,
       player.level,
+      player.exp,
+      player.realmPassed,
       player.gold,
       this.selection,
       this.character.hidden,
@@ -131,7 +133,33 @@ export class Panels {
     this.character.replaceChildren(
       this.titleBar(`${player.name} · ${player.def.name}`, this.character),
       body,
+      this.breakthrough(),
     );
+  }
+
+  /** 到达境界上限时显示突破条件和按钮。 */
+  private breakthrough(): HTMLElement {
+    const box = el('div', 'detail');
+    const { player, expToNext } = this.world;
+    const { realms, items } = this.config;
+    const realm = pendingBreakthrough(realms, player.level, player.realmPassed);
+    if (!realm?.breakthrough) {
+      box.hidden = true;
+      return box;
+    }
+    const next = realms[realms.indexOf(realm) + 1];
+    box.append(el('div', 'detail-name', `突破至${next?.name ?? ''}`));
+    for (const { item, count } of realm.breakthrough.requires) {
+      const have = player.bag[item] ?? 0;
+      box.append(el('div', have >= count ? '' : 'detail-missing', `${items[item]?.name} ${have}/${count}`));
+    }
+    const full = expToNext !== null && player.exp >= expToNext;
+    box.append(
+      el('div', full ? '' : 'detail-missing', full ? '修为已圆满' : '修为尚未圆满'),
+      el('div', 'detail-hint', `成功率 ${Math.round(realm.breakthrough.chance * 100)}%，失败会消耗材料`),
+      this.action('突破', () => this.world.attemptBreakthrough()),
+    );
+    return box;
   }
 
   private slotRow(slot: EquipSlot): HTMLElement {
@@ -207,7 +235,7 @@ export class Panels {
       if (item.mana) box.append(el('div', '', `回复 ${item.mana} 点灵力`));
       if (item.kind === 'material') box.append(el('div', '', '用于祭炼武器'));
       if (item.kind === 'potion') {
-        box.append(this.action('使用', () => this.world.useItem(selection.id)));
+        box.append(this.action('使用', () => this.world.inventory.useItem(selection.id)));
       }
       return box;
     }
@@ -232,15 +260,15 @@ export class Panels {
 
     const actions = el('div', 'detail-actions');
     if (wornSlot) {
-      actions.append(this.action('卸下', () => this.world.unequip(wornSlot)));
+      actions.append(this.action('卸下', () => this.world.inventory.unequip(wornSlot)));
     } else {
-      actions.append(this.action('装备', () => this.world.equip(equipment.uid)));
+      actions.append(this.action('装备', () => this.world.inventory.equip(equipment.uid)));
       actions.append(this.action('丢弃', () => this.world.discard(equipment.uid)));
     }
     if (item.slot === 'weapon') {
       const { goldCost, material } = this.config.affixes.refine;
       const stones = player.bag[material] ?? 0;
-      actions.append(this.action('祭炼', () => this.world.refine(equipment.uid)));
+      actions.append(this.action('祭炼', () => this.world.inventory.refine(equipment.uid)));
       box.append(el('div', 'detail-hint', `祭炼消耗祭炼石 1（有 ${stones}）、灵石 ${goldCost}`));
     }
     box.append(actions);

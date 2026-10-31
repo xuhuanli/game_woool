@@ -4,6 +4,8 @@ import { CONFIG_FILES, validateConfig, type GameConfig } from './config';
 import { Grid } from './grid';
 import { findPath } from './pathfinding';
 import { questStatus } from './quests';
+import { realmName } from './realm';
+import { Rng } from './rng';
 import { TICK_SECONDS, World, type GameEvent } from './world';
 
 const config = Object.fromEntries(
@@ -299,3 +301,161 @@ describe('任务', () => {
     expect(status(loaded, 'join-sect')).toBe('ready');
   });
 });
+
+describe('境界突破', () => {
+  const capped = () => {
+    const world = town();
+    const { player } = world;
+    player.level = 13;
+    return { world, player };
+  };
+  const stock = (world: World) => {
+    world.player.bag['foundation-pill'] = 1;
+    world.player.bag['serpent-scale'] = 3;
+  };
+  const give = (world: World, amount: number) => {
+    (world as unknown as { gainExp(amount: number): void }).gainExp(amount);
+  };
+  const seedFor = (success: boolean) => {
+    for (let seed = 1; seed < 100; seed++) {
+      const roll = new Rng(seed).next();
+      if (roll < 0.6 === success) return seed;
+    }
+    throw new Error('找不到种子');
+  };
+
+  it('到境界上限后不再升级，经验封顶', () => {
+    const { world, player } = capped();
+    give(world, 999999);
+    expect(player.level).toBe(13);
+    expect(player.exp).toBe(world.expToNext);
+  });
+
+  it('上限以下不受影响', () => {
+    const world = town();
+    give(world, 40);
+    expect(world.player.level).toBe(2);
+  });
+
+  it('缺材料或修为不满时不消耗', () => {
+    const { world, player } = capped();
+    stock(world);
+    world.attemptBreakthrough();
+    expect(player.bag['foundation-pill']).toBe(1);
+    expect(world.drainEvents()).toContainEqual({ type: 'message', text: '修为尚未圆满' });
+
+    give(world, 999999);
+    delete player.bag['serpent-scale'];
+    world.attemptBreakthrough();
+    expect(player.bag['foundation-pill']).toBe(1);
+    expect(player.realmPassed).toEqual([]);
+  });
+
+  it('突破成功后继续升级，进入筑基', () => {
+    const { world, player } = capped();
+    Object.assign(world, { rng: new Rng(seedFor(true)) });
+    stock(world);
+    give(world, 999999);
+    world.attemptBreakthrough();
+    expect(player.realmPassed).toEqual(['qi']);
+    expect(player.level).toBe(14);
+    expect(player.bag).toEqual({});
+    expect(realmName(config.realms, player.level)).toBe('筑基初期');
+  });
+
+  it('突破失败消耗材料，不掉等级，可以再试', () => {
+    const { world, player } = capped();
+    Object.assign(world, { rng: new Rng(seedFor(false)) });
+    stock(world);
+    give(world, 999999);
+    world.attemptBreakthrough();
+    expect(player.level).toBe(13);
+    expect(player.realmPassed).toEqual([]);
+    expect(player.bag).toEqual({});
+    expect(player.exp).toBe(world.expToNext);
+  });
+
+  it('突破记录写入存档', () => {
+    const { world, player } = capped();
+    player.realmPassed.push('qi');
+    player.level = 14;
+    expect(World.fromSave(config, world.toSave(1), 2).player.realmPassed).toEqual(['qi']);
+  });
+});
+
+describe('死亡掉装', () => {
+  const sword = { uid: 900, itemId: 'rusty-sword', grade: 'top', affixes: [], luck: 2 };
+  const alwaysDrop: GameConfig = {
+    ...config,
+    affixes: { ...config.affixes, death: { dropChance: 1, pickupSeconds: 60 } },
+  };
+  const dying = (setup: GameConfig = alwaysDrop) => {
+    const world = new World(setup, 'starter-field', 'body', 1);
+    const { player } = world;
+    player.equipment.weapon = structuredClone(sword);
+    player.hp = 1;
+    const monster = world.monsters[0]!;
+    monster.cell = { x: player.cell.x + 1, y: player.cell.y };
+    monster.pos = { ...monster.cell };
+    monster.home = { ...monster.cell };
+    monster.stats = { ...monster.stats, accuracy: 1e9, attack: { min: 50, max: 50 } };
+    run(world, 10, () => player.hp === 0);
+    return world;
+  };
+
+  it('死亡时按概率掉身上法器，属性随之下降，背包不掉', () => {
+    const world = new World(alwaysDrop, 'starter-field', 'body', 1);
+    world.player.equipBag.push({ ...sword, uid: 901 });
+    world.player.equipment.weapon = structuredClone(sword);
+    world.player.hp = 1;
+    const monster = world.monsters[0]!;
+    monster.cell = { x: world.player.cell.x + 1, y: world.player.cell.y };
+    monster.pos = { ...monster.cell };
+    monster.home = { ...monster.cell };
+    monster.stats = { ...monster.stats, accuracy: 1e9, attack: { min: 50, max: 50 } };
+    run(world, 10, () => world.player.hp === 0);
+    expect(world.player.equipment.weapon).toBeUndefined();
+    expect(world.player.equipBag).toHaveLength(1);
+    expect(world.items.map((item) => item.equipment?.uid)).toContain(900);
+    expect(world.deathDrops).toHaveLength(1);
+  });
+
+  it('掉落概率为 0 时不掉', () => {
+    const noDrop = { ...alwaysDrop, affixes: { ...alwaysDrop.affixes, death: { dropChance: 0, pickupSeconds: 60 } } };
+    const world = dying(noDrop);
+    expect(world.player.equipment.weapon?.uid).toBe(900);
+    expect(world.deathDrops).toEqual([]);
+  });
+
+  it('复活回城后掉落还在，回到原地能捡回', () => {
+    const world = dying();
+    run(world, 4, () => world.player.hp > 0);
+    expect(world.mapId).toBe('huangfeng-valley');
+    expect(world.items).toEqual([]);
+    expect(world.deathDrops).toHaveLength(1);
+
+    world.moveTo(world.portals[0]!);
+    run(world, 15, () => world.mapId === 'starter-field');
+    const dropped = world.items.find((item) => item.equipment?.uid === 900)!;
+    expect(dropped).toBeDefined();
+    world.pickup(dropped);
+    run(world, 10, () => world.deathDrops.length === 0);
+    expect(world.player.equipment.weapon).toEqual(sword);
+  });
+
+  it('超过限时后消失，在别的地图也会计时', () => {
+    const world = dying();
+    run(world, 4, () => world.player.hp > 0);
+    run(world, 61);
+    expect(world.deathDrops).toEqual([]);
+  });
+
+  it('死亡掉落写入存档，读档后还能在原地图看到', () => {
+    const world = dying();
+    const loaded = World.fromSave(alwaysDrop, world.toSave(1), 2);
+    expect(loaded.deathDrops).toHaveLength(1);
+    expect(loaded.deathDrops[0]?.item.equipment?.uid).toBe(900);
+    expect(loaded.deathDrops[0]?.item.expiresAt).toBe(world.deathDrops[0]?.item.expiresAt);
+  });
+});
+

@@ -1,6 +1,24 @@
 [
-  { "id": "qi", "name": "练气", "minLevel": 1, "maxLevel": 13, "stages": "layers" },
-  { "id": "foundation", "name": "筑基", "minLevel": 14, "maxLevel": 26, "stages": "phases" },
-  { "id": "core", "name": "结丹", "minLevel": 27, "maxLevel": 34, "stages": "phases" },
+  {
+    "id": "qi", "name": "练气", "minLevel": 1, "maxLevel": 13, "stages": "layers",
+    "breakthrough": {
+      "chance": 0.6,
+      "requires": [{ "item": "foundation-pill", "count": 1 }, { "item": "serpent-scale", "count": 3 }]
+    }
+  },
+  {
+    "id": "foundation", "name": "筑基", "minLevel": 14, "maxLevel": 26, "stages": "phases",
+    "breakthrough": {
+      "chance": 0.45,
+      "requires": [{ "item": "core-pill", "count": 1 }]
+    }
+  },
+  {
+    "id": "core", "name": "结丹", "minLevel": 27, "maxLevel": 34, "stages": "phases",
+    "breakthrough": {
+      "chance": 0.3,
+      "requires": [{ "item": "nascent-pill", "count": 1 }]
+    }
+  },
   { "id": "nascent", "name": "元婴", "minLevel": 35, "maxLevel": 40, "stages": "phases" }
 ]

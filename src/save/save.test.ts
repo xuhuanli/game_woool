@@ -29,7 +29,7 @@ function equippedWorld(): World {
     affixes: [{ stat: 'maxHp', value: 15 }],
     luck: 3,
   });
-  world.equip(900);
+  world.inventory.equip(900);
   return world;
 }
 
@@ -136,12 +136,14 @@ describe('版本迁移', () => {
   });
 
   it('第 1 版存档升级后带上任务和 Boss 状态', () => {
-    const { bossReadyAt: _boss, ...save } = current();
-    const { quests: _quests, ...player } = save.player;
+    const { bossReadyAt: _boss, deathDrops: _drops, ...save } = current();
+    const { quests: _quests, realmPassed: _realm, ...player } = save.player;
     const migrated = migrateSave({ ...save, version: 1, player });
     expect(migrated.version).toBe(SAVE_VERSION);
     expect(migrated.bossReadyAt).toEqual({});
     expect(migrated.player.quests).toEqual({ active: [], completed: [] });
+    expect(migrated.deathDrops).toEqual([]);
+    expect(migrated.player.realmPassed).toEqual([]);
     expect(() => World.fromSave(config, migrated, 1)).not.toThrow();
   });
 

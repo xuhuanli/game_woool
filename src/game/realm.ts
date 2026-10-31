@@ -12,3 +12,13 @@ export function realmName(realms: RealmDef[], level: number): string {
   const span = realm.maxLevel - realm.minLevel + 1;
   return `${realm.name}${PHASES.at(Math.floor((step * PHASES.length) / span))}`;
 }
+
+/** 当前等级已到境界上限且尚未突破时，返回这个境界。 */
+export function pendingBreakthrough(
+  realms: RealmDef[],
+  level: number,
+  passed: string[],
+): RealmDef | null {
+  const realm = realms.find((candidate) => candidate.maxLevel === level);
+  return realm?.breakthrough && !passed.includes(realm.id) ? realm : null;
+}

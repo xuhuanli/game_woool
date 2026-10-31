@@ -99,5 +99,9 @@
     "failLoss": 1
   },
   "bagCapacity": 40,
-  "sellRatio": 0.3
+  "sellRatio": 0.3,
+  "death": {
+    "dropChance": 0.1,
+    "pickupSeconds": 600
+  }
 }

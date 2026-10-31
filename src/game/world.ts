@@ -1,7 +1,6 @@
 import { rollAttack, type AttackOptions } from './combat';
 import type {
   Cell,
-  ClassDef,
   CombatStats,
   DamageStat,
   GameConfig,
@@ -12,26 +11,29 @@ import type {
   PortalDef,
   SkillDef,
 } from './config';
-import {
-  applyBonus,
-  equipmentBonuses,
-  EQUIP_SLOTS,
-  rollEquipment,
-  slotsFor,
-  type EquipSlot,
-  type Equipment,
-} from './equipment';
+import { equipmentName, EQUIP_SLOTS, rollEquipment, type Equipment } from './equipment';
 import { cellDistance, Grid, sameCell } from './grid';
+import { Inventory } from './inventory';
 import { findPath } from './pathfinding';
-import {
-  emptyQuestState,
-  questStatus,
-  recordObjective,
-  type QuestState,
-} from './quests';
+import { emptyQuestState, questStatus, recordObjective } from './quests';
+import { pendingBreakthrough } from './realm';
 import { Rng } from './rng';
 import { SAVE_VERSION, type SaveData } from '../save/saveData';
 import { needsTarget, skillArea } from './skills';
+import { refreshStats } from './stats';
+import type {
+  DeathDrop,
+  GameEvent,
+  GroundItem,
+  HotbarEntry,
+  Monster,
+  Player,
+  Summon,
+  Unit,
+  Vec,
+} from './types';
+
+export * from './types';
 
 export const TICK_SECONDS = 0.05;
 export const HOTBAR_SIZE = 8;
@@ -46,151 +48,24 @@ const WANDER_MIN_SECONDS = 2;
 const WANDER_MAX_SECONDS = 6;
 const SUMMON_FOLLOW_DISTANCE = 2;
 const SUMMON_TELEPORT_DISTANCE = 12;
-const BAG_FULL_NOTICE_SECONDS = 3;
 const TALK_RANGE = 2;
 const INTERACT_RANGE = 4;
-
-export interface Vec {
-  x: number;
-  y: number;
-}
-
-export interface StatusEffect {
-  kind: 'dot' | 'shield' | 'defense';
-  left: number;
-  /** dot 为每跳伤害，shield 为减伤比例，defense 为增加的防御 */
-  amount: number;
-  interval: number;
-  nextTick: number;
-  source: Unit;
-}
-
-interface PendingAction {
-  target: Unit | null;
-  skill: SkillDef | null;
-}
-
-export interface Unit {
-  id: number;
-  name: string;
-  /** 逻辑所在格，开始走一步时就占住目标格 */
-  cell: Cell;
-  /** 连续坐标，用于平滑显示 */
-  pos: Vec;
-  facing: Vec;
-  hp: number;
-  mp: number;
-  stats: CombatStats;
-  moveSpeed: number;
-  attackInterval: number;
-  attackWindup: number;
-  attackRange: number;
-  attackStat: DamageStat;
-  path: Cell[];
-  attackCooldown: number;
-  windupLeft: number;
-  pending: PendingAction | null;
-  repathLeft: number;
-  effects: StatusEffect[];
-}
-
-export interface Monster extends Unit {
-  kind: 'monster';
-  def: MonsterDef;
-  home: Cell;
-  spawnKey: string;
-  mode: 'idle' | 'chase' | 'return';
-  target: Unit | null;
-  wanderLeft: number;
-  respawnLeft: number;
-}
-
-export interface Summon extends Unit {
-  kind: 'summon';
-  def: MonsterDef;
-  target: Monster | null;
-  lifeLeft: number;
-}
-
-export type PlayerOrder =
-  | { type: 'move'; cell: Cell }
-  | { type: 'attack'; target: Monster }
-  | { type: 'cast'; skill: SkillDef; target: Monster }
-  | { type: 'pickup'; itemId: number }
-  | { type: 'talk'; npc: NpcDef };
-
-export type HotbarEntry = { kind: 'skill'; id: string } | { kind: 'item'; id: string };
-
-export interface Player extends Unit {
-  kind: 'player';
-  def: ClassDef;
-  level: number;
-  exp: number;
-  gold: number;
-  /** 可堆叠的丹药和材料 */
-  bag: Record<string, number>;
-  equipBag: Equipment[];
-  equipment: Partial<Record<EquipSlot, Equipment>>;
-  skills: string[];
-  skillCooldowns: Record<string, number>;
-  hotbar: (HotbarEntry | null)[];
-  quests: QuestState;
-  order: PlayerOrder | null;
-  /** 出招途中按下的自身技能，出招结束后释放 */
-  queuedSkill: SkillDef | null;
-  respawnLeft: number;
-  lastHurtAt: number;
-}
-
-export interface GroundItem {
-  id: number;
-  def: ItemDef;
-  amount: number;
-  equipment: Equipment | null;
-  cell: Cell;
-  expiresAt: number;
-}
-
-export type GameEvent =
-  | { type: 'attackStart'; unit: Unit; target: Unit | null; color: string | null }
-  | { type: 'skillCast'; unit: Unit; skill: SkillDef; cells: Cell[] }
-  | { type: 'skillLearned'; skill: SkillDef }
-  | { type: 'summoned'; unit: Summon }
-  | { type: 'damage'; unit: Unit; amount: number; maxRoll: boolean; source: Unit }
-  | { type: 'miss'; unit: Unit }
-  | { type: 'death'; unit: Unit }
-  | { type: 'respawn'; unit: Unit }
-  | { type: 'itemDropped'; item: GroundItem }
-  | { type: 'itemRemoved'; item: GroundItem }
-  | { type: 'pickedUp'; item: GroundItem }
-  | { type: 'equipped'; equipment: Equipment }
-  | { type: 'refined'; equipment: Equipment; success: boolean }
-  | { type: 'heal'; amount: number }
-  | { type: 'mana'; amount: number }
-  | { type: 'expGained'; amount: number }
-  | { type: 'levelUp'; level: number }
-  | { type: 'mapChanged' }
-  | { type: 'npcOpened'; npc: NpcDef }
-  | { type: 'questAccepted'; name: string }
-  | { type: 'questProgress'; name: string }
-  | { type: 'questCompleted'; name: string }
-  | { type: 'goldChanged'; amount: number }
-  | { type: 'message'; text: string };
 
 export class World {
   grid: Grid;
   mapId: string;
   readonly player: Player;
+  readonly inventory: Inventory;
   readonly monsters: Monster[] = [];
   readonly summons: Summon[] = [];
   readonly items: GroundItem[] = [];
   /** Boss 下次刷新的游戏内时间，切图后继续计时 */
   bossReadyAt: Record<string, number> = {};
+  deathDrops: DeathDrop[] = [];
   time = 0;
 
   private readonly rng: Rng;
   private nextId = 1;
-  private bagFullNoticeAt = -Infinity;
   private events: GameEvent[] = [];
 
   constructor(
@@ -224,6 +99,7 @@ export class World {
       equipBag: [],
       equipment: {},
       quests: emptyQuestState(),
+      realmPassed: [],
       skills: [],
       skillCooldowns: {},
       hotbar,
@@ -232,6 +108,13 @@ export class World {
       respawnLeft: 0,
       lastHurtAt: -Infinity,
     };
+    this.inventory = new Inventory(
+      config,
+      this.player,
+      this.rng,
+      () => this.time,
+      (event) => this.emit(event),
+    );
     this.learnSkills();
     this.loadMap(mapId);
     this.drainEvents();
@@ -257,6 +140,9 @@ export class World {
     this.grid = new Grid(map, this.npcs);
     this.monsters.length = 0;
     this.items.length = 0;
+    for (const drop of this.deathDrops) {
+      if (drop.mapId === mapId) this.items.push(drop.item);
+    }
     map.spawns.forEach((spawn, index) => {
       const def = this.config.monsters[spawn.monster];
       if (!def) throw new Error(`未知的怪物：${spawn.monster}`);
@@ -318,6 +204,12 @@ export class World {
       time: this.time,
       nextId: this.nextId,
       bossReadyAt: this.bossReadyAt,
+      deathDrops: this.deathDrops.map(({ mapId, item }) => ({
+        mapId,
+        cell: item.cell,
+        equipment: item.equipment!,
+        expiresAt: item.expiresAt,
+      })),
       player: {
         name: player.name,
         classId: player.def.id,
@@ -333,6 +225,7 @@ export class World {
         skills: player.skills,
         hotbar: player.hotbar,
         quests: player.quests,
+        realmPassed: player.realmPassed,
       },
     });
   }
@@ -346,6 +239,19 @@ export class World {
     this.time = save.time;
     this.nextId = Math.max(this.nextId, save.nextId);
     this.bossReadyAt = { ...save.bossReadyAt };
+    this.deathDrops = save.deathDrops
+      .filter((drop) => items[drop.equipment.itemId])
+      .map((drop) => ({
+        mapId: drop.mapId,
+        item: {
+          id: this.nextId++,
+          def: items[drop.equipment.itemId]!,
+          amount: 1,
+          equipment: structuredClone(drop.equipment),
+          cell: { ...drop.cell },
+          expiresAt: drop.expiresAt,
+        },
+      }));
     this.loadMap(save.mapId);
     player.level = data.level;
     player.exp = data.exp;
@@ -359,12 +265,13 @@ export class World {
       active: data.quests.active.filter((quest) => this.config.quests[quest.id]),
       completed: data.quests.completed,
     };
+    player.realmPassed = data.realmPassed;
     player.skills = data.skills.filter((id) => skills[id]);
     player.hotbar = data.hotbar.map((entry) => {
       const exists = entry?.kind === 'skill' ? skills[entry.id] : entry && items[entry.id];
       return exists ? entry : null;
     });
-    this.applyStats();
+    refreshStats(this.player, this.config);
     this.learnSkills();
     this.drainEvents();
 
@@ -416,7 +323,7 @@ export class World {
   useHotbar(slot: number, target: Monster | null = null): void {
     const entry = this.player.hotbar[slot];
     if (entry?.kind === 'skill') this.castSkill(entry.id, target);
-    else if (entry?.kind === 'item') this.useItem(entry.id);
+    else if (entry?.kind === 'item') this.inventory.useItem(entry.id);
   }
 
   castSkill(skillId: string, target: Monster | null = null): void {
@@ -444,59 +351,6 @@ export class World {
     player.repathLeft = 0;
   }
 
-  useItem(itemId: string): void {
-    const player = this.player;
-    const item = this.config.items[itemId];
-    if (!player.hp || !item) return;
-    if (!player.bag[itemId]) {
-      this.emit({ type: 'message', text: `没有${item.name}了` });
-      return;
-    }
-    const healed = Math.min(item.heal ?? 0, player.stats.maxHp - player.hp);
-    const refilled = Math.min(item.mana ?? 0, player.stats.maxMp - player.mp);
-    if (healed <= 0 && refilled <= 0) return;
-    player.hp += healed;
-    player.mp += refilled;
-    this.removeFromBag(itemId);
-    if (healed > 0) this.emit({ type: 'heal', amount: healed });
-    if (refilled > 0) this.emit({ type: 'mana', amount: refilled });
-  }
-
-  /** 把背包里的法器穿上，同栏位优先用空位，否则替换第一个。 */
-  equip(uid: number): void {
-    const player = this.player;
-    const equipment = player.equipBag.find((candidate) => candidate.uid === uid);
-    const item = equipment && this.config.items[equipment.itemId];
-    if (!player.hp || !equipment || !item) return;
-    if ((item.level ?? 1) > player.level) {
-      this.emit({ type: 'message', text: `需要等级 ${item.level}` });
-      return;
-    }
-    const slots = slotsFor(item);
-    const slot = slots.find((candidate) => !player.equipment[candidate]) ?? slots[0];
-    if (!slot) return;
-
-    player.equipBag.splice(player.equipBag.indexOf(equipment), 1);
-    const replaced = player.equipment[slot];
-    if (replaced) player.equipBag.push(replaced);
-    player.equipment[slot] = equipment;
-    this.applyStats();
-    this.emit({ type: 'equipped', equipment });
-  }
-
-  unequip(slot: EquipSlot): void {
-    const player = this.player;
-    const equipment = player.equipment[slot];
-    if (!player.hp || !equipment) return;
-    if (this.bagIsFull()) {
-      this.emit({ type: 'message', text: '背包已满' });
-      return;
-    }
-    delete player.equipment[slot];
-    player.equipBag.push(equipment);
-    this.applyStats();
-  }
-
   /** 把背包里的法器丢到脚边，丢弃后仍可捡回。 */
   discard(uid: number): void {
     const player = this.player;
@@ -506,44 +360,6 @@ export class World {
     if (!player.hp || !equipment || !item || !cell) return;
     player.equipBag.splice(player.equipBag.indexOf(equipment), 1);
     this.spawnItem(item, 1, equipment, cell);
-  }
-
-  /** 祭炼武器：消耗祭炼石和灵石，成功加幸运，失败掉幸运。 */
-  refine(uid: number): void {
-    const player = this.player;
-    const { refine } = this.config.affixes;
-    const equipment = this.findEquipment(uid);
-    if (!player.hp || !equipment) return;
-    if (this.config.items[equipment.itemId]?.slot !== 'weapon') {
-      this.emit({ type: 'message', text: '只有武器可以祭炼' });
-      return;
-    }
-    if (equipment.luck >= refine.maxLuck) {
-      this.emit({ type: 'message', text: '幸运已达上限' });
-      return;
-    }
-    if (!player.bag[refine.material]) {
-      this.emit({ type: 'message', text: `缺少${this.config.items[refine.material]?.name}` });
-      return;
-    }
-    if (player.gold < refine.goldCost) {
-      this.emit({ type: 'message', text: '灵石不足' });
-      return;
-    }
-
-    player.gold -= refine.goldCost;
-    this.removeFromBag(refine.material);
-    const success = this.rng.chance(refine.chances[equipment.luck] ?? 0);
-    equipment.luck = success
-      ? equipment.luck + 1
-      : Math.max(0, equipment.luck - refine.failLoss);
-    this.applyStats();
-    this.emit({ type: 'refined', equipment, success });
-  }
-
-  private findEquipment(uid: number): Equipment | null {
-    const worn = Object.values(this.player.equipment);
-    return [...worn, ...this.player.equipBag].find((item) => item.uid === uid) ?? null;
   }
 
   // ---- NPC、商店、任务 ----
@@ -570,9 +386,9 @@ export class World {
     }
     if (item.kind === 'equip') {
       const lowest = { ...this.config.affixes, grades: this.config.affixes.grades.slice(0, 1) };
-      if (!this.takeEquipment(rollEquipment(item, lowest, this.rng, this.nextId++))) return;
+      if (!this.inventory.takeEquipment(rollEquipment(item, lowest, this.rng, this.nextId++))) return;
     } else {
-      this.addToBag(itemId, 1);
+      this.inventory.addToBag(itemId, 1);
     }
     player.gold -= item.price;
     this.emit({ type: 'goldChanged', amount: -item.price });
@@ -599,7 +415,7 @@ export class World {
     const player = this.player;
     const price = this.config.items[itemId]?.price;
     if (!price || !player.bag[itemId] || !npc.shop || !this.isNear(npc)) return;
-    this.removeFromBag(itemId);
+    this.inventory.removeFromBag(itemId);
     const earned = Math.floor(price * this.config.affixes.sellRatio);
     player.gold += earned;
     this.emit({ type: 'goldChanged', amount: earned });
@@ -648,7 +464,7 @@ export class World {
 
     for (const objective of quest.objectives) {
       if (objective.type !== 'collect') continue;
-      for (let i = 0; i < objective.count; i++) this.removeFromBag(objective.target);
+      for (let i = 0; i < objective.count; i++) this.inventory.removeFromBag(objective.target);
     }
     player.quests.active = player.quests.active.filter((progress) => progress.id !== quest.id);
     player.quests.completed.push(quest.id);
@@ -657,12 +473,39 @@ export class World {
     player.gold += quest.rewards.gold;
     for (const item of rewards) {
       if (item.kind === 'equip') {
-        this.takeEquipment(rollEquipment(item, this.config.affixes, this.rng, this.nextId++));
+        this.inventory.takeEquipment(rollEquipment(item, this.config.affixes, this.rng, this.nextId++));
       } else {
-        this.addToBag(item.id, 1);
+        this.inventory.addToBag(item.id, 1);
       }
     }
     this.gainExp(quest.rewards.exp);
+  }
+
+  /** 尝试突破：消耗丹药和材料，成功后继续升级，失败不掉等级。 */
+  attemptBreakthrough(): void {
+    const player = this.player;
+    const realm = pendingBreakthrough(this.config.realms, player.level, player.realmPassed);
+    const needed = this.expToNext;
+    if (!realm?.breakthrough || !player.hp || needed === null) return;
+    if (player.exp < needed) {
+      this.emit({ type: 'message', text: '修为尚未圆满' });
+      return;
+    }
+    const missing = realm.breakthrough.requires.find(
+      ({ item, count }) => (player.bag[item] ?? 0) < count,
+    );
+    if (missing) {
+      this.emit({ type: 'message', text: `缺少${this.config.items[missing.item]?.name}` });
+      return;
+    }
+
+    for (const { item, count } of realm.breakthrough.requires) {
+      for (let i = 0; i < count; i++) this.inventory.removeFromBag(item);
+    }
+    const success = this.rng.chance(realm.breakthrough.chance);
+    if (success) player.realmPassed.push(realm.id);
+    this.emit({ type: 'breakthrough', realm: realm.name, success });
+    if (success) this.gainExp(0);
   }
 
   private advanceQuests(type: 'kill' | 'talk' | 'reach', target: string): void {
@@ -1049,8 +892,26 @@ export class World {
     monster.target = source;
   }
 
+  private dropWornEquipment(): void {
+    const player = this.player;
+    const { dropChance, pickupSeconds } = this.config.affixes.death;
+    for (const slot of EQUIP_SLOTS) {
+      const equipment = player.equipment[slot];
+      const def = equipment && this.config.items[equipment.itemId];
+      if (!equipment || !def || !this.rng.chance(dropChance)) continue;
+      const cell = this.grid.nearest(player.cell, (c) => this.canDropAt(c));
+      if (!cell) continue;
+      delete player.equipment[slot];
+      const item = this.spawnItem(def, 1, equipment, cell, pickupSeconds);
+      this.deathDrops.push({ mapId: this.mapId, item });
+      this.emit({ type: 'deathDrop', name: equipmentName(equipment, this.config) });
+    }
+    refreshStats(player, this.config);
+  }
+
   private killPlayer(): void {
     const player = this.player;
+    this.dropWornEquipment();
     player.order = null;
     player.path = [];
     player.respawnLeft = RESPAWN_SECONDS;
@@ -1136,29 +997,40 @@ export class World {
     return this.grid.isWalkable(cell) && !this.items.some((item) => sameCell(item.cell, cell));
   }
 
-  private spawnItem(def: ItemDef, amount: number, equipment: Equipment | null, cell: Cell): void {
+  private spawnItem(
+    def: ItemDef,
+    amount: number,
+    equipment: Equipment | null,
+    cell: Cell,
+    lifetime = GROUND_ITEM_SECONDS,
+  ): GroundItem {
     const item: GroundItem = {
       id: this.nextId++,
       def,
       amount,
       equipment,
       cell,
-      expiresAt: this.time + GROUND_ITEM_SECONDS,
+      expiresAt: this.time + lifetime,
     };
     this.items.push(item);
     this.emit({ type: 'itemDropped', item });
+    return item;
   }
 
   private gainExp(amount: number): void {
     const player = this.player;
     player.exp += amount;
-    this.emit({ type: 'expGained', amount });
+    if (amount > 0) this.emit({ type: 'expGained', amount });
     for (;;) {
       const needed = this.expToNext;
       if (needed === null || player.exp < needed) return;
+      if (pendingBreakthrough(this.config.realms, player.level, player.realmPassed)) {
+        player.exp = needed;
+        return;
+      }
       player.exp -= needed;
       player.level += 1;
-      this.applyStats();
+      refreshStats(this.player, this.config);
       player.hp = player.stats.maxHp;
       player.mp = player.stats.maxMp;
       this.emit({ type: 'levelUp', level: player.level });
@@ -1180,85 +1052,25 @@ export class World {
     }
   }
 
-  private applyStats(): void {
-    const { base, perLevel } = this.player.def;
-    const gained = this.player.level - 1;
-    const grow = (key: 'attack' | 'magic' | 'dao' | 'defense' | 'magicDefense') => ({
-      min: Math.floor(base[key].min + perLevel[key] * gained * 0.5),
-      max: Math.floor(base[key].max + perLevel[key] * gained),
-    });
-    const stats: CombatStats = {
-      ...base,
-      maxHp: base.maxHp + perLevel.maxHp * gained,
-      maxMp: base.maxMp + perLevel.maxMp * gained,
-      attack: grow('attack'),
-      magic: grow('magic'),
-      dao: grow('dao'),
-      defense: grow('defense'),
-      magicDefense: grow('magicDefense'),
-    };
-    for (const slot of EQUIP_SLOTS) {
-      const equipment = this.player.equipment[slot];
-      const item = equipment && this.config.items[equipment.itemId];
-      if (!equipment || !item) continue;
-      for (const bonus of equipmentBonuses(equipment, item)) {
-        applyBonus(stats, this.player.def, bonus);
-      }
-    }
-    this.player.stats = stats;
-    this.player.hp = Math.min(this.player.hp, stats.maxHp);
-    this.player.mp = Math.min(this.player.mp, stats.maxMp);
-  }
-
   private collectItemsAt(cell: Cell): void {
     for (const item of this.items.filter((candidate) => sameCell(candidate.cell, cell))) {
-      if (item.equipment && !this.takeEquipment(item.equipment)) continue;
+      if (item.equipment && !this.inventory.takeEquipment(item.equipment)) continue;
       this.removeItem(item);
       this.emit({ type: 'pickedUp', item });
       if (item.def.kind === 'gold') this.player.gold += item.amount;
-      else if (!item.equipment) this.addToBag(item.def.id, item.amount);
+      else if (!item.equipment) this.inventory.addToBag(item.def.id, item.amount);
     }
-  }
-
-  /** 收下法器，有空栏位且等级够时直接穿上。背包满时返回 false。 */
-  private takeEquipment(equipment: Equipment): boolean {
-    const player = this.player;
-    if (this.bagIsFull()) {
-      if (this.time - this.bagFullNoticeAt >= BAG_FULL_NOTICE_SECONDS) {
-        this.bagFullNoticeAt = this.time;
-        this.emit({ type: 'message', text: '背包已满' });
-      }
-      return false;
-    }
-    const item = this.config.items[equipment.itemId];
-    player.equipBag.push(equipment);
-    if (item && (item.level ?? 1) <= player.level && slotsFor(item).some((s) => !player.equipment[s])) {
-      this.equip(equipment.uid);
-    }
-    return true;
-  }
-
-  private bagIsFull(): boolean {
-    return this.player.equipBag.length >= this.config.affixes.bagCapacity;
-  }
-
-  private addToBag(itemId: string, amount: number): void {
-    this.player.bag[itemId] = (this.player.bag[itemId] ?? 0) + amount;
-  }
-
-  private removeFromBag(itemId: string): void {
-    const remaining = (this.player.bag[itemId] ?? 0) - 1;
-    if (remaining > 0) this.player.bag[itemId] = remaining;
-    else delete this.player.bag[itemId];
   }
 
   private expireItems(): void {
     for (const item of this.items.filter((candidate) => candidate.expiresAt <= this.time)) {
       this.removeItem(item);
     }
+    this.deathDrops = this.deathDrops.filter(({ item }) => item.expiresAt > this.time);
   }
 
   private removeItem(item: GroundItem): void {
+    this.deathDrops = this.deathDrops.filter((drop) => drop.item !== item);
     this.items.splice(this.items.indexOf(item), 1);
     this.emit({ type: 'itemRemoved', item });
   }

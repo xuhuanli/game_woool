@@ -10,6 +10,9 @@
   "spirit-pendant": {"id": "spirit-pendant", "name": "聚灵佩", "kind": "equip", "slot": "necklace", "level": 3, "bonus": {"maxMp": 15}, "price": 120},
   "iron-bracelet": {"id": "iron-bracelet", "name": "镇魂镯", "kind": "equip", "slot": "bracelet", "level": 2, "bonus": {"defense": 1}, "price": 80},
   "jade-ring": {"id": "jade-ring", "name": "青玉戒", "kind": "equip", "slot": "ring", "level": 2, "bonus": {"primary": 1}, "price": 100},
+  "foundation-pill": {"id": "foundation-pill", "name": "筑基丹", "kind": "material", "price": 2000},
+  "core-pill": {"id": "core-pill", "name": "降尘丹", "kind": "material", "price": 8000},
+  "nascent-pill": {"id": "nascent-pill", "name": "定灵丹", "kind": "material", "price": 30000},
   "ape-fur": {"id": "ape-fur", "name": "山魈皮", "kind": "material", "price": 15},
   "serpent-scale": {"id": "serpent-scale", "name": "蛟鳞", "kind": "material", "price": 150},
   "blue-sword": {"id": "blue-sword", "name": "青竹蜂云剑", "kind": "equip", "slot": "weapon", "level": 8, "bonus": {"primary": 9}, "price": 800}

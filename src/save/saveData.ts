@@ -3,7 +3,7 @@ import type { EquipSlot, Equipment } from '../game/equipment';
 import type { QuestState } from '../game/quests';
 import type { HotbarEntry } from '../game/world';
 
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3;
 
 export interface SavedPlayer {
   name: string;
@@ -20,6 +20,15 @@ export interface SavedPlayer {
   skills: string[];
   hotbar: (HotbarEntry | null)[];
   quests: QuestState;
+  realmPassed: string[];
+}
+
+export interface SavedDeathDrop {
+  mapId: string;
+  cell: Cell;
+  equipment: Equipment;
+  /** 消失的游戏内时间 */
+  expiresAt: number;
 }
 
 export interface SaveData {
@@ -32,6 +41,7 @@ export interface SaveData {
   nextId: number;
   /** Boss 下次刷新的游戏内时间，键是 地图:刷怪点序号 */
   bossReadyAt: Record<string, number>;
+  deathDrops: SavedDeathDrop[];
   player: SavedPlayer;
 }
 
@@ -45,6 +55,11 @@ export const MIGRATIONS: Migrations = {
     ...save,
     bossReadyAt: {},
     player: { ...(save.player as object), quests: { active: [], completed: [] } },
+  }),
+  2: (save) => ({
+    ...save,
+    deathDrops: [],
+    player: { ...(save.player as object), realmPassed: [] },
   }),
 };
 

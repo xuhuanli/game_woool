@@ -139,6 +139,7 @@ export class GameScene extends Phaser.Scene {
       if (!monster.hp) this.unitViews.get(monster)!.sprite.setAlpha(0);
     }
     for (const view of this.unitViews.values()) view.previous = { ...view.unit.pos };
+    for (const item of this.world.items) this.showDrop(item, false);
   }
 
   private drawGround(): void {
@@ -395,6 +396,12 @@ export class GameScene extends Phaser.Scene {
       case 'mana':
         this.floatText(this.world.player, `+${event.amount}`, '#7bb8ff', 18);
         break;
+      case 'breakthrough':
+        this.showBreakthrough(event.realm, event.success);
+        break;
+      case 'deathDrop':
+        this.hud.log(`${event.name} 掉在了原地，限时可捡回`, 'bad');
+        break;
       case 'mapChanged':
         this.buildMap();
         this.hud.log(`来到${this.world.map.name}`);
@@ -528,7 +535,7 @@ export class GameScene extends Phaser.Scene {
     this.tweens.add({ targets: view.sprite, alpha: 1, duration: 400 });
   }
 
-  private showDrop(item: GroundItem): void {
+  private showDrop(item: GroundItem, announce = true): void {
     const { x, y } = toScreen(item.cell);
     const sprite = this.add
       .image(x, y - 26, `item-${item.def.kind}`)
@@ -546,7 +553,7 @@ export class GameScene extends Phaser.Scene {
       .setDepth(UI_DEPTH - 2);
     this.tweens.add({ targets: sprite, y, duration: 320, ease: 'Bounce.easeOut' });
     this.itemViews.set(item, { sprite, label });
-    if (item.equipment) this.hud.log(`掉落了 ${this.itemLabel(item)}！`, 'gain');
+    if (announce && item.equipment) this.hud.log(`掉落了 ${this.itemLabel(item)}！`, 'gain');
   }
 
   private itemLabel(item: GroundItem): string {
@@ -559,6 +566,17 @@ export class GameScene extends Phaser.Scene {
     view.sprite.destroy();
     view.label.destroy();
     this.itemViews.delete(item);
+  }
+
+  private showBreakthrough(realm: string, success: boolean): void {
+    if (!success) {
+      this.hud.log('突破失败，材料已消耗', 'bad');
+      this.floatText(this.world.player, '突破失败', '#ff6a5a', 24);
+      return;
+    }
+    this.hud.log(`突破成功，${realm}圆满！`, 'gain');
+    this.floatText(this.world.player, '突破成功！', '#ffd84a', 28);
+    this.cameras.main.flash(300, 255, 240, 200);
   }
 
   private showLevelUp(level: number): void {

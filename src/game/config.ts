@@ -78,6 +78,8 @@ export interface RealmDef {
   minLevel: number;
   maxLevel: number;
   stages: 'layers' | 'phases';
+  /** 进入下一境界的条件，最高境界没有 */
+  breakthrough?: { chance: number; requires: { item: string; count: number }[] };
 }
 
 export interface MonsterDef {
@@ -153,6 +155,7 @@ export interface AffixConfig {
   refine: RefineConfig;
   bagCapacity: number;
   sellRatio: number;
+  death: { dropChance: number; pickupSeconds: number };
 }
 
 export interface DropEntry {
@@ -327,6 +330,11 @@ export function validateConfig(config: GameConfig): string[] {
     errors.push(`祭炼材料 ${refine.material} 不存在`);
   }
   if (refine.chances.length < refine.maxLuck) errors.push('祭炼成功率少于幸运上限');
+  for (const realm of config.realms) {
+    for (const { item } of realm.breakthrough?.requires ?? []) {
+      if (!config.items[item]) errors.push(`境界 ${realm.id} 的突破材料 ${item} 不存在`);
+    }
+  }
   const maxLevel = config.levels.expToNext.length + 1;
   for (let level = 1; level <= maxLevel; level++) {
     if (!config.realms.some((realm) => level >= realm.minLevel && level <= realm.maxLevel)) {

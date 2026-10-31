@@ -15,6 +15,7 @@ const IMPORTANT_EVENTS = new Set<GameEvent['type']>([
   'questAccepted',
   'questCompleted',
   'goldChanged',
+  'breakthrough',
 ]);
 
 export class AutoSaver {

@@ -2,7 +2,7 @@ import type { DamageStat, GameConfig } from '../game/config';
 import { equipmentName } from '../game/equipment';
 import { cellDistance } from '../game/grid';
 import { objectiveCount, questStatus } from '../game/quests';
-import { realmName } from '../game/realm';
+import { pendingBreakthrough, realmName } from '../game/realm';
 import { HOTBAR_SIZE, type World } from '../game/world';
 import { Minimap } from './minimap';
 
@@ -81,7 +81,9 @@ export class Hud {
     this.mpFill.style.width = `${(player.mp / maxMp) * 100}%`;
     this.mpText.textContent = `${Math.floor(player.mp)} / ${maxMp}`;
     this.expFill.style.width = needed ? `${(player.exp / needed) * 100}%` : '100%';
-    this.expText.textContent = needed ? `${player.exp} / ${needed}` : '满级';
+    const gated = pendingBreakthrough(this.config.realms, player.level, player.realmPassed);
+    const capped = gated && needed !== null && player.exp >= needed;
+    this.expText.textContent = capped ? '待突破' : needed ? `${player.exp} / ${needed}` : '满级';
     this.statName.textContent = STAT_NAMES[primary];
     this.attack.textContent = `${player.stats[primary].min}-${player.stats[primary].max}`;
     this.gold.textContent = String(player.gold);
@@ -95,7 +97,8 @@ export class Hud {
 
   private updateQuests(world: World): void {
     const { player } = world;
-    const signature = JSON.stringify([player.quests, player.level, player.bag]);
+    const dropClock = world.deathDrops.length > 0 ? Math.floor(world.time) : 0;
+    const signature = JSON.stringify([player.quests, player.level, player.bag, dropClock]);
     if (signature === this.questSignature) return;
     this.questSignature = signature;
 
@@ -114,6 +117,12 @@ export class Hud {
         (quest) => questStatus(quest, player.quests, player.level, player.bag) === 'available',
       );
       if (next) lines.push(`可接：${next.name}（${this.config.npcs[next.giver]?.name}）`);
+    }
+    for (const { mapId, item } of world.deathDrops) {
+      const left = Math.max(0, Math.ceil(item.expiresAt - world.time));
+      const clock = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+      const name = item.equipment ? equipmentName(item.equipment, this.config) : item.def.name;
+      lines.push(`遗落 ${name}：${this.config.maps[mapId]?.name} 剩 ${clock}`);
     }
     this.quests.replaceChildren(
       ...lines.map((line) => {

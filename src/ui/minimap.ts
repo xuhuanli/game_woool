@@ -32,6 +32,9 @@ export class Minimap {
     for (const monster of world.monsters) {
       if (monster.hp > 0) this.dot(monster.cell, monster.def.boss ? '#ff4040' : '#e08a70', monster.def.boss ? 3 : 1.5);
     }
+    for (const { mapId, item } of world.deathDrops) {
+      if (mapId === world.mapId) this.dot(item.cell, '#ffd84a', 3);
+    }
     this.dot(world.player.cell, '#ffffff', 3);
   }
 

@@ -495,3 +495,11 @@ body,
   border-color: #f0cf7a;
 }
 
+.panel-character .detail {
+  margin-top: 8px;
+}
+
+.detail-missing {
+  color: #ff8a7a;
+}
+

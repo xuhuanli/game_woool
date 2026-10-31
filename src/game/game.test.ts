@@ -244,7 +244,7 @@ describe('世界', () => {
     const world = new World(fixture(null), 'test', 'body', 1);
     world.player.bag['small-potion'] = 1;
     world.player.hp = 5;
-    world.useItem('small-potion');
+    world.inventory.useItem('small-potion');
     expect(world.player.hp).toBe(35);
     expect(world.player.bag).toEqual({});
   });
@@ -445,11 +445,11 @@ describe('法器', () => {
     const player = world.player;
     const hp = player.stats.maxHp;
     give(world, 'cloth-robe', 100, { affixes: [{ stat: 'maxHp', value: 7 }] });
-    world.equip(100);
+    world.inventory.equip(100);
     expect(player.stats.maxHp).toBe(hp + 17);
     expect(player.equipBag).toEqual([]);
     player.hp = player.stats.maxHp;
-    world.unequip('armor');
+    world.inventory.unequip('armor');
     expect(player.stats.maxHp).toBe(hp);
     expect(player.hp).toBe(hp);
     expect(player.equipBag).toHaveLength(1);
@@ -459,14 +459,14 @@ describe('法器', () => {
     const world = newWorld('spell');
     const max = world.player.stats.magic.max;
     give(world, 'rusty-sword', 100);
-    world.equip(100);
+    world.inventory.equip(100);
     expect(world.player.stats.magic.max).toBe(max + 2);
   });
 
   it('等级不够不能穿', () => {
     const world = newWorld();
     give(world, 'steel-sword', 100);
-    world.equip(100);
+    world.inventory.equip(100);
     expect(world.player.equipment.weapon).toBeUndefined();
     expect(world.player.equipBag).toHaveLength(1);
   });
@@ -476,7 +476,7 @@ describe('法器', () => {
     world.player.level = 3;
     for (const uid of [100, 101, 102]) {
       give(world, 'jade-ring', uid);
-      world.equip(uid);
+      world.inventory.equip(uid);
     }
     expect(world.player.equipment.ringLeft?.uid).toBe(102);
     expect(world.player.equipment.ringRight?.uid).toBe(101);
@@ -529,7 +529,7 @@ describe('法器', () => {
     const refineWorld = (seed: number) => {
       const world = new World(fixture(null), 'test', 'body', seed);
       const sword = give(world, 'rusty-sword', 100);
-      world.equip(100);
+      world.inventory.equip(100);
       world.player.gold = 1000;
       world.player.bag['refine-stone'] = 10;
       return { world, sword };
@@ -537,7 +537,7 @@ describe('法器', () => {
 
     it('成功加幸运，消耗材料和灵石', () => {
       const { world, sword } = refineWorld(1);
-      world.refine(sword.uid);
+      world.inventory.refine(sword.uid);
       expect(sword.luck).toBe(1);
       expect(world.player.stats.luck).toBe(1);
       expect(world.player.gold).toBe(950);
@@ -549,7 +549,7 @@ describe('法器', () => {
       sword.luck = 6;
       const events: GameEvent[] = [];
       for (let i = 0; i < 40 && world.player.bag['refine-stone']; i++) {
-        world.refine(sword.uid);
+        world.inventory.refine(sword.uid);
         events.push(...world.drainEvents());
       }
       expect(events.some((event) => event.type === 'refined' && !event.success)).toBe(true);
@@ -559,14 +559,14 @@ describe('法器', () => {
     it('只有武器能祭炼，幸运有上限，缺材料时不消耗', () => {
       const { world, sword } = refineWorld(1);
       const robe = give(world, 'cloth-robe', 101);
-      world.refine(robe.uid);
+      world.inventory.refine(robe.uid);
       expect(robe.luck).toBe(0);
       sword.luck = realConfig.affixes.refine.maxLuck;
-      world.refine(sword.uid);
+      world.inventory.refine(sword.uid);
       expect(sword.luck).toBe(realConfig.affixes.refine.maxLuck);
       sword.luck = 0;
       delete world.player.bag['refine-stone'];
-      world.refine(sword.uid);
+      world.inventory.refine(sword.uid);
       expect(world.player.gold).toBe(1000);
     });
   });
