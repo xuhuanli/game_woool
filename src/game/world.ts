@@ -1,3 +1,4 @@
+import { AutoPlay, defaultAutoSettings } from './autoPlay';
 import { rollAttack, type AttackOptions } from './combat';
 import type {
   Cell,
@@ -14,6 +15,12 @@ import type {
 import { equipmentName, EQUIP_SLOTS, rollEquipment, type Equipment } from './equipment';
 import { cellDistance, Grid, sameCell } from './grid';
 import { Inventory } from './inventory';
+import {
+  estimateIncome,
+  OFFLINE_EFFICIENCY,
+  OFFLINE_MAX_SECONDS,
+  OFFLINE_MIN_SECONDS,
+} from './offline';
 import { findPath } from './pathfinding';
 import { emptyQuestState, questStatus, recordObjective } from './quests';
 import { pendingBreakthrough } from './realm';
@@ -27,6 +34,7 @@ import type {
   GroundItem,
   HotbarEntry,
   Monster,
+  OfflineReport,
   Player,
   Summon,
   Unit,
@@ -56,6 +64,7 @@ export class World {
   mapId: string;
   readonly player: Player;
   readonly inventory: Inventory;
+  readonly autoPlay: AutoPlay;
   readonly monsters: Monster[] = [];
   readonly summons: Summon[] = [];
   readonly items: GroundItem[] = [];
@@ -100,6 +109,8 @@ export class World {
       equipment: {},
       quests: emptyQuestState(),
       realmPassed: [],
+      auto: defaultAutoSettings(),
+      lastFieldMap: null,
       skills: [],
       skillCooldowns: {},
       hotbar,
@@ -115,6 +126,7 @@ export class World {
       () => this.time,
       (event) => this.emit(event),
     );
+    this.autoPlay = new AutoPlay(this);
     this.learnSkills();
     this.loadMap(mapId);
     this.drainEvents();
@@ -137,6 +149,7 @@ export class World {
     const map = this.config.maps[mapId];
     if (!map) throw new Error(`未知的地图：${mapId}`);
     this.mapId = mapId;
+    if (!map.safe) this.player.lastFieldMap = mapId;
     this.grid = new Grid(map, this.npcs);
     this.monsters.length = 0;
     this.items.length = 0;
@@ -226,6 +239,8 @@ export class World {
         hotbar: player.hotbar,
         quests: player.quests,
         realmPassed: player.realmPassed,
+        auto: player.auto,
+        lastFieldMap: player.lastFieldMap,
       },
     });
   }
@@ -266,6 +281,8 @@ export class World {
       completed: data.quests.completed,
     };
     player.realmPassed = data.realmPassed;
+    player.auto = { ...data.auto, enabled: false };
+    player.lastFieldMap = data.lastFieldMap ?? player.lastFieldMap;
     player.skills = data.skills.filter((id) => skills[id]);
     player.hotbar = data.hotbar.map((entry) => {
       const exists = entry?.kind === 'skill' ? skills[entry.id] : entry && items[entry.id];
@@ -306,6 +323,7 @@ export class World {
     this.player.order = { type: 'move', cell: goal };
     this.player.repathLeft = 0;
     this.planPath(this.player, goal, false);
+    this.autoPlay.pauseForManualInput();
   }
 
   attack(target: Monster): void {
@@ -318,6 +336,36 @@ export class World {
     if (!this.player.hp) return;
     this.player.order = { type: 'pickup', itemId: item.id };
     this.planPath(this.player, item.cell, false);
+  }
+
+  /** 回到复活点，用于低血自动回城。 */
+  recall(): void {
+    const target = this.map.respawn ?? { ...this.map.playerStart, map: this.mapId };
+    this.emit({ type: 'message', text: '生命过低，已回城' });
+    this.changeMap(target.map, target);
+  }
+
+  /** 结算闭关收益：最多 8 小时，效率为在线的一半，只有经验和灵石。 */
+  settleOffline(savedAt: number, now: number): OfflineReport | null {
+    const player = this.player;
+    const seconds = Math.min((now - savedAt) / 1000, OFFLINE_MAX_SECONDS);
+    if (seconds < OFFLINE_MIN_SECONDS) return null;
+
+    const mapId = player.lastFieldMap ?? Object.values(this.config.maps).find((map) => !map.safe)?.id;
+    const map = mapId ? this.config.maps[mapId] : undefined;
+    if (!map) return null;
+    const { expPerSecond, goldPerSecond } = estimateIncome(
+      this.config,
+      map,
+      player.stats,
+      player.def.primaryStat,
+      player.attackInterval,
+    );
+    const exp = Math.floor(expPerSecond * seconds * OFFLINE_EFFICIENCY);
+    const gold = Math.floor(goldPerSecond * seconds * OFFLINE_EFFICIENCY);
+    player.gold += gold;
+    this.gainExp(exp);
+    return { seconds, exp, gold };
   }
 
   useHotbar(slot: number, target: Monster | null = null): void {
@@ -518,6 +566,7 @@ export class World {
 
   tick(dt = TICK_SECONDS): void {
     this.time += dt;
+    this.autoPlay.tick(dt);
     this.tickPlayer(dt);
     for (const monster of this.monsters) this.tickMonster(monster, dt);
     for (const summon of [...this.summons]) this.tickSummon(summon, dt);

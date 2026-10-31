@@ -212,12 +212,22 @@ body,
 
 .status-menu {
   display: flex;
-  gap: 6px;
+  gap: 4px;
   margin-top: 6px;
   pointer-events: auto;
 }
 
-.status-menu button,
+.status-menu button {
+  padding: 2px 6px;
+  font: 12px/1.5 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+  background: #3b3020;
+  border: 1px solid #6b5630;
+  border-radius: 4px;
+}
+
 .detail-action {
   padding: 2px 10px;
   font: inherit;
@@ -501,5 +511,71 @@ body,
 
 .detail-missing {
   color: #ff8a7a;
+}
+
+#hud .panel-auto {
+  left: 264px;
+  width: 300px;
+}
+
+.auto-field {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.auto-field select,
+.auto-field input {
+  width: 72px;
+  padding: 2px 4px;
+  font: inherit;
+  color: inherit;
+  background: #2b2418;
+  border: 1px solid #6b5630;
+  border-radius: 4px;
+}
+
+.auto-status {
+  bottom: 78px;
+  left: 50%;
+  padding: 2px 12px;
+  font-weight: 600;
+  color: #7be07b;
+  background: rgba(20, 16, 10, 0.78);
+  border-radius: 6px;
+  transform: translateX(-50%);
+}
+
+#hud .auto-status[hidden] {
+  display: none;
+}
+
+.offline {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-content: center;
+  font: 14px/1.6 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: #efe6d0;
+  background: rgba(10, 8, 5, 0.6);
+}
+
+.offline-box {
+  display: grid;
+  gap: 8px;
+  width: 280px;
+  padding: 16px;
+  background: #1f1a12;
+  border: 1px solid #6b5630;
+  border-radius: 8px;
+}
+
+.offline-box h2 {
+  margin: 0;
+  font-size: 18px;
+  color: #f0cf7a;
 }
 

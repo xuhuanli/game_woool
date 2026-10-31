@@ -1,9 +1,9 @@
 import type { Cell } from '../game/config';
 import type { EquipSlot, Equipment } from '../game/equipment';
 import type { QuestState } from '../game/quests';
-import type { HotbarEntry } from '../game/world';
+import type { AutoSettings, HotbarEntry } from '../game/world';
 
-export const SAVE_VERSION = 3;
+export const SAVE_VERSION = 4;
 
 export interface SavedPlayer {
   name: string;
@@ -21,6 +21,8 @@ export interface SavedPlayer {
   hotbar: (HotbarEntry | null)[];
   quests: QuestState;
   realmPassed: string[];
+  auto: AutoSettings;
+  lastFieldMap: string | null;
 }
 
 export interface SavedDeathDrop {
@@ -60,6 +62,14 @@ export const MIGRATIONS: Migrations = {
     ...save,
     deathDrops: [],
     player: { ...(save.player as object), realmPassed: [] },
+  }),
+  3: (save) => ({
+    ...save,
+    player: {
+      ...(save.player as object),
+      auto: { enabled: false, minGrade: 'low', potionBelow: 0.5, recallBelow: 0.2 },
+      lastFieldMap: null,
+    },
   }),
 };
 

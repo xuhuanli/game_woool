@@ -14,6 +14,7 @@ import {
   type World,
 } from '../game/world';
 import type { AutoSaver } from '../save/autoSaver';
+import type { AutoPanel } from '../ui/autoPanel';
 import type { Hud } from '../ui/hud';
 import type { NpcPanel } from '../ui/npcPanel';
 import type { Panels } from '../ui/panels';
@@ -64,6 +65,7 @@ export class GameScene extends Phaser.Scene {
     private readonly panels: Panels,
     private readonly saver: AutoSaver,
     private readonly npcPanel: NpcPanel,
+    private readonly autoPanel: AutoPanel,
   ) {
     super('game');
   }
@@ -117,6 +119,7 @@ export class GameScene extends Phaser.Scene {
     this.hud.update(this.world);
     this.panels.update();
     this.npcPanel.update();
+    this.autoPanel.update();
   }
 
   // ---- 场景搭建 ----

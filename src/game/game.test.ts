@@ -289,7 +289,7 @@ describe('技能', () => {
   it('升级后学会新技能', () => {
     const world = new World(fixture({ x: 3, y: 2 }, [], 0), 'test', 'spirit', 1);
     const monster = world.monsters[0]!;
-    world.player.exp = 110 + 70 + 40;
+    world.player.exp = (110 + 70 + 40) * 15;
     monster.stats = stats({ maxHp: 1, attack: { min: 0, max: 0 } });
     monster.hp = 1;
     world.attack(monster);

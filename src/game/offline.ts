@@ -5,7 +5,7 @@ export const OFFLINE_MAX_SECONDS = 8 * 3600;
 export const OFFLINE_EFFICIENCY = 0.5;
 export const OFFLINE_MIN_SECONDS = 60;
 /** 每杀一只怪在路上和拾取花的时间 */
-const TRAVEL_SECONDS = 5;
+const TRAVEL_SECONDS = 3;
 
 export interface IncomeRates {
   expPerSecond: number;

@@ -333,7 +333,7 @@ describe('境界突破', () => {
 
   it('上限以下不受影响', () => {
     const world = town();
-    give(world, 40);
+    give(world, world.expToNext!);
     expect(world.player.level).toBe(2);
   });
 
@@ -456,6 +456,169 @@ describe('死亡掉装', () => {
     expect(loaded.deathDrops).toHaveLength(1);
     expect(loaded.deathDrops[0]?.item.equipment?.uid).toBe(900);
     expect(loaded.deathDrops[0]?.item.expiresAt).toBe(world.deathDrops[0]?.item.expiresAt);
+  });
+});
+
+describe('自动挂机', () => {
+  const field = (classId = 'body', seed = 1) => {
+    const world = new World(config, 'starter-field', classId, seed);
+    world.player.auto.enabled = true;
+    return world;
+  };
+
+  it('关闭时什么都不做', () => {
+    const world = field();
+    world.player.auto.enabled = false;
+    for (const monster of world.monsters) monster.def = { ...monster.def, aggroRange: 0 };
+    run(world, 5);
+    expect(world.player.order).toBeNull();
+  });
+
+  it('三个职业都能自动打怪并拾取', () => {
+    for (const classId of Object.keys(config.classes)) {
+      const world = field(classId);
+      run(world, 240);
+      expect(world.player.exp + world.player.level * 1000, classId).toBeGreaterThan(1000);
+      expect(world.player.gold, classId).toBeGreaterThan(0);
+    }
+  });
+
+  it('自动使用技能', () => {
+    const world = field('spell');
+    run(world, 30, () => Object.keys(world.player.skillCooldowns).length > 0);
+    expect(world.player.skillCooldowns['spell-fire']).toBeDefined();
+  });
+
+  it('生命低于阈值时吃药', () => {
+    const world = field();
+    world.player.bag['small-potion'] = 2;
+    world.player.hp = 10;
+    run(world, 1);
+    expect(world.player.bag['small-potion']).toBeLessThan(2);
+  });
+
+  it('低血回城后关闭挂机', () => {
+    const world = field();
+    world.player.hp = 5;
+    run(world, 1);
+    expect(world.mapId).toBe('huangfeng-valley');
+    expect(world.player.auto.enabled).toBe(false);
+  });
+
+  it('回城阈值为 0 时不回城', () => {
+    const world = field();
+    world.player.auto.recallBelow = 0;
+    world.player.hp = 5;
+    for (const monster of world.monsters) monster.def = { ...monster.def, aggroRange: 0 };
+    run(world, 0.5);
+    expect(world.mapId).toBe('starter-field');
+  });
+
+  it('不打 Boss', () => {
+    const world = new World(config, 'taina-mountain', 'body', 1);
+    world.player.auto.enabled = true;
+    for (const monster of world.monsters) {
+      if (!monster.def.boss) monster.hp = 0;
+      monster.respawnLeft = 999;
+    }
+    run(world, 3);
+    expect(world.player.order).toBeNull();
+  });
+
+  it('品阶过滤：不捡低于设置的法器，灵石和丹药照捡', () => {
+    const world = field();
+    for (const monster of world.monsters) {
+      monster.hp = 0;
+      monster.respawnLeft = 999;
+    }
+    world.player.auto.minGrade = 'high';
+    const at = (x: number, y: number) => ({ x: world.player.cell.x + x, y: world.player.cell.y + y });
+    const spawn = (...args: unknown[]) =>
+      (world as unknown as { spawnItem(...args: unknown[]): void }).spawnItem(...args);
+    spawn(config.items['rusty-sword'], 1, { uid: 800, itemId: 'rusty-sword', grade: 'low', affixes: [], luck: 0 }, at(1, 0));
+    spawn(config.items.gold, 7, null, at(2, 0));
+    run(world, 4);
+    expect(world.player.gold).toBe(7);
+    expect(world.items.map((item) => item.equipment?.uid)).toContain(800);
+  });
+
+  it('手动移动后暂停，之后继续挂机', () => {
+    const world = field();
+    for (const monster of world.monsters) monster.def = { ...monster.def, aggroRange: 0 };
+    const start = { x: world.player.cell.x, y: world.player.cell.y + 1 };
+    world.moveTo(start);
+    run(world, 2);
+    expect(world.player.cell).toEqual(start);
+    run(world, 2);
+    expect(world.player.order?.type).toBe('attack');
+  });
+
+  it('设置写入存档，读档后挂机保持关闭', () => {
+    const world = field();
+    world.player.auto.minGrade = 'high';
+    const loaded = World.fromSave(config, world.toSave(1), 2);
+    expect(loaded.player.auto.minGrade).toBe('high');
+    expect(loaded.player.auto.enabled).toBe(false);
+  });
+});
+
+describe('闭关', () => {
+  const hour = 3600 * 1000;
+  const fielded = () => {
+    const world = new World(config, 'starter-field', 'body', 1);
+    world.player.level = 3;
+    return world;
+  };
+
+  it('不足一分钟没有收益，时钟倒退也没有', () => {
+    const world = fielded();
+    expect(world.settleOffline(0, 30 * 1000)).toBeNull();
+    expect(world.settleOffline(hour, 0)).toBeNull();
+    expect(world.player.gold).toBe(0);
+  });
+
+  it('收益随时间增长，超过 8 小时不再增加', () => {
+    const one = fielded().settleOffline(0, hour)!;
+    const eight = fielded().settleOffline(0, 8 * hour)!;
+    const ten = fielded().settleOffline(0, 10 * hour)!;
+    expect(one.exp).toBeGreaterThan(0);
+    expect(eight.gold).toBeGreaterThan(one.gold * 7);
+    expect(ten).toEqual(eight);
+  });
+
+  it('只给经验和灵石，不给法器，不会死亡', () => {
+    const world = fielded();
+    world.player.hp = 1;
+    world.settleOffline(0, 8 * hour);
+    expect(world.player.equipBag).toEqual([]);
+    expect(world.player.hp).toBeGreaterThan(0);
+  });
+
+  it('到境界上限时经验封顶', () => {
+    const world = fielded();
+    world.player.level = 13;
+    world.settleOffline(0, 8 * hour);
+    expect(world.player.level).toBe(13);
+  });
+
+  it('在主城下线按最后到过的野外地图结算', () => {
+    const world = fielded();
+    const save = world.toSave(0);
+    save.mapId = 'huangfeng-valley';
+    save.player.cell = { x: 12, y: 14 };
+    const loaded = World.fromSave(config, save, 2);
+    expect(loaded.settleOffline(0, hour)?.gold).toBeGreaterThan(0);
+  });
+
+  it('旧存档没有野外记录时，在野外读档会记下当前地图', () => {
+    const save = fielded().toSave(0);
+    save.player.lastFieldMap = null;
+    expect(World.fromSave(config, save, 2).player.lastFieldMap).toBe('starter-field');
+  });
+
+  it('从未去过野外时也能结算', () => {
+    const world = town();
+    expect(world.settleOffline(0, hour)?.exp).toBeGreaterThan(0);
   });
 });
 

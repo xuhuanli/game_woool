@@ -36,12 +36,12 @@ export class AutoPlay {
     this.thinkLeft = THINK_SECONDS;
 
     const health = player.hp / player.stats.maxHp;
-    if (player.auto.recallBelow > 0 && health < player.auto.recallBelow) {
+    const healed = this.usePotions(health);
+    if (!healed && player.auto.recallBelow > 0 && health < player.auto.recallBelow) {
       player.auto.enabled = false;
       world.recall();
       return;
     }
-    this.usePotions(health);
     if (this.pauseLeft > 0 || player.windupLeft > 0) return;
 
     const target = this.currentTarget();
@@ -65,7 +65,8 @@ export class AutoPlay {
     return order?.type === 'attack' || order?.type === 'cast' ? order.target : null;
   }
 
-  private usePotions(health: number): void {
+  /** 需要时吃药，吃了回血丹药时返回 true。 */
+  private usePotions(health: number): boolean {
     const { player, config, inventory } = this.world;
     const mana = player.stats.maxMp > 0 ? player.mp / player.stats.maxMp : 1;
     for (const itemId of Object.keys(player.bag)) {
@@ -75,9 +76,10 @@ export class AutoPlay {
         (item?.mana && mana < MANA_POTION_BELOW);
       if (wanted) {
         inventory.useItem(itemId);
-        return;
+        return !!item?.heal;
       }
     }
+    return false;
   }
 
   private useSkills(target: Monster, health: number): void {

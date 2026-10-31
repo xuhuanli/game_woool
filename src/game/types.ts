@@ -82,6 +82,15 @@ export type PlayerOrder =
 
 export type HotbarEntry = { kind: 'skill'; id: string } | { kind: 'item'; id: string };
 
+export interface AutoSettings {
+  enabled: boolean;
+  /** 自动拾取法器的最低品阶 */
+  minGrade: string;
+  potionBelow: number;
+  /** 0 表示不自动回城 */
+  recallBelow: number;
+}
+
 export interface Player extends Unit {
   kind: 'player';
   def: ClassDef;
@@ -98,6 +107,9 @@ export interface Player extends Unit {
   quests: QuestState;
   /** 已完成突破的境界 */
   realmPassed: string[];
+  auto: AutoSettings;
+  /** 闭关收益按最后到过的野外地图计算 */
+  lastFieldMap: string | null;
   order: PlayerOrder | null;
   /** 出招途中按下的自身技能，出招结束后释放 */
   queuedSkill: SkillDef | null;
@@ -112,6 +124,12 @@ export interface GroundItem {
   equipment: Equipment | null;
   cell: Cell;
   expiresAt: number;
+}
+
+export interface OfflineReport {
+  seconds: number;
+  exp: number;
+  gold: number;
 }
 
 /** 死亡掉落的法器，切图后仍然保留，限时内可以回去捡。 */

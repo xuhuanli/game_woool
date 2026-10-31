@@ -4,8 +4,10 @@ import { World } from './game/world';
 import { GameScene } from './render/GameScene';
 import { AutoSaver } from './save/autoSaver';
 import { IndexedDbSaveStore } from './save/saveStore';
+import { AutoPanel } from './ui/autoPanel';
 import { Hud } from './ui/hud';
 import { NpcPanel } from './ui/npcPanel';
+import { showOfflineReport } from './ui/offlineDialog';
 import { Panels } from './ui/panels';
 import { SavePanel } from './ui/savePanel';
 import { showStartScreen } from './ui/startScreen';
@@ -34,6 +36,8 @@ const world =
     ? World.fromSave(config, start.save, seed)
     : new World(config, 'huangfeng-valley', start.classId, seed, start.name);
 
+const report = start.kind === 'continue' ? world.settleOffline(start.save.savedAt, Date.now()) : null;
+
 const hud = new Hud(config, world);
 const panels = new Panels(world, config);
 const npcPanel = new NpcPanel(world, config);
@@ -42,7 +46,9 @@ const saver = new AutoSaver(world, store, (error) => {
   hud.log('保存失败，请导出存档', 'bad');
 });
 new SavePanel(world, store, saver, hud);
+const autoPanel = new AutoPanel(world);
 void saver.saveNow();
+if (report) showOfflineReport(report);
 
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) void saver.saveNow();
@@ -54,7 +60,7 @@ new Phaser.Game({
   parent: 'game',
   backgroundColor: '#17140f',
   scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
-  scene: new GameScene(world, hud, panels, saver, npcPanel),
+  scene: new GameScene(world, hud, panels, saver, npcPanel, autoPanel),
 });
 
 if (import.meta.env.DEV) {

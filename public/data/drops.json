@@ -1,28 +1,28 @@
 {
   "none": [],
   "ash-rat": [
-    {"item": "gold", "chance": 0.9, "min": 5, "max": 15},
+    {"item": "gold", "chance": 0.9, "min": 1, "max": 3},
     {"item": "small-potion", "chance": 0.15},
     {"item": "small-mana", "chance": 0.15},
-    {"item": "refine-stone", "chance": 0.03},
-    {"item": "rusty-sword", "chance": 0.02},
-    {"item": "cloth-robe", "chance": 0.02},
-    {"item": "iron-helm", "chance": 0.01},
-    {"item": "spirit-pendant", "chance": 0.01},
-    {"item": "iron-bracelet", "chance": 0.015},
-    {"item": "jade-ring", "chance": 0.015},
-    {"item": "steel-sword", "chance": 0.003}
+    {"item": "refine-stone", "chance": 0.0075},
+    {"item": "rusty-sword", "chance": 0.005},
+    {"item": "cloth-robe", "chance": 0.005},
+    {"item": "iron-helm", "chance": 0.0025},
+    {"item": "spirit-pendant", "chance": 0.0025},
+    {"item": "iron-bracelet", "chance": 0.0037},
+    {"item": "jade-ring", "chance": 0.0037},
+    {"item": "steel-sword", "chance": 0.0008}
   ],
   "mountain-ape": [
-    {"item": "gold", "chance": 0.95, "min": 20, "max": 45},
+    {"item": "gold", "chance": 0.95, "min": 4, "max": 9},
     {"item": "ape-fur", "chance": 0.4},
     {"item": "small-potion", "chance": 0.2},
-    {"item": "refine-stone", "chance": 0.06},
-    {"item": "iron-helm", "chance": 0.03},
-    {"item": "spirit-pendant", "chance": 0.03},
-    {"item": "iron-bracelet", "chance": 0.03},
-    {"item": "jade-ring", "chance": 0.03},
-    {"item": "steel-sword", "chance": 0.02}
+    {"item": "refine-stone", "chance": 0.015},
+    {"item": "iron-helm", "chance": 0.0075},
+    {"item": "spirit-pendant", "chance": 0.0075},
+    {"item": "iron-bracelet", "chance": 0.0075},
+    {"item": "jade-ring", "chance": 0.0075},
+    {"item": "steel-sword", "chance": 0.005}
   ],
   "flood-serpent": [
     {"item": "gold", "chance": 1, "min": 300, "max": 600},
