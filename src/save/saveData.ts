@@ -3,7 +3,7 @@ import type { EquipSlot, Equipment } from '../game/equipment';
 import type { QuestState } from '../game/quests';
 import type { AutoSettings, HotbarEntry } from '../game/world';
 
-export const SAVE_VERSION = 5;
+export const SAVE_VERSION = 6;
 
 export interface SavedPlayer {
   name: string;
@@ -22,6 +22,8 @@ export interface SavedPlayer {
   quests: QuestState;
   realmPassed: string[];
   breakthroughFails: Record<string, number>;
+  skillLevels: Record<string, number>;
+  storage: Equipment[];
   weakUntil: number;
   lastDeathAt: number | null;
   auto: AutoSettings;
@@ -82,6 +84,10 @@ export const MIGRATIONS: Migrations = {
       weakUntil: 0,
       lastDeathAt: null,
     },
+  }),
+  5: (save) => ({
+    ...save,
+    player: { ...(save.player as object), skillLevels: {}, storage: [] },
   }),
 };
 

@@ -99,6 +99,7 @@
     "failLoss": 1
   },
   "bagCapacity": 40,
+  "storageCapacity": 100,
   "sellRatio": 0.3,
   "death": {
     "dropChance": 0.3,

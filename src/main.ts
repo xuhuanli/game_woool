@@ -12,6 +12,7 @@ import { NpcPanel } from './ui/npcPanel';
 import { showOfflineReport } from './ui/offlineDialog';
 import { Panels } from './ui/panels';
 import { SavePanel } from './ui/savePanel';
+import { SkillPanel } from './ui/skillPanel';
 import { showStartScreen } from './ui/startScreen';
 import './ui/hud.css';
 
@@ -63,6 +64,7 @@ const saver = new AutoSaver(world, store, (error) => {
 });
 new SavePanel(world, store, saver, hud);
 const autoPanel = new AutoPanel(world);
+new SkillPanel(world);
 void saver.saveNow();
 if (report) showOfflineReport(report);
 

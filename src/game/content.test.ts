@@ -3,6 +3,7 @@ import { validateConfig, type GameConfig } from './config';
 import type { Equipment } from './equipment';
 import { Grid } from './grid';
 import { findPath } from './pathfinding';
+import { questDestination } from './navigation';
 import { questStatus } from './quests';
 import { loadConfigFromDisk } from './testConfig';
 import { breakthroughChance, realmName } from './realm';
@@ -871,6 +872,343 @@ describe('闭关', () => {
   it('从未去过野外时也能结算', () => {
     const world = town();
     expect(world.settleOffline(0, hour)?.exp).toBeGreaterThan(0);
+  });
+});
+
+describe('40 级内容', () => {
+  const levelTo = (world: World, level: number) => {
+    const { player } = world;
+    world.player.realmPassed = config.realms.map((realm) => realm.id);
+    while (player.level < level) {
+      (world as unknown as { gainExp(amount: number): void }).gainExp(world.expToNext!);
+    }
+  };
+
+  it('三职业到 40 级技能都能放进快捷栏，丹药格不被占用', () => {
+    for (const classId of Object.keys(config.classes)) {
+      const world = new World(config, 'huangfeng-valley', classId, 1);
+      levelTo(world, 40);
+      const skills = Object.values(config.skills).filter((skill) => skill.classId === classId);
+      expect(world.player.skills, classId).toHaveLength(skills.length);
+      expect(skills.length, classId).toBeGreaterThanOrEqual(6);
+      const slotted = world.player.hotbar.filter((entry) => entry?.kind === 'skill');
+      expect(slotted, classId).toHaveLength(skills.length);
+      expect(world.player.hotbar.filter((entry) => entry?.kind === 'item')).toHaveLength(2);
+    }
+  });
+
+  it('每个境界每个栏位都有法器，等级和属性逐级提高', () => {
+    const slots = ['weapon', 'armor', 'helmet', 'necklace', 'bracelet', 'ring'] as const;
+    for (const slot of slots) {
+      const tiers = Object.values(config.items)
+        .filter((item) => item.slot === slot)
+        .sort((a, b) => (a.level ?? 1) - (b.level ?? 1));
+      const highest = tiers.at(-1)!;
+      expect(highest.level, slot).toBe(35);
+      for (const level of [14, 27, 35]) {
+        expect(tiers.some((item) => item.level === level), `${slot} ${level}`).toBe(true);
+      }
+      const power = (item: (typeof tiers)[number]) =>
+        Object.values(item.bonus ?? {}).reduce((sum, value) => sum + value, 0);
+      const byLevel = tiers.filter((item) => (item.level ?? 1) >= 14).map(power);
+      expect([...byLevel].sort((a, b) => a - b)).toEqual(byLevel);
+    }
+  });
+
+  it('增伤功法提高伤害，到时结束', () => {
+    const world = new World(config, 'huangfeng-valley', 'body', 1);
+    levelTo(world, 34);
+    const { player } = world;
+    const brahma = 'body-brahma';
+    player.skillCooldowns[brahma] = 0;
+    world.castSkill(brahma);
+    run(world, 0.5);
+    expect(player.effects.map((effect) => effect.kind)).toContain('empower');
+    run(world, 16);
+    expect(player.effects).toEqual([]);
+  });
+
+  it('傀儡替换灵虫，只保留一个召唤物', () => {
+    const world = new World(config, 'starter-field', 'spirit', 1);
+    for (const monster of world.monsters) monster.def = { ...monster.def, aggroRange: 0 };
+    levelTo(world, 16);
+    const { player } = world;
+    world.castSkill('spirit-summon');
+    run(world, 0.6);
+    expect(world.summons[0]?.def.id).toBe('gold-bug');
+    player.mp = player.stats.maxMp;
+    world.castSkill('spirit-puppet');
+    run(world, 0.7);
+    expect(world.summons.map((summon) => summon.def.id)).toEqual(['iron-puppet']);
+  });
+
+  it('自动挂机能用新功法', () => {
+    const world = new World(config, 'taina-mountain', 'spell', 3);
+    levelTo(world, 30);
+    world.player.auto.enabled = true;
+    world.player.auto.recallBelow = 0;
+    run(world, 120);
+    expect(Object.keys(world.player.skillCooldowns)).toContain('spell-bixie');
+  });
+});
+
+describe('怪物种类', () => {
+  const fight = (monsterId: string) => {
+    const setup = structuredClone(config);
+    setup.maps['starter-field']!.spawns = [{ monster: monsterId, x: 9, y: 5 }];
+    setup.maps['starter-field']!.portals = [];
+    const world = new World(setup, 'starter-field', 'body', 2);
+    const { player } = world;
+    player.stats = { ...player.stats, maxHp: 900, evasion: 0 };
+    player.hp = 900;
+    return { world, player, monster: world.monsters[0]! };
+  };
+
+  it('远程怪站在原地射击', () => {
+    const { world, player, monster } = fight('thorn-sprite');
+    run(world, 6, () => player.hp < 900);
+    expect(player.hp).toBeLessThan(900);
+    expect(Math.abs(monster.cell.x - player.cell.x)).toBeGreaterThan(1);
+  });
+
+  it('放毒的怪让玩家持续掉血', () => {
+    const { world, player } = fight('venom-spider');
+    run(world, 6, () => player.effects.some((effect) => effect.kind === 'dot'));
+    expect(player.effects.map((effect) => effect.kind)).toContain('dot');
+    const before = player.hp;
+    run(world, 2.5);
+    expect(player.hp).toBeLessThan(before);
+  });
+
+  it('冲锋的怪瞬间贴到身边', () => {
+    const { world, player, monster } = fight('wolf-rider');
+    monster.cell = { x: player.cell.x + 5, y: player.cell.y };
+    monster.pos = { ...monster.cell };
+    monster.home = { ...monster.cell };
+    run(world, 4, () => Math.abs(monster.cell.x - player.cell.x) <= 1 && player.hp < 900);
+    expect(Math.abs(monster.cell.x - player.cell.x)).toBeLessThanOrEqual(1);
+    expect(player.hp).toBeLessThan(900);
+  });
+
+  it('召唤怪叫小怪，小怪有上限且死后不重生', () => {
+    const { world, player, monster } = fight('ape-shaman');
+    run(world, 3, () => world.monsters.length > 1);
+    expect(world.monsters).toHaveLength(3);
+    run(world, 20);
+    expect(world.monsters.filter((candidate) => candidate.temporary).length).toBeLessThanOrEqual(2);
+    const minion = world.monsters.find((candidate) => candidate.temporary)!;
+    player.stats = { ...player.stats, attack: { min: 999, max: 999 }, accuracy: 1e9 };
+    minion.stats = { ...minion.stats, defense: { min: 0, max: 0 } };
+    monster.stats = { ...monster.stats, defense: { min: 0, max: 0 } };
+    world.attack(minion);
+    run(world, 8, () => !world.monsters.includes(minion));
+    expect(world.monsters).not.toContain(minion);
+  });
+});
+
+describe('特殊法宝', () => {
+  const ring = (itemId: string) => ({ uid: 700, itemId, grade: 'low', affixes: [], luck: 0 });
+  const fightSetup = (itemId: string) => {
+    const world = new World(config, 'starter-field', 'body', 1);
+    world.player.equipment.ringLeft = ring(itemId);
+    return { world, player: world.player, monster: world.monsters[0]! };
+  };
+  const hit = (world: World, source: unknown, target: unknown, amount: number) =>
+    (world as unknown as { dealDamage(a: unknown, b: unknown, c: number, d: boolean): void }).dealDamage(source, target, amount, false);
+
+  it('定身戒让怪物停止行动', () => {
+    const { world, player, monster } = fightSetup('stun-ring');
+    player.stats = { ...player.stats, accuracy: 1e9, attack: { min: 1, max: 1 } };
+    monster.stats = { ...monster.stats, maxHp: 1e6 };
+    monster.hp = 1e6;
+    const c = { x: player.cell.x + 1, y: player.cell.y };
+    monster.cell = { ...c };
+    monster.pos = { ...c };
+    monster.home = { ...c };
+    world.attack(monster);
+    run(world, 60, () => monster.stunLeft > 0);
+    expect(monster.stunLeft).toBeGreaterThan(0);
+  });
+
+  it('被定身的怪不攻击', () => {
+    const { world, player, monster } = fightSetup('stun-ring');
+    const c = { x: player.cell.x + 1, y: player.cell.y };
+    monster.cell = { ...c };
+    monster.pos = { ...c };
+    monster.home = { ...c };
+    monster.stunLeft = 5;
+    const hp = player.hp;
+    run(world, 2);
+    expect(player.hp).toBe(hp);
+  });
+
+  it('涅槃戒复活一次，冷却内再死就真死', () => {
+    const { world, player, monster } = fightSetup('revive-ring');
+    hit(world, monster, player, 9999);
+    expect(player.hp).toBe(Math.ceil(player.stats.maxHp * 0.3));
+    hit(world, monster, player, 9999);
+    expect(player.hp).toBe(0);
+  });
+
+  it('护身戒用灵力分担伤害', () => {
+    const { world, player, monster } = fightSetup('guard-ring');
+    const { hp, mp } = player;
+    hit(world, monster, player, 10);
+    expect(player.mp).toBe(mp - 3);
+    expect(player.hp).toBe(hp - 7);
+  });
+
+  it('遁光戒随机传送并进入冷却', () => {
+    const { world, player } = fightSetup('blink-ring');
+    const start = { ...player.cell };
+    world.useTeleportRing();
+    expect(player.cell).not.toEqual(start);
+    const landed = { ...player.cell };
+    world.useTeleportRing();
+    expect(player.cell).toEqual(landed);
+  });
+});
+
+describe('套装', () => {
+  it('凑齐件数时属性生效，脱下后消失', () => {
+    const world = new World(config, 'huangfeng-valley', 'body', 1);
+    const { player } = world;
+    player.level = 14;
+    const piece = (uid: number, itemId: string) => {
+      player.equipBag.push({ uid, itemId, grade: 'low', affixes: [], luck: 0 });
+      world.inventory.equip(uid);
+    };
+    piece(1, 'sword-14');
+    const one = player.stats.maxHp;
+    piece(2, 'crown-14');
+    expect(player.stats.maxHp).toBe(one + 40);
+    world.inventory.unequip('helmet');
+    expect(player.stats.maxHp).toBe(one);
+  });
+});
+
+describe('功法修炼', () => {
+  it('消耗残卷和灵石提高威力，有上限', () => {
+    const world = new World(config, 'huangfeng-valley', 'body', 1);
+    const { player, inventory } = world;
+    player.gold = 9999;
+    player.bag['skill-tome'] = 5;
+    inventory.upgradeSkill('body-smash');
+    expect(player.skillLevels['body-smash']).toBe(2);
+    expect(inventory.skillPower('body-smash')).toBeCloseTo(1.15);
+    inventory.upgradeSkill('body-smash');
+    inventory.upgradeSkill('body-smash');
+    expect(player.skillLevels['body-smash']).toBe(3);
+    expect(player.bag['skill-tome']).toBe(3);
+  });
+
+  it('没学会的功法不能修炼，修炼等级写入存档', () => {
+    const world = new World(config, 'huangfeng-valley', 'body', 1);
+    const { player, inventory } = world;
+    player.gold = 9999;
+    player.bag['skill-tome'] = 5;
+    inventory.upgradeSkill('body-whirl');
+    expect(player.skillLevels['body-whirl']).toBeUndefined();
+    inventory.upgradeSkill('body-smash');
+    expect(World.fromSave(config, world.toSave(1), 2).player.skillLevels['body-smash']).toBe(2);
+  });
+});
+
+describe('符、仓库、批量卖出', () => {
+  it('回城符回到主城，随机传送符留在本图', () => {
+    const world = new World(config, 'starter-field', 'body', 1);
+    world.player.bag['random-scroll'] = 1;
+    world.player.bag['recall-scroll'] = 1;
+    const start = { ...world.player.cell };
+    world.inventory.useItem('random-scroll');
+    expect(world.mapId).toBe('starter-field');
+    expect(world.player.cell).not.toEqual(start);
+    world.inventory.useItem('recall-scroll');
+    expect(world.mapId).toBe('huangfeng-valley');
+    expect(world.player.bag).toEqual({});
+  });
+
+  it('仓库存取，写入存档，离开后不能操作', () => {
+    const world = town();
+    standBy(world, 'vault-keeper');
+    const keeper = npc('vault-keeper');
+    world.player.equipBag.push({ uid: 900, itemId: 'cloth-robe', grade: 'top', affixes: [], luck: 0 });
+    world.deposit(keeper, 900);
+    expect(world.player.equipBag).toEqual([]);
+    expect(world.player.storage).toHaveLength(1);
+    expect(World.fromSave(config, world.toSave(1), 2).player.storage[0]?.uid).toBe(900);
+    world.withdraw(keeper, 900);
+    expect(world.player.equipBag).toHaveLength(1);
+    world.moveTo({ x: 20, y: 20 });
+    run(world, 15, () => world.player.order === null);
+    world.deposit(keeper, 900);
+    expect(world.player.storage).toEqual([]);
+  });
+
+  it('批量卖出不高于指定品阶的法器', () => {
+    const world = town();
+    standBy(world, 'herb-keeper');
+    const item = (uid: number, grade: string) => ({ uid, itemId: 'cloth-robe', grade, affixes: [], luck: 0 });
+    world.player.equipBag.push(item(1, 'low'), item(2, 'mid'), item(3, 'high'), item(4, 'top'));
+    world.sellAllUpToGrade(npc('herb-keeper'), 'mid');
+    expect(world.player.equipBag.map((equipment) => equipment.uid)).toEqual([3, 4]);
+    expect(world.player.gold).toBe(18 + 36);
+  });
+});
+
+describe('Boss 刷新提示', () => {
+  it('在别的地图也能收到提示，只提示一次', () => {
+    const world = town();
+    world.bossReadyAt['taina-mountain:7'] = world.time + 1;
+    const events: GameEvent[] = [];
+    run(world, 3, () => {
+      events.push(...world.drainEvents());
+      return false;
+    });
+    const notices = events.filter((event) => event.type === 'bossReady');
+    expect(notices).toEqual([{ type: 'bossReady', name: '铁甲蛟', mapName: '太南山' }]);
+  });
+});
+
+describe('自动寻路', () => {
+  it('跨两张地图走到目的地', () => {
+    const world = town();
+    world.navigate({ mapId: 'taina-mountain', cell: { x: 6, y: 6 } });
+    run(world, 120, () => world.player.route === null && world.player.order === null);
+    expect(world.mapId).toBe('taina-mountain');
+    expect(world.player.cell).toEqual({ x: 6, y: 6 });
+  });
+
+  it('到达后自动和 NPC 对话', () => {
+    const world = new World(config, 'starter-field', 'body', 1);
+    for (const monster of world.monsters) monster.def = { ...monster.def, aggroRange: 0 };
+    const guide = npc('guide-senior');
+    world.navigate({ mapId: guide.map, cell: guide, npc: guide });
+    const events: GameEvent[] = [];
+    run(world, 40, () => {
+      events.push(...world.drainEvents());
+      return events.some((event) => event.type === 'npcOpened');
+    });
+    expect(events).toContainEqual({ type: 'npcOpened', npc: guide });
+  });
+
+  it('手动移动会取消寻路', () => {
+    const world = town();
+    world.navigate({ mapId: 'starter-field', cell: { x: 6, y: 6 } });
+    world.moveTo({ x: 13, y: 14 });
+    expect(world.player.route).toBeNull();
+  });
+
+  it('任务目的地：击杀去刷怪点，收集去掉落地图，完成后回 NPC', () => {
+    const world = town();
+    world.player.level = 3;
+    world.player.quests.completed.push('join-sect');
+    world.acceptQuest('clear-rats');
+    world.acceptQuest('ape-fur');
+    expect(questDestination(world, config.quests['clear-rats']!, world.player)?.mapId).toBe('starter-field');
+    expect(questDestination(world, config.quests['ape-fur']!, world.player)?.mapId).toBe('taina-mountain');
+    world.player.bag['ape-fur'] = 3;
+    expect(questDestination(world, config.quests['ape-fur']!, world.player)?.npc?.id).toBe('herb-keeper');
   });
 });
 

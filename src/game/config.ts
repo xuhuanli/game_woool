@@ -57,6 +57,7 @@ export type SkillEffect =
   | { type: 'heal'; stat: DamageStat; multiplier: number; flat: number }
   | { type: 'shield'; reduction: number; duration: number }
   | { type: 'defense'; amount: number; duration: number }
+  | { type: 'empower'; multiplier: number; duration: number }
   | { type: 'summon'; monster: string; hpPerLevel: number; duration: number };
 
 export interface SkillDef {
@@ -99,6 +100,12 @@ export interface AbilityDef {
   shape: 'around' | 'target' | 'line';
   size: number;
   multiplier: number;
+  /** 命中后中毒 */
+  poison?: { damage: number; duration: number };
+  /** 前摇结束时冲到目标身边 */
+  charge?: boolean;
+  /** 召唤小怪，不造成伤害 */
+  summon?: { monster: string; count: number };
 }
 
 export interface PhaseDef {
@@ -120,6 +127,8 @@ export interface MonsterDef {
   exp: number;
   respawnSeconds: number;
   dropTable: string;
+  /** 普攻距离，缺省为近战 */
+  attackRange?: number;
   boss?: boolean;
   abilities?: AbilityDef[];
   phases?: PhaseDef[];
@@ -139,10 +148,18 @@ export type BonusStat =
   | 'evasion'
   | 'luck';
 
+export type SpecialDef =
+  | { kind: 'stun'; chance: number; seconds: number }
+  | { kind: 'revive'; ratio: number; seconds: number }
+  | { kind: 'manaShield'; ratio: number }
+  | { kind: 'teleport'; seconds: number };
+
 export interface ItemDef {
   id: string;
   name: string;
-  kind: 'gold' | 'potion' | 'material' | 'equip';
+  kind: 'gold' | 'potion' | 'material' | 'equip' | 'scroll';
+  scroll?: 'recall' | 'random';
+  special?: SpecialDef;
   heal?: number;
   mana?: number;
   slot?: 'weapon' | 'armor' | 'helmet' | 'necklace' | 'bracelet' | 'ring';
@@ -181,6 +198,7 @@ export interface AffixConfig {
   pool: AffixDef[];
   refine: RefineConfig;
   bagCapacity: number;
+  storageCapacity: number;
   sellRatio: number;
   death: {
     dropChance: number;
@@ -192,6 +210,13 @@ export interface AffixConfig {
     /** 死亡后这段时间内再死不掉装 */
     graceSeconds: number;
   };
+}
+
+export interface SetDef {
+  id: string;
+  name: string;
+  pieces: string[];
+  bonuses: { count: number; bonus: Partial<Record<BonusStat, number>> }[];
 }
 
 export interface DropEntry {
@@ -253,6 +278,7 @@ export interface NpcDef {
   /** 完成这个任务后消失 */
   hiddenAfter?: string;
   shop?: string[];
+  storage?: boolean;
   travel?: TravelOption[];
 }
 
@@ -289,6 +315,7 @@ export interface GameSettings {
   /** 突破失败后属性降低的比例 */
   weakFactor: number;
   weakSeconds: number;
+  skillUpgrade: { material: string; goldCost: number; maxLevel: number; powerPerLevel: number };
   pickup: { goldRadius: number; itemRadius: number; equipmentRadius: number };
 }
 
@@ -301,12 +328,16 @@ export interface GameConfig {
   monsters: Record<string, MonsterDef>;
   items: Record<string, ItemDef>;
   affixes: AffixConfig;
+  sets: Record<string, SetDef>;
   drops: Record<string, DropEntry[]>;
   maps: Record<string, MapDef>;
   npcs: Record<string, NpcDef>;
   quests: Record<string, QuestDef>;
   dialogues: Record<string, string[]>;
 }
+
+/** 快捷栏 8 格，后两格固定放丹药 */
+export const SKILL_SLOTS = 6;
 
 export const CONFIG_FILES = [
   'game',
@@ -317,6 +348,7 @@ export const CONFIG_FILES = [
   'monsters',
   'items',
   'affixes',
+  'sets',
   'drops',
   'maps',
   'npcs',
@@ -387,6 +419,22 @@ export function validateConfig(config: GameConfig): string[] {
   }
   for (const item of Object.values(config.items)) {
     if (item.kind === 'equip' && !item.slot) errors.push(`法器 ${item.id} 缺少栏位`);
+  }
+  for (const classDef of Object.values(config.classes)) {
+    const count = Object.values(config.skills).filter((skill) => skill.classId === classDef.id).length;
+    if (count > SKILL_SLOTS) errors.push(`职业 ${classDef.id} 的技能超过快捷栏 ${SKILL_SLOTS} 格`);
+  }
+  for (const set of Object.values(config.sets)) {
+    for (const piece of set.pieces) {
+      if (!config.items[piece]) errors.push(`套装 ${set.id} 的 ${piece} 不存在`);
+    }
+  }
+  for (const monster of Object.values(config.monsters)) {
+    for (const ability of monster.abilities ?? []) {
+      if (ability.summon && !config.monsters[ability.summon.monster]) {
+        errors.push(`怪物 ${monster.id} 的召唤物 ${ability.summon.monster} 不存在`);
+      }
+    }
   }
   const { refine } = config.affixes;
   if (config.items[refine.material]?.kind !== 'material') {

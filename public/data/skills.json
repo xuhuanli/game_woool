@@ -53,5 +53,40 @@
     "id": "spirit-summon", "name": "唤噬金虫", "classId": "spirit", "level": 7,
     "mpCost": 16, "cooldown": 15, "windup": 0.4, "range": 0, "color": "#f0cf7a",
     "effect": { "type": "summon", "monster": "gold-bug", "hpPerLevel": 10, "duration": 60 }
+  },
+  "body-mingwang": {
+    "id": "body-mingwang", "name": "明王诀", "classId": "body", "level": 14,
+    "mpCost": 18, "cooldown": 10, "windup": 0.3, "range": 0, "color": "#ffcf5a",
+    "effect": { "type": "damage", "stat": "attack", "multiplier": 1.8, "shape": "around", "size": 3 }
+  },
+  "body-vajra": {
+    "id": "body-vajra", "name": "金刚诀", "classId": "body", "level": 24,
+    "mpCost": 24, "cooldown": 30, "windup": 0.2, "range": 0, "color": "#e6c87a",
+    "effect": { "type": "defense", "amount": 14, "duration": 20 }
+  },
+  "body-brahma": {
+    "id": "body-brahma", "name": "梵圣真魔功", "classId": "body", "level": 34,
+    "mpCost": 36, "cooldown": 45, "windup": 0.3, "range": 0, "color": "#ff5a3c",
+    "effect": { "type": "empower", "multiplier": 0.4, "duration": 15 }
+  },
+  "spell-qingyuan": {
+    "id": "spell-qingyuan", "name": "青元剑诀", "classId": "spell", "level": 14,
+    "mpCost": 22, "cooldown": 7, "windup": 0.3, "range": 7, "color": "#7fe0c0",
+    "effect": { "type": "damage", "stat": "magic", "multiplier": 2, "shape": "line", "size": 7 }
+  },
+  "spell-bixie": {
+    "id": "spell-bixie", "name": "辟邪神雷", "classId": "spell", "level": 30,
+    "mpCost": 48, "cooldown": 12, "windup": 0.5, "range": 8, "color": "#d0a0ff",
+    "effect": { "type": "damage", "stat": "magic", "multiplier": 2.2, "shape": "circle", "size": 3 }
+  },
+  "spirit-puppet": {
+    "id": "spirit-puppet", "name": "傀儡术", "classId": "spirit", "level": 16,
+    "mpCost": 40, "cooldown": 25, "windup": 0.5, "range": 0, "color": "#a8b0bc",
+    "effect": { "type": "summon", "monster": "iron-puppet", "hpPerLevel": 30, "duration": 90 }
+  },
+  "spirit-corrosion": {
+    "id": "spirit-corrosion", "name": "腐骨毒", "classId": "spirit", "level": 30,
+    "mpCost": 30, "cooldown": 6, "windup": 0.3, "range": 7, "color": "#b6e04a",
+    "effect": { "type": "dot", "stat": "dao", "multiplier": 1.5, "duration": 10, "interval": 1 }
   }
 }

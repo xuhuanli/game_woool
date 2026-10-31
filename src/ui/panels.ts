@@ -1,10 +1,11 @@
-import type { BonusStat, DamageStat, GameConfig } from '../game/config';
+import type { BonusStat, DamageStat, GameConfig, SetDef, SpecialDef } from '../game/config';
 import {
   EQUIP_SLOTS,
   equipmentBonuses,
   equipmentColor,
   equipmentName,
   SLOT_NAMES,
+  slotsFor,
   type EquipSlot,
   type Equipment,
 } from '../game/equipment';
@@ -239,7 +240,8 @@ export class Panels {
       if (item.heal) box.append(el('div', '', `回复 ${item.heal} 点生命`));
       if (item.mana) box.append(el('div', '', `回复 ${item.mana} 点灵力`));
       if (item.kind === 'material') box.append(el('div', '', '用于祭炼武器'));
-      if (item.kind === 'potion') {
+      if (item.scroll) box.append(el('div', '', item.scroll === 'recall' ? '回到主城' : '在当前地图随机传送'));
+      if (item.kind === 'potion' || item.kind === 'scroll') {
         box.append(this.action('使用', () => this.world.inventory.useItem(selection.id)));
       }
       return box;
@@ -262,6 +264,10 @@ export class Panels {
     for (const bonus of equipmentBonuses(equipment, item)) {
       box.append(el('div', '', `${this.bonusName(bonus.stat)} +${bonus.value}`));
     }
+    if (item.special) box.append(el('div', 'detail-special', this.specialText(item.special)));
+    const set = Object.values(this.config.sets).find((candidate) => candidate.pieces.includes(item.id));
+    if (set) box.append(this.setInfo(set));
+    if (!wornSlot) box.append(this.comparison(equipment));
 
     const actions = el('div', 'detail-actions');
     if (wornSlot) {
@@ -277,6 +283,63 @@ export class Panels {
       box.append(el('div', 'detail-hint', `祭炼消耗祭炼石 1（有 ${stones}）、灵石 ${goldCost}`));
     }
     box.append(actions);
+    return box;
+  }
+
+  private specialText(special: SpecialDef): string {
+    switch (special.kind) {
+      case 'stun':
+        return `攻击时 ${Math.round(special.chance * 100)}% 概率定身 ${special.seconds} 秒`;
+      case 'revive':
+        return `致命伤时原地复活，冷却 ${special.seconds} 秒`;
+      case 'manaShield':
+        return `${Math.round(special.ratio * 100)}% 伤害由灵力承担`;
+      case 'teleport':
+        return `按 T 随机传送，冷却 ${special.seconds} 秒`;
+    }
+  }
+
+  private setInfo(set: SetDef): HTMLElement {
+    const wornItems = Object.values(this.world.player.equipment).map((worn) => worn.itemId);
+    const count = set.pieces.filter((piece) => wornItems.includes(piece)).length;
+    const box = el('div', 'detail-set');
+    box.append(el('div', '', `${set.name}（已穿 ${count}/${set.pieces.length}）`));
+    for (const tier of set.bonuses) {
+      const bonus = Object.entries(tier.bonus)
+        .map(([stat, value]) => `${this.bonusName(stat as BonusStat)} +${value}`)
+        .join('，');
+      box.append(el('div', count >= tier.count ? '' : 'detail-hint', `${tier.count} 件：${bonus}`));
+    }
+    return box;
+  }
+
+  /** 和同栏位已穿的法器对比，戒指和手镯取第一个栏位。 */
+  private comparison(equipment: Equipment): HTMLElement {
+    const { items } = this.config;
+    const item = items[equipment.itemId]!;
+    const slots = slotsFor(item);
+    const worn = slots.map((slot) => this.world.player.equipment[slot]).find(Boolean);
+    const box = el('div', 'detail-compare');
+    if (!worn) {
+      box.textContent = '该栏位未穿戴';
+      return box;
+    }
+    const total = (target: Equipment) => {
+      const sum = new Map<BonusStat, number>();
+      for (const { stat, value } of equipmentBonuses(target, items[target.itemId]!)) {
+        sum.set(stat, (sum.get(stat) ?? 0) + value);
+      }
+      return sum;
+    };
+    const next = total(equipment);
+    const current = total(worn);
+    box.append(el('div', 'detail-hint', `对比 ${equipmentName(worn, this.config)}`));
+    for (const stat of new Set([...next.keys(), ...current.keys()])) {
+      const change = (next.get(stat) ?? 0) - (current.get(stat) ?? 0);
+      if (change === 0) continue;
+      const text = `${this.bonusName(stat)} ${change > 0 ? '+' : ''}${change}`;
+      box.append(el('div', change > 0 ? 'detail-better' : 'detail-missing', text));
+    }
     return box;
   }
 

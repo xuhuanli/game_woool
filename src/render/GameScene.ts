@@ -18,6 +18,7 @@ import type { AutoPanel } from '../ui/autoPanel';
 import type { Hud } from '../ui/hud';
 import type { NpcPanel } from '../ui/npcPanel';
 import type { Panels } from '../ui/panels';
+import { GameAudio } from './audio';
 import { directionRow, TILE_H, TILE_W, toCell, toScreen } from './iso';
 import {
   createPlaceholderArt,
@@ -35,6 +36,9 @@ const TARGET_CENTER_OFFSET = 20;
 const HOVER_TINT = 0xffc0a0;
 const DIRT_COLOR = 0x7a6a4a;
 const GOLD_MERGE_MS = 1000;
+const PILLAR_HEIGHT = 150;
+/** 上品及以上有光柱 */
+const PILLAR_GRADE = 2;
 const FLY_MS = 260;
 
 interface UnitView {
@@ -54,6 +58,8 @@ interface NpcView {
 interface ItemView {
   sprite: Phaser.GameObjects.Image;
   label: Phaser.GameObjects.Text;
+  /** 高品阶法器的光柱 */
+  pillar: Phaser.GameObjects.Graphics | null;
 }
 
 export class GameScene extends Phaser.Scene {
@@ -65,6 +71,7 @@ export class GameScene extends Phaser.Scene {
   private holding = false;
   private holdTimer = 0;
   private pendingGold = 0;
+  private readonly audio = new GameAudio();
   private hovered: UnitView | null = null;
   private tileCursor!: Phaser.GameObjects.Graphics;
 
@@ -114,6 +121,13 @@ export class GameScene extends Phaser.Scene {
     this.hud.onSlot = (slot) => this.useSlot(slot);
     keyboard.addCapture('SPACE');
     keyboard.on('keydown-SPACE', () => this.world.pickupNearbyEquipment());
+    keyboard.on('keydown-T', () => this.world.useTeleportRing());
+    keyboard.on('keydown-M', () => {
+      this.hud.log(this.audio.toggleMute() ? '已静音' : '已开启声音');
+    });
+    const unlockAudio = () => this.audio.unlock();
+    window.addEventListener('pointerdown', unlockAudio, { once: true });
+    window.addEventListener('keydown', unlockAudio, { once: true });
 
     this.hud.log(`来到${this.world.map.name}`);
   }
@@ -379,6 +393,31 @@ export class GameScene extends Phaser.Scene {
       case 'attackStart':
         this.playAttack(event.unit);
         if (event.target) this.showProjectile(event.unit, event.target, event.color);
+        if (event.color) this.audio.play('cast');
+        break;
+      case 'monsterAdded':
+        this.addUnitView(event.unit, event.unit.def.id, event.unit.def.look.scale);
+        break;
+      case 'stunned':
+        this.floatText(event.unit, '定身', '#9fd0ff', 16);
+        break;
+      case 'bossReady':
+        this.hud.log(`${event.name}已在${event.mapName}现身！`, 'bad');
+        this.audio.play('warning');
+        break;
+      case 'revived':
+        this.hud.log('涅槃戒发动，原地复活', 'gain');
+        this.floatText(this.world.player, '涅槃', '#ffd84a', 26);
+        this.audio.play('levelUp');
+        this.cameras.main.flash(300, 255, 220, 160);
+        break;
+      case 'teleported':
+        this.hud.log('遁光而去');
+        this.audio.play('portal');
+        break;
+      case 'skillUpgraded':
+        this.hud.log(`${event.name}修至 ${event.level} 层`, 'gain');
+        this.audio.play('levelUp');
         break;
       case 'skillCast':
         this.showSkill(event.unit, event.skill, event.cells);
@@ -410,6 +449,7 @@ export class GameScene extends Phaser.Scene {
       case 'pickedUp': {
         const { def, amount } = event.item;
         if (event.magnet) this.flyToPlayer(event.item);
+        this.audio.play(def.kind === 'gold' ? 'gold' : 'pickup');
         if (def.kind === 'gold') {
           this.addGold(amount);
         } else {
@@ -441,6 +481,7 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'telegraph':
         this.showTelegraph(event.cells, event.seconds, event.color);
+        this.audio.play('warning');
         this.hud.log(event.name, 'bad');
         break;
       case 'npcsChanged':
@@ -450,6 +491,7 @@ export class GameScene extends Phaser.Scene {
         this.hud.log(this.world.player.weakUntil > 0 ? '突破失败，身体虚弱' : '虚弱已消退');
         break;
       case 'mapChanged':
+        this.audio.play('portal');
         this.buildMap();
         this.hud.log(`来到${this.world.map.name}`);
         break;
@@ -497,6 +539,7 @@ export class GameScene extends Phaser.Scene {
     if (!view) return;
     const isPlayer = unit === this.world.player;
     this.floatText(unit, String(amount), isPlayer ? '#ff6a5a' : maxRoll ? '#ffd84a' : '#ffffff', maxRoll ? 24 : 18);
+    this.audio.play(isPlayer ? 'hurt' : maxRoll ? 'crit' : 'hit');
 
     view.sprite.setTintFill(0xffffff);
     this.time.delayedCall(70, () => {
@@ -510,6 +553,7 @@ export class GameScene extends Phaser.Scene {
   private playDeath(unit: Unit): void {
     const view = this.unitViews.get(unit);
     if (!view) return;
+    if (unit === this.world.player) this.audio.play('death');
     view.attacking = false;
     view.sprite.stop();
     this.tweens.add({
@@ -520,7 +564,9 @@ export class GameScene extends Phaser.Scene {
       duration: 500,
       ease: 'Quad.easeIn',
       onComplete: () => {
-        if ((unit as Summon).kind === 'summon') this.removeUnitView(view);
+        if ((unit as Summon).kind === 'summon' || (unit as Monster).temporary) {
+          this.removeUnitView(view);
+        }
       },
     });
   }
@@ -599,8 +645,33 @@ export class GameScene extends Phaser.Scene {
       .setOrigin(0.5, 1)
       .setDepth(UI_DEPTH - 2);
     this.tweens.add({ targets: sprite, y, duration: 320, ease: 'Bounce.easeOut' });
-    this.itemViews.set(item, { sprite, label });
-    if (announce && item.equipment) this.hud.log(`掉落了 ${this.itemLabel(item)}！`, 'gain');
+    const rank = this.gradeRank(item);
+    const pillar = rank >= PILLAR_GRADE ? this.addPillar(x, y, item) : null;
+    this.itemViews.set(item, { sprite, label, pillar });
+    if (!announce || !item.equipment) return;
+    this.hud.log(`掉落了 ${this.itemLabel(item)}！`, 'gain');
+    if (rank >= PILLAR_GRADE) this.audio.play('rare');
+    if (rank === this.world.config.affixes.grades.length - 1) {
+      this.cameras.main.flash(250, 255, 200, 120);
+      this.cameras.main.shake(180, 0.004);
+    }
+  }
+
+  private gradeRank(item: GroundItem): number {
+    const { grades } = this.world.config.affixes;
+    return grades.findIndex((grade) => grade.id === item.equipment?.grade);
+  }
+
+  /** 高品阶法器落地时的光柱，隔着半屏也能看到。 */
+  private addPillar(x: number, y: number, item: GroundItem): Phaser.GameObjects.Graphics {
+    const color = Phaser.Display.Color.HexStringToColor(
+      equipmentColor(item.equipment!, this.world.config),
+    ).color;
+    const pillar = this.add.graphics().setDepth(y - 2);
+    pillar.fillGradientStyle(color, color, color, color, 0, 0, 0.7, 0.7);
+    pillar.fillRect(x - 9, y - PILLAR_HEIGHT, 18, PILLAR_HEIGHT);
+    this.tweens.add({ targets: pillar, alpha: 0.45, duration: 700, yoyo: true, repeat: -1 });
+    return pillar;
   }
 
   private itemLabel(item: GroundItem): string {
@@ -612,6 +683,7 @@ export class GameScene extends Phaser.Scene {
     if (!view) return;
     view.sprite.destroy();
     view.label.destroy();
+    view.pillar?.destroy();
     this.itemViews.delete(item);
   }
 
@@ -660,6 +732,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private showBreakthrough(realm: string, success: boolean): void {
+    this.audio.play(success ? 'levelUp' : 'death');
     if (!success) {
       this.hud.log('突破失败，材料已消耗', 'bad');
       this.floatText(this.world.player, '突破失败', '#ff6a5a', 24);
@@ -671,6 +744,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private showLevelUp(level: number): void {
+    this.audio.play('levelUp');
     this.hud.log(`升到了 ${level} 级！`, 'gain');
     this.floatText(this.world.player, `升级！Lv.${level}`, '#ffd84a', 26);
     const { x, y } = toScreen(this.world.player.pos);

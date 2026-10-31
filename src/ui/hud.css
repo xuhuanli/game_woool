@@ -212,14 +212,14 @@ body,
 
 .status-menu {
   display: flex;
-  gap: 4px;
+  gap: 3px;
   margin-top: 6px;
   pointer-events: auto;
 }
 
 .status-menu button {
-  padding: 2px 6px;
-  font: 12px/1.5 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  padding: 2px 3px;
+  font: 11px/1.5 'PingFang SC', 'Microsoft YaHei', sans-serif;
   color: inherit;
   white-space: nowrap;
   cursor: pointer;
@@ -366,6 +366,23 @@ body,
   border-top: 1px solid #4a3c22;
 }
 
+.detail-special {
+  color: #c9b6ff;
+}
+
+.detail-set {
+  margin-top: 4px;
+  color: #7be07b;
+}
+
+.detail-compare {
+  margin-top: 4px;
+}
+
+.detail-better {
+  color: #7be07b;
+}
+
 .detail-name {
   font-weight: 600;
 }
@@ -443,6 +460,16 @@ body,
   height: 110px;
 }
 
+.quest-link {
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.quest-link:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
 .quests {
   top: 226px;
   left: 12px;
@@ -511,6 +538,28 @@ body,
 
 .detail-missing {
   color: #ff8a7a;
+}
+
+#hud .panel-skills {
+  left: 264px;
+  width: 340px;
+}
+
+.skill-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 8px;
+  padding: 4px 0;
+  border-top: 1px solid #4a3c22;
+}
+
+.skill-row.locked {
+  color: #8d8472;
+}
+
+.skill-row small {
+  grid-column: 1 / -1;
+  color: #a79c84;
 }
 
 #hud .panel-auto {

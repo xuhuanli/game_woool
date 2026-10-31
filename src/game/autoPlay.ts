@@ -21,6 +21,10 @@ export class AutoPlay {
 
   constructor(private readonly world: World) {}
 
+  get active(): boolean {
+    return this.world.player.auto.enabled;
+  }
+
   /** 玩家手动移动后暂停一会儿，避免挂机马上抢回操作。 */
   pauseForManualInput(): void {
     this.pauseLeft = MANUAL_PAUSE_SECONDS;
@@ -109,6 +113,7 @@ export class AutoPlay {
         return health < HEAL_SKILL_BELOW;
       case 'shield':
       case 'defense':
+      case 'empower':
         return !player.effects.some((active) => active.kind === effect.type);
       case 'summon':
         return summons.length === 0;

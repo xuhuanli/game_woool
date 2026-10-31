@@ -18,9 +18,9 @@ export interface Vec {
 }
 
 export interface StatusEffect {
-  kind: 'dot' | 'shield' | 'defense';
+  kind: 'dot' | 'shield' | 'defense' | 'empower';
   left: number;
-  /** dot 为每跳伤害，shield 为减伤比例，defense 为增加的防御 */
+  /** dot 为每跳伤害，shield 为减伤比例，defense 为增加的防御，empower 为增伤比例 */
   amount: number;
   interval: number;
   nextTick: number;
@@ -56,6 +56,8 @@ export interface Unit {
   pending: PendingAction | null;
   repathLeft: number;
   effects: StatusEffect[];
+  /** 被定身的剩余时间 */
+  stunLeft: number;
 }
 
 export interface Monster extends Unit {
@@ -68,6 +70,8 @@ export interface Monster extends Unit {
   abilityCooldowns: Record<string, number>;
   /** 已进入的 Boss 阶段数 */
   phase: number;
+  /** 被召唤的小怪，死后不重生 */
+  temporary?: boolean;
   wanderLeft: number;
   respawnLeft: number;
 }
@@ -87,6 +91,13 @@ export type PlayerOrder =
   | { type: 'talk'; npc: NpcDef };
 
 export type HotbarEntry = { kind: 'skill'; id: string } | { kind: 'item'; id: string };
+
+export interface RouteTarget {
+  mapId: string;
+  cell: Cell;
+  /** 到达后与这个 NPC 对话 */
+  npc?: NpcDef;
+}
 
 export interface AutoSettings {
   enabled: boolean;
@@ -115,6 +126,14 @@ export interface Player extends Unit {
   realmPassed: string[];
   /** 各境界的突破失败次数 */
   breakthroughFails: Record<string, number>;
+  /** 功法等级，缺省为 1 */
+  skillLevels: Record<string, number>;
+  /** 仓库里的法器 */
+  storage: Equipment[];
+  reviveReadyAt: number;
+  teleportReadyAt: number;
+  /** 正在自动寻路的目的地 */
+  route: RouteTarget | null;
   /** 突破失败后的虚弱状态，属性降低 */
   weakUntil: number;
   lastDeathAt: number;
@@ -178,6 +197,12 @@ export type GameEvent =
   | { type: 'deathDrop'; name: string }
   | { type: 'telegraph'; name: string; cells: Cell[]; seconds: number; color: string }
   | { type: 'npcsChanged' }
+  | { type: 'monsterAdded'; unit: Monster }
+  | { type: 'stunned'; unit: Unit }
+  | { type: 'bossReady'; name: string; mapName: string }
+  | { type: 'revived' }
+  | { type: 'teleported' }
+  | { type: 'skillUpgraded'; name: string; level: number }
   | { type: 'mapChanged' }
   | { type: 'npcOpened'; npc: NpcDef }
   | { type: 'questAccepted'; name: string }

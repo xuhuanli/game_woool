@@ -52,10 +52,10 @@
     "spawns": [
       {"monster": "mountain-ape", "x": 12, "y": 4},
       {"monster": "mountain-ape", "x": 12, "y": 10},
-      {"monster": "mountain-ape", "x": 19, "y": 4},
-      {"monster": "mountain-ape", "x": 22, "y": 10},
+      {"monster": "wolf-rider", "x": 19, "y": 4},
+      {"monster": "wolf-rider", "x": 22, "y": 10},
       {"monster": "mountain-ape", "x": 5, "y": 18},
-      {"monster": "mountain-ape", "x": 5, "y": 24},
+      {"monster": "ape-shaman", "x": 5, "y": 24},
       {"monster": "mountain-ape", "x": 14, "y": 20},
       {"monster": "flood-serpent", "x": 21, "y": 21}
     ]

@@ -1,6 +1,7 @@
-import type { DamageStat, GameConfig } from '../game/config';
+import type { DamageStat, GameConfig, QuestDef } from '../game/config';
 import { equipmentName } from '../game/equipment';
 import { cellDistance } from '../game/grid';
+import { questDestination } from '../game/navigation';
 import { objectiveCount, questStatus } from '../game/quests';
 import { pendingBreakthrough, realmName } from '../game/realm';
 import { HOTBAR_SIZE, type World } from '../game/world';
@@ -103,7 +104,7 @@ export class Hud {
     if (signature === this.questSignature) return;
     this.questSignature = signature;
 
-    const lines = player.quests.active.flatMap((progress) => {
+    const lines: { text: string; quest?: QuestDef }[] = player.quests.active.flatMap((progress) => {
       const quest = this.config.quests[progress.id];
       if (!quest) return [];
       const ready = questStatus(quest, player.quests, player.level, player.bag) === 'ready';
@@ -111,31 +112,47 @@ export class Hud {
       const counts = quest.objectives
         .map((objective, index) => `${objectiveCount(quest, index, progress, player.bag)}/${objective.count}`)
         .join(' ');
-      return [`${quest.name}：${ready ? `回去找${giver}` : `${quest.summary} ${counts}`}`];
+      const text = `${quest.name}：${ready ? `回去找${giver}` : `${quest.summary} ${counts}`}`;
+      return [{ text, quest }];
     });
     if (lines.length === 0) {
       const next = Object.values(this.config.quests).find(
         (quest) => questStatus(quest, player.quests, player.level, player.bag) === 'available',
       );
-      if (next) lines.push(`可接：${next.name}（${this.config.npcs[next.giver]?.name}）`);
+      if (next) lines.push({ text: `可接：${next.name}（${this.config.npcs[next.giver]?.name}）`, quest: next });
     }
     const clockUntil = (time: number) => {
       const left = Math.max(0, Math.ceil(time - world.time));
       return `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
     };
-    if (player.weakUntil > 0) lines.push(`虚弱：属性降低，剩 ${clockUntil(player.weakUntil)}`);
+    if (player.weakUntil > 0) lines.push({ text: `虚弱：属性降低，剩 ${clockUntil(player.weakUntil)}` });
     for (const { mapId, item } of world.deathDrops) {
       const clock = clockUntil(item.expiresAt);
       const name = item.equipment ? equipmentName(item.equipment, this.config) : item.def.name;
-      lines.push(`遗落 ${name}：${this.config.maps[mapId]?.name} 剩 ${clock}`);
+      lines.push({ text: `遗落 ${name}：${this.config.maps[mapId]?.name} 剩 ${clock}` });
     }
     this.quests.replaceChildren(
-      ...lines.map((line) => {
+      ...lines.map(({ text, quest }) => {
         const row = document.createElement('div');
-        row.textContent = line;
+        row.textContent = text;
+        if (quest) {
+          row.className = 'quest-link';
+          row.title = '点击自动寻路';
+          row.addEventListener('click', () => this.navigateTo(world, quest));
+        }
         return row;
       }),
     );
+  }
+
+  private navigateTo(world: World, quest: QuestDef): void {
+    const available = !world.player.quests.active.some((progress) => progress.id === quest.id);
+    const giver = this.config.npcs[quest.giver];
+    const target =
+      available && giver
+        ? { mapId: giver.map, cell: { x: giver.x, y: giver.y }, npc: giver }
+        : questDestination(world, quest, world.player);
+    if (target) world.navigate(target);
   }
 
   private updateBoss(world: World): void {

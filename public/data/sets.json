@@ -1,0 +1,29 @@
+{
+  "qingyuan": {
+    "id": "qingyuan", "name": "青元套",
+    "pieces": ["sword-14", "robe-14", "crown-14", "pendant-14", "bracelet-14", "ring-14"],
+    "bonuses": [
+      { "count": 2, "bonus": { "maxHp": 40 } },
+      { "count": 4, "bonus": { "primary": 3 } },
+      { "count": 6, "bonus": { "primary": 5, "luck": 1 } }
+    ]
+  },
+  "xuantian": {
+    "id": "xuantian", "name": "玄天套",
+    "pieces": ["sword-27", "robe-27", "crown-27", "pendant-27", "bracelet-27", "ring-27"],
+    "bonuses": [
+      { "count": 2, "bonus": { "maxHp": 90 } },
+      { "count": 4, "bonus": { "primary": 6 } },
+      { "count": 6, "bonus": { "primary": 9, "luck": 1 } }
+    ]
+  },
+  "yuanci": {
+    "id": "yuanci", "name": "元磁套",
+    "pieces": ["sword-35", "robe-35", "crown-35", "pendant-35", "bracelet-35", "ring-35"],
+    "bonuses": [
+      { "count": 2, "bonus": { "maxHp": 160 } },
+      { "count": 4, "bonus": { "primary": 10 } },
+      { "count": 6, "bonus": { "primary": 15, "luck": 2 } }
+    ]
+  }
+}

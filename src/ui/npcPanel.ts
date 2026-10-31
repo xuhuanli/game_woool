@@ -1,5 +1,5 @@
 import type { GameConfig, NpcDef, QuestDef } from '../game/config';
-import { equipmentColor, equipmentName } from '../game/equipment';
+import { equipmentColor, equipmentName, type Equipment } from '../game/equipment';
 import { cellDistance } from '../game/grid';
 import { questsForNpc, questStatus } from '../game/quests';
 import type { World } from '../game/world';
@@ -9,6 +9,7 @@ const CLOSE_DISTANCE = 6;
 type View =
   | { kind: 'home' }
   | { kind: 'shop' }
+  | { kind: 'storage' }
   | { kind: 'dialogue'; quest: QuestDef; lines: string[]; index: number; finish: boolean };
 
 function el<K extends keyof HTMLElementTagNameMap>(tag: K, className = '', text = '') {
@@ -62,6 +63,7 @@ export class NpcPanel {
       player.level,
       player.bag,
       player.equipBag.map((equipment) => equipment.uid),
+      player.storage.map((equipment) => equipment.uid),
       player.quests,
     ]);
     if (signature === this.signature) return;
@@ -78,6 +80,7 @@ export class NpcPanel {
     const body = el('div', 'npc-body');
     if (this.view.kind === 'home') this.renderHome(npc, body);
     else if (this.view.kind === 'shop') this.renderShop(npc, body);
+    else if (this.view.kind === 'storage') this.renderStorage(npc, body);
     else this.renderDialogue(this.view, body);
     this.panel.replaceChildren(header, body);
   }
@@ -99,6 +102,9 @@ export class NpcPanel {
     }
     if (npc.shop) {
       body.append(this.option('打开商店', () => (this.view = { kind: 'shop' })));
+    }
+    if (npc.storage) {
+      body.append(this.option('打开仓库', () => (this.view = { kind: 'storage' })));
     }
     npc.travel?.forEach((option, index) => {
       const need = option.level ? `，需要等级 ${option.level}` : '';
@@ -150,6 +156,11 @@ export class NpcPanel {
     }
 
     body.append(el('p', 'npc-quest', '出售'));
+    const { grades } = config.affixes;
+    for (const grade of grades.slice(0, 2)) {
+      const label = `一键卖出 ${grade.name}及以下法器`;
+      body.append(this.option(label, () => world.sellAllUpToGrade(npc, grade.id)));
+    }
     for (const equipment of player.equipBag) {
       const label = `${equipmentName(equipment, config)}（${world.sellPrice(equipment)} 灵石）`;
       const button = this.option(label, () => world.sellEquipment(npc, equipment.uid));
@@ -163,6 +174,25 @@ export class NpcPanel {
       const label = `${item.name}×${count}（${price} 灵石）`;
       body.append(this.option(label, () => world.sellItem(npc, itemId)));
     }
+    body.append(this.option('返回', () => (this.view = { kind: 'home' })));
+  }
+
+  private renderStorage(npc: NpcDef, body: HTMLElement): void {
+    const { world, config } = this;
+    const { player } = world;
+    const list = (title: string, items: Equipment[], run: (uid: number) => void) => {
+      body.append(el('p', 'npc-quest', title));
+      for (const equipment of items) {
+        const button = this.option(equipmentName(equipment, config), () => run(equipment.uid));
+        button.style.color = equipmentColor(equipment, config);
+        body.append(button);
+      }
+    };
+    const capacity = config.affixes.storageCapacity;
+    list(`仓库 ${player.storage.length}/${capacity}（点击取出）`, player.storage, (uid) =>
+      world.withdraw(npc, uid),
+    );
+    list('背包（点击存入）', player.equipBag, (uid) => world.deposit(npc, uid));
     body.append(this.option('返回', () => (this.view = { kind: 'home' })));
   }
 

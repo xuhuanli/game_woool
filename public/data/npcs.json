@@ -6,7 +6,11 @@
   "herb-keeper": {
     "id": "herb-keeper", "name": "百药堂掌柜", "map": "huangfeng-valley", "x": 7, "y": 10,
     "color": "#7ddc6f", "greeting": "herb-greeting",
-    "shop": ["small-potion", "small-mana", "refine-stone", "rusty-sword", "cloth-robe"]
+    "shop": ["small-potion", "small-mana", "refine-stone", "recall-scroll", "random-scroll", "rusty-sword", "cloth-robe"]
+  },
+  "vault-keeper": {
+    "id": "vault-keeper", "name": "藏宝阁管事", "map": "huangfeng-valley", "x": 9, "y": 13,
+    "color": "#c9a24a", "greeting": "vault-greeting", "storage": true
   },
   "gate-steward": {
     "id": "gate-steward", "name": "传送阵执事", "map": "huangfeng-valley", "x": 17, "y": 10,

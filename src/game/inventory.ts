@@ -1,4 +1,4 @@
-import type { GameConfig } from './config';
+import type { GameConfig, ItemDef, SpecialDef } from './config';
 import { slotsFor, type EquipSlot, type Equipment } from './equipment';
 import type { Rng } from './rng';
 import { refreshStats } from './stats';
@@ -16,7 +16,47 @@ export class Inventory {
     private readonly rng: Rng,
     private readonly now: () => number,
     private readonly emit: (event: GameEvent) => void,
+    private readonly useScroll: (item: ItemDef) => void,
   ) {}
+
+  /** 查找身上带某种特效的法宝。 */
+  special<K extends SpecialDef['kind']>(kind: K): Extract<SpecialDef, { kind: K }> | null {
+    for (const equipment of Object.values(this.player.equipment)) {
+      const special = this.config.items[equipment.itemId]?.special;
+      if (special?.kind === kind) return special as Extract<SpecialDef, { kind: K }>;
+    }
+    return null;
+  }
+
+  /** 功法修炼：消耗残卷和灵石，提高功法威力。 */
+  upgradeSkill(skillId: string): void {
+    const { player, config } = this;
+    const { material, goldCost, maxLevel } = config.game.skillUpgrade;
+    const skill = config.skills[skillId];
+    const level = player.skillLevels[skillId] ?? 1;
+    if (!skill || !player.skills.includes(skillId)) return;
+    if (level >= maxLevel) {
+      this.emit({ type: 'message', text: '功法已修至圆满' });
+      return;
+    }
+    if (!player.bag[material]) {
+      this.emit({ type: 'message', text: `缺少${config.items[material]?.name}` });
+      return;
+    }
+    if (player.gold < goldCost) {
+      this.emit({ type: 'message', text: '灵石不足' });
+      return;
+    }
+    player.gold -= goldCost;
+    this.removeFromBag(material);
+    player.skillLevels[skillId] = level + 1;
+    this.emit({ type: 'skillUpgraded', name: skill.name, level: level + 1 });
+  }
+
+  skillPower(skillId: string): number {
+    const { powerPerLevel } = this.config.game.skillUpgrade;
+    return 1 + powerPerLevel * ((this.player.skillLevels[skillId] ?? 1) - 1);
+  }
 
   useItem(itemId: string): void {
     const player = this.player;
@@ -24,6 +64,11 @@ export class Inventory {
     if (!player.hp || !item) return;
     if (!player.bag[itemId]) {
       this.emit({ type: 'message', text: `没有${item.name}了` });
+      return;
+    }
+    if (item.kind === 'scroll') {
+      this.removeFromBag(itemId);
+      this.useScroll(item);
       return;
     }
     const healed = Math.min(item.heal ?? 0, player.stats.maxHp - player.hp);

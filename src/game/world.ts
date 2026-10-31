@@ -26,6 +26,7 @@ import {
 import { findPath } from './pathfinding';
 import { emptyQuestState, questStatus, recordObjective } from './quests';
 import { breakthroughChance, pendingBreakthrough } from './realm';
+import { nextPortal } from './navigation';
 import { Rng } from './rng';
 import { SAVE_VERSION, type SaveData } from '../save/saveData';
 import { needsTarget, skillArea } from './skills';
@@ -38,6 +39,7 @@ import type {
   Monster,
   OfflineReport,
   Player,
+  RouteTarget,
   Summon,
   Unit,
   Vec,
@@ -114,6 +116,11 @@ export class World {
       quests: emptyQuestState(),
       realmPassed: [],
       breakthroughFails: {},
+      skillLevels: {},
+      storage: [],
+      reviveReadyAt: 0,
+      teleportReadyAt: 0,
+      route: null,
       weakUntil: 0,
       lastDeathAt: -Infinity,
       auto: defaultAutoSettings(),
@@ -132,6 +139,7 @@ export class World {
       this.rng,
       () => this.time,
       (event) => this.emit(event),
+      (item) => this.useScroll(item),
     );
     this.autoPlay = new AutoPlay(this);
     this.learnSkills();
@@ -176,19 +184,7 @@ export class World {
       const def = this.config.monsters[spawn.monster];
       if (!def) throw new Error(`未知的怪物：${spawn.monster}`);
       const spawnKey = `${mapId}:${index}`;
-      const monster: Monster = {
-        ...this.createUnit(def.name, spawn, def.stats, this.monsterTiming(def)),
-        kind: 'monster',
-        def,
-        home: { x: spawn.x, y: spawn.y },
-        spawnKey,
-        mode: 'idle',
-        target: null,
-        abilityCooldowns: {},
-        phase: 0,
-        wanderLeft: this.rng.next() * WANDER_MAX_SECONDS,
-        respawnLeft: 0,
-      };
+      const monster = this.createMonster(def, spawn, spawnKey);
       const waiting = (this.bossReadyAt[spawnKey] ?? 0) - this.time;
       if (waiting > 0) {
         monster.hp = 0;
@@ -196,6 +192,22 @@ export class World {
       }
       this.monsters.push(monster);
     });
+  }
+
+  private createMonster(def: MonsterDef, cell: Cell, spawnKey: string): Monster {
+    return {
+      ...this.createUnit(def.name, cell, def.stats, this.monsterTiming(def)),
+      kind: 'monster',
+      def,
+      home: { x: cell.x, y: cell.y },
+      spawnKey,
+      mode: 'idle',
+      target: null,
+      abilityCooldowns: {},
+      phase: 0,
+      wanderLeft: this.rng.next() * WANDER_MAX_SECONDS,
+      respawnLeft: 0,
+    };
   }
 
   private changeMap(mapId: string, cell: Cell): void {
@@ -258,6 +270,8 @@ export class World {
         quests: player.quests,
         realmPassed: player.realmPassed,
         breakthroughFails: player.breakthroughFails,
+        skillLevels: player.skillLevels,
+        storage: player.storage,
         weakUntil: player.weakUntil,
         lastDeathAt: Number.isFinite(player.lastDeathAt) ? player.lastDeathAt : null,
         auto: player.auto,
@@ -303,6 +317,8 @@ export class World {
     };
     player.realmPassed = data.realmPassed;
     player.breakthroughFails = data.breakthroughFails;
+    player.skillLevels = data.skillLevels;
+    player.storage = data.storage.filter(known);
     player.weakUntil = data.weakUntil;
     player.lastDeathAt = data.lastDeathAt ?? -Infinity;
     player.auto = { ...data.auto, enabled: false };
@@ -345,6 +361,7 @@ export class World {
     const goal = this.grid.nearest(cell, (c) => this.grid.isWalkable(c));
     if (!goal || !this.player.hp) return;
     this.player.order = { type: 'move', cell: goal };
+    this.player.route = null;
     this.player.repathLeft = 0;
     this.planPath(this.player, goal, false);
     this.autoPlay.pauseForManualInput();
@@ -352,6 +369,7 @@ export class World {
 
   attack(target: Monster): void {
     if (!this.player.hp || !target.hp) return;
+    if (!this.autoPlay.active) this.player.route = null;
     this.player.order = { type: 'attack', target };
     this.player.repathLeft = 0;
   }
@@ -362,11 +380,76 @@ export class World {
     this.planPath(this.player, item.cell, false);
   }
 
-  /** 回到复活点，用于低血自动回城。 */
-  recall(): void {
+  /** 回到复活点，用于低血自动回城和回城符。 */
+  recall(notice = '生命过低，已回城'): void {
     const target = this.map.respawn ?? { ...this.map.playerStart, map: this.mapId };
-    this.emit({ type: 'message', text: '生命过低，已回城' });
+    this.emit({ type: 'message', text: notice });
     this.changeMap(target.map, target);
+  }
+
+  private useScroll(item: ItemDef): void {
+    if (item.scroll === 'recall') this.recall('已回城');
+    else this.teleportRandomly();
+  }
+
+  private teleportRandomly(): void {
+    const { player, grid } = this;
+    player.order = null;
+    player.path = [];
+    for (let attempt = 0; attempt < 50; attempt++) {
+      const cell = { x: this.rng.int(0, grid.width - 1), y: this.rng.int(0, grid.height - 1) };
+      if (!this.isFree(cell, player)) continue;
+      player.cell = { ...cell };
+      player.pos = { ...cell };
+      this.emit({ type: 'teleported' });
+      return;
+    }
+  }
+
+  /** 遁光戒：随机传送，有冷却。 */
+  useTeleportRing(): void {
+    const { player } = this;
+    const ring = this.inventory.special('teleport');
+    if (!ring || !player.hp) return;
+    if (this.time < player.teleportReadyAt) {
+      this.emit({ type: 'message', text: '遁光戒冷却中' });
+      return;
+    }
+    player.teleportReadyAt = this.time + ring.seconds;
+    this.teleportRandomly();
+  }
+
+  /** 自动寻路到目的地，跨地图时沿传送点走，能接上后续对话。 */
+  navigate(target: RouteTarget): void {
+    if (!this.player.hp) return;
+    if (target.mapId !== this.mapId && !nextPortal(this, target.mapId)) {
+      this.emit({ type: 'message', text: '暂时找不到去那里的路' });
+      return;
+    }
+    this.player.route = target;
+    this.followRoute();
+  }
+
+  private followRoute(): void {
+    const { player } = this;
+    const route = player.route;
+    if (!route || player.order) return;
+    if (route.mapId === this.mapId) {
+      player.route = null;
+      if (route.npc) this.talkTo(route.npc);
+      else this.walkTo(route.cell);
+      return;
+    }
+    const portal = nextPortal(this, route.mapId);
+    if (portal) this.walkTo(portal);
+    else player.route = null;
+  }
+
+  private walkTo(cell: Cell): void {
+    const goal = this.grid.nearest(cell, (c) => this.grid.isWalkable(c));
+    if (!goal) return;
+    this.player.order = { type: 'move', cell: goal };
+    this.planPath(this.player, goal, false);
   }
 
   /** 结算闭关收益：最多 8 小时，效率为在线的一半，只有经验和灵石。 */
@@ -475,6 +558,41 @@ export class World {
     player.order = { type: 'talk', npc };
     const goal = this.grid.nearest(npc, (c) => this.isFree(c, player));
     if (goal) this.planPath(player, goal, false);
+  }
+
+  deposit(npc: NpcDef, uid: number): void {
+    const { player } = this;
+    const equipment = player.equipBag.find((candidate) => candidate.uid === uid);
+    if (!equipment || !npc.storage || !this.isNear(npc)) return;
+    if (player.storage.length >= this.config.affixes.storageCapacity) {
+      this.emit({ type: 'message', text: '仓库已满' });
+      return;
+    }
+    player.equipBag.splice(player.equipBag.indexOf(equipment), 1);
+    player.storage.push(equipment);
+  }
+
+  withdraw(npc: NpcDef, uid: number): void {
+    const { player } = this;
+    const equipment = player.storage.find((candidate) => candidate.uid === uid);
+    if (!equipment || !npc.storage || !this.isNear(npc)) return;
+    if (this.inventory.bagIsFull()) {
+      this.emit({ type: 'message', text: '背包已满' });
+      return;
+    }
+    player.storage.splice(player.storage.indexOf(equipment), 1);
+    player.equipBag.push(equipment);
+  }
+
+  /** 批量卖出背包里不高于某个品阶的法器。 */
+  sellAllUpToGrade(npc: NpcDef, gradeId: string): void {
+    const { grades } = this.config.affixes;
+    const limit = grades.findIndex((grade) => grade.id === gradeId);
+    if (!npc.shop || !this.isNear(npc)) return;
+    const selling = this.player.equipBag.filter(
+      (equipment) => grades.findIndex((grade) => grade.id === equipment.grade) <= limit,
+    );
+    for (const equipment of selling) this.sellEquipment(npc, equipment.uid);
   }
 
   private isNear(npc: NpcDef): boolean {
@@ -641,6 +759,7 @@ export class World {
   tick(dt = TICK_SECONDS): void {
     this.time += dt;
     this.autoPlay.tick(dt);
+    this.announceBosses();
     this.tickPlayer(dt);
     for (const monster of this.monsters) this.tickMonster(monster, dt);
     for (const summon of [...this.summons]) this.tickSummon(summon, dt);
@@ -661,6 +780,7 @@ export class World {
       this.emit({ type: 'weakChanged' });
     }
     this.attractItems();
+    this.followRoute();
     this.tickRegen(dt);
     this.tickEffects(player, dt);
     for (const [skillId, left] of Object.entries(player.skillCooldowns)) {
@@ -722,6 +842,18 @@ export class World {
     }
   }
 
+  /** Boss 刷新时全图提示，在别的地图也能收到。 */
+  private announceBosses(): void {
+    for (const [spawnKey, readyAt] of Object.entries(this.bossReadyAt)) {
+      if (readyAt > this.time) continue;
+      delete this.bossReadyAt[spawnKey];
+      const [mapId = '', index = '0'] = spawnKey.split(':');
+      const map = this.config.maps[mapId];
+      const monster = this.config.monsters[map?.spawns[Number(index)]?.monster ?? ''];
+      if (map && monster) this.emit({ type: 'bossReady', name: monster.name, mapName: map.name });
+    }
+  }
+
   private tickMonster(monster: Monster, dt: number): void {
     if (!monster.hp) {
       monster.respawnLeft -= dt;
@@ -731,6 +863,10 @@ export class World {
     this.tickEffects(monster, dt);
     for (const [id, left] of Object.entries(monster.abilityCooldowns)) {
       monster.abilityCooldowns[id] = Math.max(0, left - dt);
+    }
+    if (monster.hp && monster.stunLeft > 0) {
+      monster.stunLeft -= dt;
+      return;
     }
     if (!monster.hp || this.tickAttackTimers(monster, dt)) return;
 
@@ -906,10 +1042,47 @@ export class World {
   }
 
   private resolveAbility(caster: Unit, ability: AbilityDef, cells: Cell[]): void {
-    for (const unit of [this.player, ...this.summons]) {
-      if (unit.hp > 0 && cells.some((cell) => sameCell(cell, unit.cell))) {
-        this.resolveHit(caster, unit, { stat: 'attack', multiplier: ability.multiplier });
+    if (ability.summon) {
+      this.summonMinions(caster, ability.summon.monster, ability.summon.count);
+      return;
+    }
+    if (ability.charge) {
+      const target = cells[0];
+      const landing = target && this.grid.nearest(target, (c) => this.isFree(c, caster));
+      if (landing) {
+        caster.cell = { ...landing };
+        caster.pos = { ...landing };
+        caster.path = [];
       }
+    }
+    for (const unit of [this.player, ...this.summons]) {
+      if (unit.hp <= 0 || !cells.some((cell) => sameCell(cell, unit.cell))) continue;
+      this.resolveHit(caster, unit, { stat: 'attack', multiplier: ability.multiplier });
+      if (ability.poison && unit.hp > 0) {
+        unit.effects = unit.effects.filter((e) => e.kind !== 'dot' || e.source !== caster);
+        unit.effects.push({
+          kind: 'dot',
+          left: ability.poison.duration,
+          amount: ability.poison.damage,
+          interval: 1,
+          nextTick: 1,
+          source: caster,
+        });
+      }
+    }
+  }
+
+  private summonMinions(caster: Unit, monsterId: string, count: number): void {
+    const def = this.config.monsters[monsterId];
+    if (!def) return;
+    const alive = this.monsters.filter((monster) => monster.temporary && monster.hp > 0).length;
+    for (let i = alive; i < count; i++) {
+      const cell = this.grid.nearest(caster.cell, (c) => this.isFree(c, caster));
+      if (!cell) return;
+      const minion = this.createMonster(def, cell, `minion:${this.nextId}`);
+      minion.temporary = true;
+      this.monsters.push(minion);
+      this.emit({ type: 'monsterAdded', unit: minion });
     }
   }
 
@@ -955,11 +1128,12 @@ export class World {
 
     switch (effect.type) {
       case 'damage': {
+        const power = effect.multiplier * this.inventory.skillPower(skill.id);
         const hit = this.monsters.filter(
           (monster) => monster.hp > 0 && cells.some((cell) => sameCell(cell, monster.cell)),
         );
         for (const monster of hit) {
-          this.resolveHit(caster, monster, effect);
+          this.resolveHit(caster, monster, { stat: effect.stat, multiplier: power });
           if (effect.knockback && monster.hp > 0) {
             this.knockBack(monster, caster.cell, effect.knockback);
           }
@@ -972,7 +1146,12 @@ export class World {
         target.effects.push({
           kind: 'dot',
           left: effect.duration,
-          amount: Math.max(1, Math.round(caster.stats[effect.stat].max * effect.multiplier)),
+          amount: Math.max(
+            1,
+            Math.round(
+              caster.stats[effect.stat].max * effect.multiplier * this.inventory.skillPower(skill.id),
+            ),
+          ),
           interval: effect.interval,
           nextTick: effect.interval,
           source: caster,
@@ -996,13 +1175,16 @@ export class World {
       case 'defense':
         this.addEffect(caster, 'defense', effect.amount, effect.duration);
         break;
+      case 'empower':
+        this.addEffect(caster, 'empower', effect.multiplier, effect.duration);
+        break;
       case 'summon':
         this.summon(effect.monster, effect.hpPerLevel, effect.duration);
         break;
     }
   }
 
-  private addEffect(unit: Unit, kind: 'shield' | 'defense', amount: number, duration: number): void {
+  private addEffect(unit: Unit, kind: 'shield' | 'defense' | 'empower', amount: number, duration: number): void {
     unit.effects = unit.effects.filter((effect) => effect.kind !== kind);
     unit.effects.push({ kind, left: duration, amount, interval: 0, nextTick: 0, source: unit });
   }
@@ -1044,9 +1226,10 @@ export class World {
 
   private resolveHit(attacker: Unit, target: Unit, options: AttackOptions = {}): void {
     const stat = options.stat ?? attacker.attackStat;
+    const empower = attacker.effects.find((effect) => effect.kind === 'empower')?.amount ?? 0;
     const result = rollAttack(attacker.stats, this.defendingStats(target), this.rng, {
-      ...options,
       stat,
+      multiplier: (options.multiplier ?? 1) * (1 + empower),
     });
     if (!result.hit) {
       this.emit({ type: 'miss', unit: target });
@@ -1054,6 +1237,14 @@ export class World {
       return;
     }
     this.dealDamage(attacker, target, result.damage, result.maxRoll);
+    if (attacker === this.player && target.hp > 0) this.tryStun(target);
+  }
+
+  private tryStun(target: Unit): void {
+    const ring = this.inventory.special('stun');
+    if (!ring || !this.rng.chance(ring.chance)) return;
+    target.stunLeft = ring.seconds;
+    this.emit({ type: 'stunned', unit: target });
   }
 
   private defendingStats(unit: Unit): CombatStats {
@@ -1067,7 +1258,8 @@ export class World {
 
   private dealDamage(source: Unit, target: Unit, raw: number, maxRoll: boolean): void {
     const shield = target.effects.find((effect) => effect.kind === 'shield')?.amount ?? 0;
-    const amount = Math.max(1, Math.round(raw * (1 - shield)));
+    let amount = Math.max(1, Math.round(raw * (1 - shield)));
+    if (target === this.player) amount -= this.absorbWithMana(amount);
     target.hp = Math.max(0, target.hp - amount);
     this.emit({ type: 'damage', unit: target, amount, maxRoll, source });
 
@@ -1079,9 +1271,31 @@ export class World {
       return;
     }
 
-    if (target === this.player) this.killPlayer();
-    else if (this.monsters.includes(target as Monster)) this.killMonster(target as Monster);
+    if (target === this.player) {
+      if (!this.tryRevive()) this.killPlayer();
+    } else if (this.monsters.includes(target as Monster)) this.killMonster(target as Monster);
     else this.killSummon(target as Summon);
+  }
+
+  /** 护身戒：一部分伤害由灵力承担。 */
+  private absorbWithMana(amount: number): number {
+    const { player } = this;
+    const ring = this.inventory.special('manaShield');
+    if (!ring) return 0;
+    const absorbed = Math.min(Math.floor(amount * ring.ratio), Math.floor(player.mp));
+    player.mp -= absorbed;
+    return absorbed;
+  }
+
+  /** 涅槃戒：致命伤时原地复活，有冷却。 */
+  private tryRevive(): boolean {
+    const { player } = this;
+    const ring = this.inventory.special('revive');
+    if (!ring || this.time < player.reviveReadyAt) return false;
+    player.reviveReadyAt = this.time + ring.seconds;
+    player.hp = Math.ceil(player.stats.maxHp * ring.ratio);
+    this.emit({ type: 'revived' });
+    return true;
   }
 
   private aggro(target: Unit, source: Unit): void {
@@ -1123,6 +1337,7 @@ export class World {
     player.windupLeft = 0;
     player.pending = null;
     player.queuedSkill = null;
+    player.route = null;
     player.effects = [];
     this.emit({ type: 'death', unit: player });
     this.emit({ type: 'message', text: '你被击败了，即将回到出生点' });
@@ -1146,6 +1361,12 @@ export class World {
   }
 
   private killMonster(monster: Monster): void {
+    if (monster.temporary) {
+      this.monsters.splice(this.monsters.indexOf(monster), 1);
+      this.emit({ type: 'death', unit: monster });
+      this.gainExp(monster.def.exp);
+      return;
+    }
     monster.path = [];
     monster.respawnLeft = monster.def.respawnSeconds;
     monster.windupLeft = 0;
@@ -1403,7 +1624,7 @@ export class World {
   }
 
   private monsterTiming(def: MonsterDef) {
-    return { ...def, attackRange: 1, attackStat: 'attack' as const };
+    return { ...def, attackRange: def.attackRange ?? 1, attackStat: 'attack' as const };
   }
 
   private createUnit(
@@ -1438,6 +1659,7 @@ export class World {
       pending: null,
       repathLeft: 0,
       effects: [],
+      stunLeft: 0,
     };
   }
 

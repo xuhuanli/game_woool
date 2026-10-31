@@ -135,6 +135,8 @@ describe('版本迁移', () => {
       quests: _quests,
       realmPassed: _realm,
       breakthroughFails: _fails,
+      skillLevels: _skills,
+      storage: _storage,
       weakUntil: _weak,
       lastDeathAt: _death,
       auto: _auto,

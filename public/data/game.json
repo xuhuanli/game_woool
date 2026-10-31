@@ -2,6 +2,7 @@
   "startMap": "huangfeng-valley",
   "weakFactor": 0.2,
   "weakSeconds": 600,
+  "skillUpgrade": { "material": "skill-tome", "goldCost": 300, "maxLevel": 3, "powerPerLevel": 0.15 },
   "pickup": {
     "goldRadius": 6,
     "itemRadius": 2,
