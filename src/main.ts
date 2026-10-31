@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import { CONFIG_FILES, validateConfig, type GameConfig } from './game/config';
 import { World } from './game/world';
 import { GameScene } from './render/GameScene';
+import type { SpriteManifest, SpriteManifests } from './render/placeholders';
 import { AutoSaver } from './save/autoSaver';
 import { IndexedDbSaveStore } from './save/saveStore';
 import { AutoPanel } from './ui/autoPanel';
@@ -12,6 +13,8 @@ import { Panels } from './ui/panels';
 import { SavePanel } from './ui/savePanel';
 import { showStartScreen } from './ui/startScreen';
 import './ui/hud.css';
+
+const BAKED_SPRITES = ['body'];
 
 async function loadConfig(): Promise<GameConfig> {
   const entries = await Promise.all(
@@ -24,7 +27,18 @@ async function loadConfig(): Promise<GameConfig> {
   return Object.fromEntries(entries) as unknown as GameConfig;
 }
 
+/** 读取已烘焙的精灵表说明，没有的角色继续用占位图。 */
+async function loadSpriteManifests(): Promise<SpriteManifests> {
+  const manifests: SpriteManifests = {};
+  for (const key of BAKED_SPRITES) {
+    const response = await fetch(`${import.meta.env.BASE_URL}assets/sprites/${key}.json`);
+    if (response.ok) manifests[key] = (await response.json()) as SpriteManifest;
+  }
+  return manifests;
+}
+
 const config = await loadConfig();
+const sprites = await loadSpriteManifests();
 const errors = validateConfig(config);
 if (errors.length > 0) throw new Error(errors.join('\n'));
 
@@ -60,7 +74,7 @@ new Phaser.Game({
   parent: 'game',
   backgroundColor: '#17140f',
   scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
-  scene: new GameScene(world, hud, panels, saver, npcPanel, autoPanel),
+  scene: new GameScene(world, hud, panels, saver, npcPanel, autoPanel, sprites),
 });
 
 if (import.meta.env.DEV) {

@@ -16,6 +16,34 @@ export const SHEET = {
   rows: 8,
 } as const;
 
+/** 正式精灵表的说明，由 tools/bake 生成。 */
+export interface SpriteManifest {
+  frameW: number;
+  frameH: number;
+  originY: number;
+  columns: number;
+  displayScale: number;
+  clips: Record<string, { frames: number[]; rate: number; loop: boolean }>;
+}
+
+export type SpriteManifests = Record<string, SpriteManifest>;
+
+/** 为已加载的正式精灵表注册动画，动画名和占位图一致。 */
+export function createSpriteAnimations(scene: Phaser.Scene, manifests: SpriteManifests): void {
+  for (const [key, manifest] of Object.entries(manifests)) {
+    for (const [name, clip] of Object.entries(manifest.clips)) {
+      for (let row = 0; row < SHEET.rows; row++) {
+        scene.anims.create({
+          key: `${key}-${name}-${row}`,
+          frames: clip.frames.map((column) => ({ key, frame: row * manifest.columns + column })),
+          frameRate: clip.rate,
+          repeat: clip.loop ? -1 : 0,
+        });
+      }
+    }
+  }
+}
+
 type Painter = (ctx: CanvasRenderingContext2D, angle: number, column: number) => void;
 
 function createCanvas(width: number, height: number) {
@@ -206,9 +234,13 @@ function addImage(
   scene.textures.addCanvas(key, canvas);
 }
 
-export function createPlaceholderArt(scene: Phaser.Scene, config: GameConfig): void {
+export function createPlaceholderArt(
+  scene: Phaser.Scene,
+  config: GameConfig,
+  manifests: SpriteManifests,
+): void {
   for (const [classId, look] of Object.entries(HERO_LOOKS)) {
-    addSheet(scene, classId, paintHero(look));
+    if (!manifests[classId]) addSheet(scene, classId, paintHero(look));
   }
   for (const monster of Object.values(config.monsters)) {
     addSheet(scene, monster.id, paintBeast(monster.look.fur, monster.look.head));

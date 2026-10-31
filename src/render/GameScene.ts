@@ -19,7 +19,12 @@ import type { Hud } from '../ui/hud';
 import type { NpcPanel } from '../ui/npcPanel';
 import type { Panels } from '../ui/panels';
 import { directionRow, TILE_H, TILE_W, toCell, toScreen } from './iso';
-import { createPlaceholderArt, SHEET } from './placeholders';
+import {
+  createPlaceholderArt,
+  createSpriteAnimations,
+  SHEET,
+  type SpriteManifests,
+} from './placeholders';
 
 const FONT = '"PingFang SC", "Microsoft YaHei", sans-serif';
 const HOLD_REPATH_MS = 200;
@@ -66,12 +71,23 @@ export class GameScene extends Phaser.Scene {
     private readonly saver: AutoSaver,
     private readonly npcPanel: NpcPanel,
     private readonly autoPanel: AutoPanel,
+    private readonly sprites: SpriteManifests,
   ) {
     super('game');
   }
 
+  preload(): void {
+    for (const [key, manifest] of Object.entries(this.sprites)) {
+      this.load.spritesheet(key, `${import.meta.env.BASE_URL}assets/sprites/${key}.png`, {
+        frameWidth: manifest.frameW,
+        frameHeight: manifest.frameH,
+      });
+    }
+  }
+
   create(): void {
-    createPlaceholderArt(this, this.world.config);
+    createPlaceholderArt(this, this.world.config, this.sprites);
+    createSpriteAnimations(this, this.sprites);
 
     this.tileCursor = this.add.graphics().setDepth(1);
     this.addUnitView(this.world.player, this.world.player.def.id);
@@ -209,7 +225,11 @@ export class GameScene extends Phaser.Scene {
 
   private addUnitView(unit: Unit, texture: string, scale = 1): void {
     const { x, y } = toScreen(unit.pos);
-    const sprite = this.add.sprite(x, y, texture, 0).setOrigin(0.5, SHEET.originY).setScale(scale);
+    const manifest = this.sprites[texture];
+    const sprite = this.add
+      .sprite(x, y, texture, 0)
+      .setOrigin(0.5, manifest?.originY ?? SHEET.originY)
+      .setScale(scale * (manifest?.displayScale ?? 1));
     const hpBar = unit === this.world.player ? null : this.add.graphics().setDepth(UI_DEPTH - 1);
     this.unitViews.set(unit, {
       unit,
