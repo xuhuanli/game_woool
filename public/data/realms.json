@@ -1,0 +1,6 @@
+[
+  { "id": "qi", "name": "练气", "minLevel": 1, "maxLevel": 13, "stages": "layers" },
+  { "id": "foundation", "name": "筑基", "minLevel": 14, "maxLevel": 26, "stages": "phases" },
+  { "id": "core", "name": "结丹", "minLevel": 27, "maxLevel": 34, "stages": "phases" },
+  { "id": "nascent", "name": "元婴", "minLevel": 35, "maxLevel": 40, "stages": "phases" }
+]

@@ -1,0 +1,71 @@
+{
+  "body": {
+    "id": "body",
+    "name": "体修",
+    "description": "近战，精于硬扛。以肉身硬撼妖兽。",
+    "primaryStat": "attack",
+    "base": {
+      "maxHp": 70,
+      "maxMp": 20,
+      "attack": { "min": 4, "max": 8 },
+      "magic": { "min": 0, "max": 0 },
+      "dao": { "min": 0, "max": 0 },
+      "defense": { "min": 0, "max": 2 },
+      "magicDefense": { "min": 0, "max": 1 },
+      "accuracy": 10,
+      "evasion": 2,
+      "luck": 0
+    },
+    "perLevel": { "maxHp": 14, "maxMp": 3, "attack": 1, "magic": 0, "dao": 0, "defense": 0.6, "magicDefense": 0.3 },
+    "moveSpeed": 3.5,
+    "attackInterval": 0.9,
+    "attackWindup": 0.25,
+    "attackRange": 1
+  },
+  "spell": {
+    "id": "spell",
+    "name": "法修",
+    "description": "远程，高伤脆皮。以法术破敌于数丈之外。",
+    "primaryStat": "magic",
+    "base": {
+      "maxHp": 45,
+      "maxMp": 50,
+      "attack": { "min": 1, "max": 3 },
+      "magic": { "min": 3, "max": 7 },
+      "dao": { "min": 0, "max": 0 },
+      "defense": { "min": 0, "max": 1 },
+      "magicDefense": { "min": 0, "max": 2 },
+      "accuracy": 10,
+      "evasion": 2,
+      "luck": 0
+    },
+    "perLevel": { "maxHp": 8, "maxMp": 9, "attack": 0.2, "magic": 1.1, "dao": 0, "defense": 0.3, "magicDefense": 0.5 },
+    "moveSpeed": 3.5,
+    "attackInterval": 1.1,
+    "attackWindup": 0.3,
+    "attackRange": 6
+  },
+  "spirit": {
+    "id": "spirit",
+    "name": "御灵修士",
+    "description": "远程持续伤害与召唤。驱使灵虫，以毒磨死强敌。",
+    "primaryStat": "dao",
+    "base": {
+      "maxHp": 55,
+      "maxMp": 40,
+      "attack": { "min": 1, "max": 3 },
+      "magic": { "min": 0, "max": 0 },
+      "dao": { "min": 3, "max": 6 },
+      "defense": { "min": 0, "max": 1 },
+      "magicDefense": { "min": 0, "max": 2 },
+      "accuracy": 10,
+      "evasion": 3,
+      "luck": 0
+    },
+    "perLevel": { "maxHp": 10, "maxMp": 7, "attack": 0.2, "magic": 0, "dao": 0.9, "defense": 0.4, "magicDefense": 0.4 },
+    "moveSpeed": 3.5,
+    "attackInterval": 1.1,
+    "attackWindup": 0.3,
+    "attackRange": 5
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "body-smash": {
+    "id": "body-smash", "name": "崩山击", "classId": "body", "level": 1,
+    "mpCost": 4, "cooldown": 3, "windup": 0.2, "range": 1, "color": "#ffb347",
+    "effect": { "type": "damage", "stat": "attack", "multiplier": 1.8, "shape": "single" }
+  },
+  "body-pierce": {
+    "id": "body-pierce", "name": "穿云刺", "classId": "body", "level": 4,
+    "mpCost": 6, "cooldown": 5, "windup": 0.2, "range": 3, "color": "#ffd166",
+    "effect": { "type": "damage", "stat": "attack", "multiplier": 1.4, "shape": "line", "size": 3 }
+  },
+  "body-whirl": {
+    "id": "body-whirl", "name": "旋风斩", "classId": "body", "level": 8,
+    "mpCost": 10, "cooldown": 8, "windup": 0.3, "range": 0, "color": "#ff7b54",
+    "effect": { "type": "damage", "stat": "attack", "multiplier": 1.3, "shape": "around", "size": 2 }
+  },
+  "spell-fire": {
+    "id": "spell-fire", "name": "火弹术", "classId": "spell", "level": 1,
+    "mpCost": 4, "cooldown": 1.2, "windup": 0.25, "range": 7, "color": "#ff7a3c",
+    "effect": { "type": "damage", "stat": "magic", "multiplier": 1.6, "shape": "single" }
+  },
+  "spell-thunder": {
+    "id": "spell-thunder", "name": "天雷术", "classId": "spell", "level": 3,
+    "mpCost": 10, "cooldown": 6, "windup": 0.4, "range": 7, "color": "#8fb8ff",
+    "effect": { "type": "damage", "stat": "magic", "multiplier": 1.3, "shape": "circle", "size": 2 }
+  },
+  "spell-shield": {
+    "id": "spell-shield", "name": "金光罩", "classId": "spell", "level": 6,
+    "mpCost": 12, "cooldown": 20, "windup": 0.2, "range": 0, "color": "#ffe27a",
+    "effect": { "type": "shield", "reduction": 0.5, "duration": 12 }
+  },
+  "spell-gale": {
+    "id": "spell-gale", "name": "罡风术", "classId": "spell", "level": 8,
+    "mpCost": 8, "cooldown": 8, "windup": 0.2, "range": 0, "color": "#b8f0d0",
+    "effect": { "type": "damage", "stat": "magic", "multiplier": 0.8, "shape": "around", "size": 2, "knockback": 3 }
+  },
+  "spirit-poison": {
+    "id": "spirit-poison", "name": "噬灵毒", "classId": "spirit", "level": 1,
+    "mpCost": 4, "cooldown": 2, "windup": 0.25, "range": 6, "color": "#7ddc6f",
+    "effect": { "type": "dot", "stat": "dao", "multiplier": 0.6, "duration": 8, "interval": 1 }
+  },
+  "spirit-heal": {
+    "id": "spirit-heal", "name": "回春术", "classId": "spirit", "level": 3,
+    "mpCost": 8, "cooldown": 5, "windup": 0.3, "range": 0, "color": "#9df2b0",
+    "effect": { "type": "heal", "stat": "dao", "multiplier": 3, "flat": 8 }
+  },
+  "spirit-ward": {
+    "id": "spirit-ward", "name": "固元诀", "classId": "spirit", "level": 5,
+    "mpCost": 8, "cooldown": 20, "windup": 0.2, "range": 0, "color": "#c9b6ff",
+    "effect": { "type": "defense", "amount": 4, "duration": 20 }
+  },
+  "spirit-summon": {
+    "id": "spirit-summon", "name": "唤噬金虫", "classId": "spirit", "level": 7,
+    "mpCost": 16, "cooldown": 15, "windup": 0.4, "range": 0, "color": "#f0cf7a",
+    "effect": { "type": "summon", "monster": "gold-bug", "hpPerLevel": 10, "duration": 60 }
+  }
+}

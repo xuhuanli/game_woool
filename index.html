@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>修仙传奇（暂定）</title>
+  </head>
+  <body>
+    <div id="game"></div>
+    <div id="hud" hidden>
+      <section class="status">
+        <div class="status-title"><span id="hud-name"></span></div>
+        <div class="status-row"><span id="hud-class"></span> · <b id="hud-realm"></b></div>
+        <div class="bar hp"><i id="hud-hp-fill"></i><span id="hud-hp-text"></span></div>
+        <div class="bar mp"><i id="hud-mp-fill"></i><span id="hud-mp-text"></span></div>
+        <div class="bar exp"><i id="hud-exp-fill"></i><span id="hud-exp-text"></span></div>
+        <div class="status-row"><span id="hud-stat-name"></span> <b id="hud-attack"></b> · 灵石 <b id="hud-gold"></b></div>
+        <div class="status-row">法器 <b id="hud-weapon"></b></div>
+        <div class="status-row">背包 <b id="hud-bag"></b></div>
+      </section>
+      <section class="hotbar" id="hud-hotbar"></section>
+      <section class="log" id="hud-log"></section>
+      <section class="help">左键点地面移动，按住持续移动，点怪攻击，点物品拾取，F1～F8 或 1～8 用快捷栏</section>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

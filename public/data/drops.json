@@ -1,0 +1,10 @@
+{
+  "none": [],
+  "ash-rat": [
+    { "item": "gold", "chance": 0.9, "min": 5, "max": 15 },
+    { "item": "small-potion", "chance": 0.2 },
+    { "item": "small-mana", "chance": 0.2 },
+    { "item": "rusty-sword", "chance": 0.08 },
+    { "item": "steel-sword", "chance": 0.01 }
+  ]
+}

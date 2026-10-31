@@ -1,0 +1,211 @@
+html,
+body,
+#game {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #17140f;
+}
+
+#hud {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  color: #efe6d0;
+  font: 13px/1.5 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  text-shadow: 0 1px 2px #000;
+}
+
+#hud section {
+  position: absolute;
+}
+
+.status {
+  top: 12px;
+  left: 12px;
+  width: 240px;
+  padding: 10px 12px;
+  background: rgba(20, 16, 10, 0.78);
+  border: 1px solid #6b5630;
+  border-radius: 6px;
+}
+
+.status-title {
+  margin-bottom: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #f0cf7a;
+}
+
+.status-row b {
+  font-weight: 500;
+  color: #fff;
+}
+
+.bar {
+  position: relative;
+  height: 16px;
+  margin-bottom: 4px;
+  overflow: hidden;
+  background: #2b2418;
+  border-radius: 3px;
+}
+
+.bar i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  display: block;
+}
+
+.bar.hp i {
+  background: linear-gradient(#d8483c, #8f1f18);
+}
+
+.bar.mp i {
+  background: linear-gradient(#4a8fe0, #1f4f94);
+}
+
+.bar.exp i {
+  background: linear-gradient(#d9b84a, #8a6d17);
+}
+
+.bar span {
+  position: absolute;
+  inset: 0;
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+}
+
+.hotbar {
+  bottom: 12px;
+  left: 50%;
+  display: flex;
+  gap: 4px;
+  pointer-events: auto;
+  transform: translateX(-50%);
+}
+
+.hotbar button {
+  position: relative;
+  width: 62px;
+  height: 58px;
+  padding: 2px;
+  overflow: hidden;
+  font: 12px/1.25 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: #efe6d0;
+  cursor: pointer;
+  background: rgba(20, 16, 10, 0.85);
+  border: 1px solid #6b5630;
+  border-radius: 5px;
+}
+
+.hotbar button.unusable {
+  color: #8d8472;
+}
+
+.hotbar kbd {
+  display: block;
+  font: 10px monospace;
+  color: #c9bea6;
+}
+
+.hotbar i {
+  position: absolute;
+  inset: auto 0 0;
+  display: block;
+  background: rgba(0, 0, 0, 0.65);
+}
+
+.log {
+  bottom: 12px;
+  left: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 320px;
+  height: 132px;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.log .gain {
+  color: #f0cf7a;
+}
+
+.log .bad {
+  color: #ff8a7a;
+}
+
+.help {
+  top: 12px;
+  right: 12px;
+  max-width: 320px;
+  padding: 6px 10px;
+  font-size: 12px;
+  color: #c9bea6;
+  background: rgba(20, 16, 10, 0.6);
+  border-radius: 6px;
+}
+
+#hud[hidden] {
+  display: none;
+}
+
+.create {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-content: center;
+  gap: 16px;
+  padding: 16px;
+  color: #efe6d0;
+  font: 14px/1.5 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: #17140f;
+}
+
+.create h1 {
+  margin: 0;
+  font-size: 24px;
+  color: #f0cf7a;
+  text-align: center;
+}
+
+.create input {
+  padding: 8px 10px;
+  font: inherit;
+  color: inherit;
+  background: #2b2418;
+  border: 1px solid #6b5630;
+  border-radius: 6px;
+}
+
+.create-classes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 200px));
+  gap: 12px;
+}
+
+.create-classes button {
+  padding: 12px;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  background: #2b2418;
+  border: 1px solid #6b5630;
+  border-radius: 6px;
+}
+
+.create-classes button:hover {
+  border-color: #f0cf7a;
+}
+
+.create-classes b {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 16px;
+  color: #f0cf7a;
+}

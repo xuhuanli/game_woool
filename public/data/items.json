@@ -1,0 +1,7 @@
+{
+  "gold": { "id": "gold", "name": "灵石", "kind": "gold" },
+  "small-potion": { "id": "small-potion", "name": "回春丹", "kind": "potion", "heal": 30 },
+  "small-mana": { "id": "small-mana", "name": "回气丹", "kind": "potion", "mana": 30 },
+  "rusty-sword": { "id": "rusty-sword", "name": "下品法器·青铜剑", "kind": "weapon", "attackBonus": 2 },
+  "steel-sword": { "id": "steel-sword", "name": "中品法器·精钢剑", "kind": "weapon", "attackBonus": 5 }
+}

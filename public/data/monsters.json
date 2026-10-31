@@ -1,0 +1,52 @@
+{
+  "ash-rat": {
+    "id": "ash-rat",
+    "name": "灰鳞鼠",
+    "stats": {
+      "maxHp": 18,
+      "maxMp": 0,
+      "attack": { "min": 2, "max": 5 },
+      "magic": { "min": 0, "max": 0 },
+      "dao": { "min": 0, "max": 0 },
+      "defense": { "min": 0, "max": 1 },
+      "magicDefense": { "min": 0, "max": 1 },
+      "accuracy": 8,
+      "evasion": 2,
+      "luck": 0
+    },
+    "moveSpeed": 1.8,
+    "attackInterval": 1.4,
+    "attackWindup": 0.35,
+    "aggroRange": 4,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 12,
+    "respawnSeconds": 12,
+    "dropTable": "ash-rat"
+  },
+  "gold-bug": {
+    "id": "gold-bug",
+    "name": "噬金虫",
+    "stats": {
+      "maxHp": 30,
+      "maxMp": 0,
+      "attack": { "min": 2, "max": 4 },
+      "magic": { "min": 0, "max": 0 },
+      "dao": { "min": 0, "max": 0 },
+      "defense": { "min": 1, "max": 2 },
+      "magicDefense": { "min": 1, "max": 2 },
+      "accuracy": 10,
+      "evasion": 2,
+      "luck": 0
+    },
+    "moveSpeed": 3.2,
+    "attackInterval": 1,
+    "attackWindup": 0.25,
+    "aggroRange": 6,
+    "leashRange": 12,
+    "wanderRadius": 0,
+    "exp": 0,
+    "respawnSeconds": 0,
+    "dropTable": "none"
+  }
+}

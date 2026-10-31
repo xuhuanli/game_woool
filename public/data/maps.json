@@ -1,0 +1,35 @@
+{
+  "starter-field": {
+    "id": "starter-field",
+    "name": "彩霞山",
+    "width": 32,
+    "height": 32,
+    "playerStart": { "x": 6, "y": 6 },
+    "obstacles": [
+      { "x": 0, "y": 0, "w": 32, "h": 1 },
+      { "x": 0, "y": 31, "w": 32, "h": 1 },
+      { "x": 0, "y": 0, "w": 1, "h": 32 },
+      { "x": 31, "y": 0, "w": 1, "h": 32 },
+      { "x": 10, "y": 3, "w": 2, "h": 8 },
+      { "x": 16, "y": 8, "w": 7, "h": 2 },
+      { "x": 5, "y": 15, "w": 8, "h": 2 },
+      { "x": 20, "y": 15, "w": 2, "h": 7 },
+      { "x": 12, "y": 22, "w": 3, "h": 3 },
+      { "x": 25, "y": 5, "w": 2, "h": 2 },
+      { "x": 26, "y": 24, "w": 2, "h": 2 }
+    ],
+    "spawns": [
+      { "monster": "ash-rat", "x": 14, "y": 5 },
+      { "monster": "ash-rat", "x": 17, "y": 5 },
+      { "monster": "ash-rat", "x": 26, "y": 10 },
+      { "monster": "ash-rat", "x": 7, "y": 12 },
+      { "monster": "ash-rat", "x": 15, "y": 13 },
+      { "monster": "ash-rat", "x": 25, "y": 16 },
+      { "monster": "ash-rat", "x": 6, "y": 20 },
+      { "monster": "ash-rat", "x": 9, "y": 26 },
+      { "monster": "ash-rat", "x": 17, "y": 19 },
+      { "monster": "ash-rat", "x": 18, "y": 27 },
+      { "monster": "ash-rat", "x": 24, "y": 27 }
+    ]
+  }
+}
