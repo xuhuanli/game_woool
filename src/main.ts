@@ -4,6 +4,7 @@ import { World } from './game/world';
 import { GameScene } from './render/GameScene';
 import { createCharacter } from './ui/characterCreate';
 import { Hud } from './ui/hud';
+import { Panels } from './ui/panels';
 import './ui/hud.css';
 
 async function loadConfig(): Promise<GameConfig> {
@@ -24,13 +25,14 @@ if (errors.length > 0) throw new Error(errors.join('\n'));
 const character = await createCharacter(config);
 const world = new World(config, 'starter-field', character.classId, Date.now(), character.name);
 const hud = new Hud(config);
+const panels = new Panels(world, config);
 
 new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
   backgroundColor: '#17140f',
   scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
-  scene: new GameScene(world, hud),
+  scene: new GameScene(world, hud, panels),
 });
 
 if (import.meta.env.DEV) {

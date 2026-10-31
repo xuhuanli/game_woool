@@ -95,13 +95,59 @@ export interface MonsterDef {
   dropTable: string;
 }
 
+export type BonusStat =
+  | 'primary'
+  | 'maxHp'
+  | 'maxMp'
+  | 'attack'
+  | 'magic'
+  | 'dao'
+  | 'defense'
+  | 'magicDefense'
+  | 'accuracy'
+  | 'evasion'
+  | 'luck';
+
 export interface ItemDef {
   id: string;
   name: string;
-  kind: 'gold' | 'potion' | 'weapon';
+  kind: 'gold' | 'potion' | 'material' | 'equip';
   heal?: number;
   mana?: number;
-  attackBonus?: number;
+  slot?: 'weapon' | 'armor' | 'helmet' | 'necklace' | 'bracelet' | 'ring';
+  level?: number;
+  bonus?: Partial<Record<BonusStat, number>>;
+}
+
+export interface GradeDef {
+  id: string;
+  name: string;
+  color: string;
+  weight: number;
+  affixes: number;
+}
+
+export interface AffixDef {
+  stat: BonusStat;
+  name: string;
+  min: number;
+  max: number;
+}
+
+export interface RefineConfig {
+  material: string;
+  goldCost: number;
+  maxLuck: number;
+  /** 按当前幸运查成功率 */
+  chances: number[];
+  failLoss: number;
+}
+
+export interface AffixConfig {
+  grades: GradeDef[];
+  pool: AffixDef[];
+  refine: RefineConfig;
+  bagCapacity: number;
 }
 
 export interface DropEntry {
@@ -128,6 +174,7 @@ export interface GameConfig {
   skills: Record<string, SkillDef>;
   monsters: Record<string, MonsterDef>;
   items: Record<string, ItemDef>;
+  affixes: AffixConfig;
   drops: Record<string, DropEntry[]>;
   maps: Record<string, MapDef>;
 }
@@ -139,6 +186,7 @@ export const CONFIG_FILES = [
   'skills',
   'monsters',
   'items',
+  'affixes',
   'drops',
   'maps',
 ] as const;
@@ -172,6 +220,14 @@ export function validateConfig(config: GameConfig): string[] {
       errors.push(`技能 ${skill.id} 的召唤物 ${skill.effect.monster} 不存在`);
     }
   }
+  for (const item of Object.values(config.items)) {
+    if (item.kind === 'equip' && !item.slot) errors.push(`法器 ${item.id} 缺少栏位`);
+  }
+  const { refine } = config.affixes;
+  if (config.items[refine.material]?.kind !== 'material') {
+    errors.push(`祭炼材料 ${refine.material} 不存在`);
+  }
+  if (refine.chances.length < refine.maxLuck) errors.push('祭炼成功率少于幸运上限');
   const maxLevel = config.levels.expToNext.length + 1;
   for (let level = 1; level <= maxLevel; level++) {
     if (!config.realms.some((realm) => level >= realm.minLevel && level <= realm.maxLevel)) {

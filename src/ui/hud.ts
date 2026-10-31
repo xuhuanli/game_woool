@@ -1,4 +1,5 @@
 import type { DamageStat, GameConfig } from '../game/config';
+import { equipmentName } from '../game/equipment';
 import { realmName } from '../game/realm';
 import { HOTBAR_SIZE, type World } from '../game/world';
 
@@ -33,7 +34,6 @@ export class Hud {
   private readonly attack = byId('hud-attack');
   private readonly gold = byId('hud-gold');
   private readonly weapon = byId('hud-weapon');
-  private readonly bag = byId('hud-bag');
   private readonly logBox = byId('hud-log');
   private readonly slots: SlotView[] = [];
 
@@ -71,11 +71,8 @@ export class Hud {
     this.statName.textContent = STAT_NAMES[primary];
     this.attack.textContent = `${player.stats[primary].min}-${player.stats[primary].max}`;
     this.gold.textContent = String(player.gold);
-    this.weapon.textContent = player.weapon?.name ?? '无';
-    this.bag.textContent =
-      Object.entries(player.bag)
-        .map(([id, count]) => `${this.config.items[id]?.name ?? id}×${count}`)
-        .join('、') || '空';
+    const weapon = player.equipment.weapon;
+    this.weapon.textContent = weapon ? equipmentName(weapon, this.config) : '无';
     this.updateHotbar(world);
   }
 

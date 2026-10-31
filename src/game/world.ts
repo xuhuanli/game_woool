@@ -9,6 +9,15 @@ import type {
   MonsterDef,
   SkillDef,
 } from './config';
+import {
+  applyBonus,
+  equipmentBonuses,
+  EQUIP_SLOTS,
+  rollEquipment,
+  slotsFor,
+  type EquipSlot,
+  type Equipment,
+} from './equipment';
 import { cellDistance, Grid, sameCell } from './grid';
 import { findPath } from './pathfinding';
 import { Rng } from './rng';
@@ -27,6 +36,7 @@ const WANDER_MIN_SECONDS = 2;
 const WANDER_MAX_SECONDS = 6;
 const SUMMON_FOLLOW_DISTANCE = 2;
 const SUMMON_TELEPORT_DISTANCE = 12;
+const BAG_FULL_NOTICE_SECONDS = 3;
 
 export interface Vec {
   x: number;
@@ -103,8 +113,10 @@ export interface Player extends Unit {
   level: number;
   exp: number;
   gold: number;
+  /** 可堆叠的丹药和材料 */
   bag: Record<string, number>;
-  weapon: ItemDef | null;
+  equipBag: Equipment[];
+  equipment: Partial<Record<EquipSlot, Equipment>>;
   skills: string[];
   skillCooldowns: Record<string, number>;
   hotbar: (HotbarEntry | null)[];
@@ -119,6 +131,7 @@ export interface GroundItem {
   id: number;
   def: ItemDef;
   amount: number;
+  equipment: Equipment | null;
   cell: Cell;
   expiresAt: number;
 }
@@ -135,7 +148,8 @@ export type GameEvent =
   | { type: 'itemDropped'; item: GroundItem }
   | { type: 'itemRemoved'; item: GroundItem }
   | { type: 'pickedUp'; item: GroundItem }
-  | { type: 'equipped'; item: ItemDef }
+  | { type: 'equipped'; equipment: Equipment }
+  | { type: 'refined'; equipment: Equipment; success: boolean }
   | { type: 'heal'; amount: number }
   | { type: 'mana'; amount: number }
   | { type: 'expGained'; amount: number }
@@ -153,10 +167,11 @@ export class World {
   private readonly rng: Rng;
   private readonly startCell: Cell;
   private nextId = 1;
+  private bagFullNoticeAt = -Infinity;
   private events: GameEvent[] = [];
 
   constructor(
-    private readonly config: GameConfig,
+    readonly config: GameConfig,
     mapId: string,
     classId: string,
     seed: number,
@@ -183,7 +198,8 @@ export class World {
       exp: 0,
       gold: 0,
       bag: {},
-      weapon: null,
+      equipBag: [],
+      equipment: {},
       skills: [],
       skillCooldowns: {},
       hotbar,
@@ -289,6 +305,90 @@ export class World {
     this.removeFromBag(itemId);
     if (healed > 0) this.emit({ type: 'heal', amount: healed });
     if (refilled > 0) this.emit({ type: 'mana', amount: refilled });
+  }
+
+  /** 把背包里的法器穿上，同栏位优先用空位，否则替换第一个。 */
+  equip(uid: number): void {
+    const player = this.player;
+    const equipment = player.equipBag.find((candidate) => candidate.uid === uid);
+    const item = equipment && this.config.items[equipment.itemId];
+    if (!player.hp || !equipment || !item) return;
+    if ((item.level ?? 1) > player.level) {
+      this.emit({ type: 'message', text: `需要等级 ${item.level}` });
+      return;
+    }
+    const slots = slotsFor(item);
+    const slot = slots.find((candidate) => !player.equipment[candidate]) ?? slots[0];
+    if (!slot) return;
+
+    player.equipBag.splice(player.equipBag.indexOf(equipment), 1);
+    const replaced = player.equipment[slot];
+    if (replaced) player.equipBag.push(replaced);
+    player.equipment[slot] = equipment;
+    this.applyStats();
+    this.emit({ type: 'equipped', equipment });
+  }
+
+  unequip(slot: EquipSlot): void {
+    const player = this.player;
+    const equipment = player.equipment[slot];
+    if (!player.hp || !equipment) return;
+    if (this.bagIsFull()) {
+      this.emit({ type: 'message', text: '背包已满' });
+      return;
+    }
+    delete player.equipment[slot];
+    player.equipBag.push(equipment);
+    this.applyStats();
+  }
+
+  /** 把背包里的法器丢到脚边，丢弃后仍可捡回。 */
+  discard(uid: number): void {
+    const player = this.player;
+    const equipment = player.equipBag.find((candidate) => candidate.uid === uid);
+    const item = equipment && this.config.items[equipment.itemId];
+    const cell = this.grid.nearest(player.cell, (c) => this.canDropAt(c) && !sameCell(c, player.cell));
+    if (!player.hp || !equipment || !item || !cell) return;
+    player.equipBag.splice(player.equipBag.indexOf(equipment), 1);
+    this.spawnItem(item, 1, equipment, cell);
+  }
+
+  /** 祭炼武器：消耗祭炼石和灵石，成功加幸运，失败掉幸运。 */
+  refine(uid: number): void {
+    const player = this.player;
+    const { refine } = this.config.affixes;
+    const equipment = this.findEquipment(uid);
+    if (!player.hp || !equipment) return;
+    if (this.config.items[equipment.itemId]?.slot !== 'weapon') {
+      this.emit({ type: 'message', text: '只有武器可以祭炼' });
+      return;
+    }
+    if (equipment.luck >= refine.maxLuck) {
+      this.emit({ type: 'message', text: '幸运已达上限' });
+      return;
+    }
+    if (!player.bag[refine.material]) {
+      this.emit({ type: 'message', text: `缺少${this.config.items[refine.material]?.name}` });
+      return;
+    }
+    if (player.gold < refine.goldCost) {
+      this.emit({ type: 'message', text: '灵石不足' });
+      return;
+    }
+
+    player.gold -= refine.goldCost;
+    this.removeFromBag(refine.material);
+    const success = this.rng.chance(refine.chances[equipment.luck] ?? 0);
+    equipment.luck = success
+      ? equipment.luck + 1
+      : Math.max(0, equipment.luck - refine.failLoss);
+    this.applyStats();
+    this.emit({ type: 'refined', equipment, success });
+  }
+
+  private findEquipment(uid: number): Equipment | null {
+    const worn = Object.values(this.player.equipment);
+    return [...worn, ...this.player.equipBag].find((item) => item.uid === uid) ?? null;
   }
 
   // ---- 主循环 ----
@@ -715,21 +815,31 @@ export class World {
     for (const entry of this.config.drops[monster.def.dropTable] ?? []) {
       if (!this.rng.chance(entry.chance)) continue;
       const def = this.config.items[entry.item];
-      const cell = this.grid.nearest(
-        monster.cell,
-        (c) => this.grid.isWalkable(c) && !this.items.some((item) => sameCell(item.cell, c)),
-      );
+      const cell = this.grid.nearest(monster.cell, (c) => this.canDropAt(c));
       if (!def || !cell) continue;
-      const item: GroundItem = {
-        id: this.nextId++,
-        def,
-        amount: this.rng.int(entry.min ?? 1, entry.max ?? 1),
-        cell,
-        expiresAt: this.time + GROUND_ITEM_SECONDS,
-      };
-      this.items.push(item);
-      this.emit({ type: 'itemDropped', item });
+      const equipment =
+        def.kind === 'equip'
+          ? rollEquipment(def, this.config.affixes, this.rng, this.nextId++)
+          : null;
+      this.spawnItem(def, this.rng.int(entry.min ?? 1, entry.max ?? 1), equipment, cell);
     }
+  }
+
+  private canDropAt(cell: Cell): boolean {
+    return this.grid.isWalkable(cell) && !this.items.some((item) => sameCell(item.cell, cell));
+  }
+
+  private spawnItem(def: ItemDef, amount: number, equipment: Equipment | null, cell: Cell): void {
+    const item: GroundItem = {
+      id: this.nextId++,
+      def,
+      amount,
+      equipment,
+      cell,
+      expiresAt: this.time + GROUND_ITEM_SECONDS,
+    };
+    this.items.push(item);
+    this.emit({ type: 'itemDropped', item });
   }
 
   private gainExp(amount: number): void {
@@ -764,7 +874,7 @@ export class World {
   }
 
   private applyStats(): void {
-    const { base, perLevel, primaryStat } = this.player.def;
+    const { base, perLevel } = this.player.def;
     const gained = this.player.level - 1;
     const grow = (key: 'attack' | 'magic' | 'dao' | 'defense' | 'magicDefense') => ({
       min: Math.floor(base[key].min + perLevel[key] * gained * 0.5),
@@ -780,29 +890,49 @@ export class World {
       defense: grow('defense'),
       magicDefense: grow('magicDefense'),
     };
-    stats[primaryStat].max += this.player.weapon?.attackBonus ?? 0;
+    for (const slot of EQUIP_SLOTS) {
+      const equipment = this.player.equipment[slot];
+      const item = equipment && this.config.items[equipment.itemId];
+      if (!equipment || !item) continue;
+      for (const bonus of equipmentBonuses(equipment, item)) {
+        applyBonus(stats, this.player.def, bonus);
+      }
+    }
     this.player.stats = stats;
+    this.player.hp = Math.min(this.player.hp, stats.maxHp);
+    this.player.mp = Math.min(this.player.mp, stats.maxMp);
   }
 
   private collectItemsAt(cell: Cell): void {
     for (const item of this.items.filter((candidate) => sameCell(candidate.cell, cell))) {
+      if (item.equipment && !this.takeEquipment(item.equipment)) continue;
       this.removeItem(item);
       this.emit({ type: 'pickedUp', item });
-      if (item.def.kind === 'gold') {
-        this.player.gold += item.amount;
-      } else if (item.def.kind === 'weapon' && this.isUpgrade(item.def)) {
-        if (this.player.weapon) this.addToBag(this.player.weapon.id, 1);
-        this.player.weapon = item.def;
-        this.applyStats();
-        this.emit({ type: 'equipped', item: item.def });
-      } else {
-        this.addToBag(item.def.id, item.amount);
-      }
+      if (item.def.kind === 'gold') this.player.gold += item.amount;
+      else if (!item.equipment) this.addToBag(item.def.id, item.amount);
     }
   }
 
-  private isUpgrade(item: ItemDef): boolean {
-    return (item.attackBonus ?? 0) > (this.player.weapon?.attackBonus ?? 0);
+  /** 收下法器，有空栏位且等级够时直接穿上。背包满时返回 false。 */
+  private takeEquipment(equipment: Equipment): boolean {
+    const player = this.player;
+    if (this.bagIsFull()) {
+      if (this.time - this.bagFullNoticeAt >= BAG_FULL_NOTICE_SECONDS) {
+        this.bagFullNoticeAt = this.time;
+        this.emit({ type: 'message', text: '背包已满' });
+      }
+      return false;
+    }
+    const item = this.config.items[equipment.itemId];
+    player.equipBag.push(equipment);
+    if (item && (item.level ?? 1) <= player.level && slotsFor(item).some((s) => !player.equipment[s])) {
+      this.equip(equipment.uid);
+    }
+    return true;
+  }
+
+  private bagIsFull(): boolean {
+    return this.player.equipBag.length >= this.config.affixes.bagCapacity;
   }
 
   private addToBag(itemId: string, amount: number): void {

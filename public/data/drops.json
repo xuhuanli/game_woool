@@ -4,7 +4,13 @@
     { "item": "gold", "chance": 0.9, "min": 5, "max": 15 },
     { "item": "small-potion", "chance": 0.2 },
     { "item": "small-mana", "chance": 0.2 },
-    { "item": "rusty-sword", "chance": 0.08 },
+    { "item": "refine-stone", "chance": 0.08 },
+    { "item": "rusty-sword", "chance": 0.05 },
+    { "item": "cloth-robe", "chance": 0.05 },
+    { "item": "iron-helm", "chance": 0.04 },
+    { "item": "spirit-pendant", "chance": 0.04 },
+    { "item": "iron-bracelet", "chance": 0.04 },
+    { "item": "jade-ring", "chance": 0.04 },
     { "item": "steel-sword", "chance": 0.01 }
   ]
 }

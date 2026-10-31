@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import type { Cell, SkillDef } from '../game/config';
+import { equipmentColor, equipmentName } from '../game/equipment';
 import { cellDistance, sameCell } from '../game/grid';
 import {
   TICK_SECONDS,
@@ -12,6 +13,7 @@ import {
   type World,
 } from '../game/world';
 import type { Hud } from '../ui/hud';
+import type { Panels } from '../ui/panels';
 import { directionRow, TILE_H, TILE_W, toCell, toScreen } from './iso';
 import { createPlaceholderArt, SHEET } from './placeholders';
 
@@ -49,6 +51,7 @@ export class GameScene extends Phaser.Scene {
   constructor(
     private readonly world: World,
     private readonly hud: Hud,
+    private readonly panels: Panels,
   ) {
     super('game');
   }
@@ -96,6 +99,7 @@ export class GameScene extends Phaser.Scene {
 
     this.updatePointer(delta);
     this.hud.update(this.world);
+    this.panels.update();
   }
 
   // ---- 场景搭建 ----
@@ -274,14 +278,19 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'pickedUp': {
         const { def, amount } = event.item;
-        const text = def.kind === 'gold' ? `获得 ${amount} 灵石` : `拾取 ${def.name}`;
-        this.hud.log(text, 'gain');
-        this.floatText(this.world.player, `+${def.kind === 'gold' ? amount : def.name}`, '#f0cf7a', 15);
+        const name = this.itemLabel(event.item);
+        this.hud.log(def.kind === 'gold' ? `获得 ${amount} 灵石` : `拾取 ${name}`, 'gain');
+        this.floatText(this.world.player, `+${def.kind === 'gold' ? amount : name}`, '#f0cf7a', 15);
         break;
       }
       case 'equipped':
-        this.hud.log(`装备 ${event.item.name}，攻击提升`, 'gain');
+        this.hud.log(`装备 ${equipmentName(event.equipment, this.world.config)}`, 'gain');
         break;
+      case 'refined': {
+        const name = equipmentName(event.equipment, this.world.config);
+        this.hud.log(event.success ? `祭炼成功：${name}` : `祭炼失败：${name}`, event.success ? 'gain' : 'bad');
+        break;
+      }
       case 'heal':
         this.floatText(this.world.player, `+${event.amount}`, '#7be07b', 18);
         break;
@@ -408,12 +417,11 @@ export class GameScene extends Phaser.Scene {
       .image(x, y - 26, `item-${item.def.kind}`)
       .setOrigin(0.5, 0.75)
       .setDepth(y - 1);
-    const rare = item.def.kind === 'weapon';
     const label = this.add
-      .text(x, y - 22, item.def.name, {
+      .text(x, y - 22, this.itemLabel(item), {
         fontFamily: FONT,
         fontSize: '12px',
-        color: rare ? '#7fd0ff' : '#efe6d0',
+        color: item.equipment ? equipmentColor(item.equipment, this.world.config) : '#efe6d0',
         stroke: '#000000',
         strokeThickness: 3,
       })
@@ -421,7 +429,11 @@ export class GameScene extends Phaser.Scene {
       .setDepth(UI_DEPTH - 2);
     this.tweens.add({ targets: sprite, y, duration: 320, ease: 'Bounce.easeOut' });
     this.itemViews.set(item, { sprite, label });
-    if (rare) this.hud.log(`掉落了 ${item.def.name}！`, 'gain');
+    if (item.equipment) this.hud.log(`掉落了 ${this.itemLabel(item)}！`, 'gain');
+  }
+
+  private itemLabel(item: GroundItem): string {
+    return item.equipment ? equipmentName(item.equipment, this.world.config) : item.def.name;
   }
 
   private removeItemView(item: GroundItem): void {

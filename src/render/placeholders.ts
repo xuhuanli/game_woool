@@ -257,7 +257,18 @@ export function createPlaceholderArt(scene: Phaser.Scene): void {
     ctx.fill();
   });
 
-  addImage(scene, 'item-weapon', 32, 32, (ctx) => {
+  addImage(scene, 'item-material', 20, 20, (ctx) => {
+    ctx.fillStyle = '#b48cff';
+    ctx.beginPath();
+    ctx.moveTo(10, 1);
+    ctx.lineTo(18, 10);
+    ctx.lineTo(10, 19);
+    ctx.lineTo(2, 10);
+    ctx.closePath();
+    ctx.fill();
+  });
+
+  addImage(scene, 'item-equip', 32, 32, (ctx) => {
     ctx.strokeStyle = '#d9dee6';
     ctx.lineWidth = 4;
     ctx.beginPath();

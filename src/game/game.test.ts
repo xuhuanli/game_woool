@@ -1,7 +1,15 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { rollAttack } from './combat';
-import { CONFIG_FILES, validateConfig, type CombatStats, type GameConfig, type MapDef } from './config';
+import {
+  CONFIG_FILES,
+  validateConfig,
+  type AffixConfig,
+  type CombatStats,
+  type GameConfig,
+  type MapDef,
+} from './config';
+import { equipmentName, rollEquipment, type Equipment } from './equipment';
 import { Grid } from './grid';
 import { findPath } from './pathfinding';
 import { realmName } from './realm';
@@ -14,6 +22,12 @@ const realConfig = Object.fromEntries(
     JSON.parse(readFileSync(`public/data/${name}.json`, 'utf8')) as unknown,
   ]),
 ) as unknown as GameConfig;
+
+/** 只有下品的品阶表，让法器属性固定。 */
+const plainGrades: AffixConfig = {
+  ...realConfig.affixes,
+  grades: [{ id: 'low', name: '下品', color: '#fff', weight: 1, affixes: 0 }],
+};
 
 const realmConfig = () => realConfig.realms;
 const realmClasses = () => realConfig.classes;
@@ -40,6 +54,7 @@ function fixture(
   return {
     ...realConfig,
     maps: { test: map },
+    affixes: plainGrades,
     drops: { 'ash-rat': [{ item: 'rusty-sword', chance: dropChance }] },
   };
 }
@@ -171,7 +186,7 @@ describe('世界', () => {
 
     world.pickup(world.items[0]!);
     run(world, 10, () => world.items.length === 0);
-    expect(world.player.weapon?.id).toBe('rusty-sword');
+    expect(world.player.equipment.weapon?.itemId).toBe('rusty-sword');
     expect(world.player.stats.attack.max).toBe(baseMax + 2);
   });
 
@@ -390,5 +405,174 @@ describe('技能', () => {
     expect(world.summons).toHaveLength(1);
     run(world, 61);
     expect(world.summons).toHaveLength(0);
+  });
+});
+
+describe('法器', () => {
+  const item = (id: string) => realConfig.items[id]!;
+  const give = (world: World, itemId: string, uid: number, patch: Partial<Equipment> = {}) => {
+    const equipment = { ...rollEquipment(item(itemId), plainGrades, new Rng(1), uid), ...patch };
+    world.player.equipBag.push(equipment);
+    return equipment;
+  };
+  const newWorld = (classId = 'body') => new World(fixture(null), 'test', classId, 1);
+
+  it('品阶决定附加属性条数，且不重复', () => {
+    const top = { ...realConfig.affixes, grades: [realConfig.affixes.grades[3]!] };
+    const rng = new Rng(9);
+    for (let i = 0; i < 50; i++) {
+      const rolled = rollEquipment(item('rusty-sword'), top, rng, i);
+      expect(rolled.affixes).toHaveLength(3);
+      expect(new Set(rolled.affixes.map((affix) => affix.stat)).size).toBe(3);
+    }
+  });
+
+  it('品阶按权重出现', () => {
+    const rng = new Rng(3);
+    const counts: Record<string, number> = {};
+    for (let i = 0; i < 5000; i++) {
+      const { grade } = rollEquipment(item('rusty-sword'), realConfig.affixes, rng, i);
+      counts[grade] = (counts[grade] ?? 0) + 1;
+    }
+    expect(counts.low!).toBeGreaterThan(counts.mid!);
+    expect(counts.mid!).toBeGreaterThan(counts.high!);
+    expect(counts.high!).toBeGreaterThan(counts.top!);
+    expect(counts.top!).toBeGreaterThan(0);
+  });
+
+  it('穿上加属性，脱下恢复', () => {
+    const world = newWorld();
+    const player = world.player;
+    const hp = player.stats.maxHp;
+    give(world, 'cloth-robe', 100, { affixes: [{ stat: 'maxHp', value: 7 }] });
+    world.equip(100);
+    expect(player.stats.maxHp).toBe(hp + 17);
+    expect(player.equipBag).toEqual([]);
+    player.hp = player.stats.maxHp;
+    world.unequip('armor');
+    expect(player.stats.maxHp).toBe(hp);
+    expect(player.hp).toBe(hp);
+    expect(player.equipBag).toHaveLength(1);
+  });
+
+  it('主属性按职业生效', () => {
+    const world = newWorld('spell');
+    const max = world.player.stats.magic.max;
+    give(world, 'rusty-sword', 100);
+    world.equip(100);
+    expect(world.player.stats.magic.max).toBe(max + 2);
+  });
+
+  it('等级不够不能穿', () => {
+    const world = newWorld();
+    give(world, 'steel-sword', 100);
+    world.equip(100);
+    expect(world.player.equipment.weapon).toBeUndefined();
+    expect(world.player.equipBag).toHaveLength(1);
+  });
+
+  it('戒指优先穿空位，都满时替换第一个', () => {
+    const world = newWorld();
+    world.player.level = 3;
+    for (const uid of [100, 101, 102]) {
+      give(world, 'jade-ring', uid);
+      world.equip(uid);
+    }
+    expect(world.player.equipment.ringLeft?.uid).toBe(102);
+    expect(world.player.equipment.ringRight?.uid).toBe(101);
+    expect(world.player.equipBag.map((equipment) => equipment.uid)).toEqual([100]);
+  });
+
+  it('捡到法器时有空位自动穿上，没有空位放进背包', () => {
+    const world = new World(fixture({ x: 3, y: 2 }), 'test', 'body', 1);
+    const monster = world.monsters[0]!;
+    world.player.equipment.weapon = give(world, 'rusty-sword', 100);
+    world.player.equipBag.length = 0;
+    monster.stats = stats({ maxHp: 1, attack: { min: 0, max: 0 } });
+    monster.hp = 1;
+    world.attack(monster);
+    run(world, 10, () => monster.hp === 0);
+    world.pickup(world.items[0]!);
+    run(world, 5, () => world.items.length === 0);
+    expect(world.player.equipment.weapon?.uid).toBe(100);
+    expect(world.player.equipBag).toHaveLength(1);
+  });
+
+  it('背包满时法器留在地上', () => {
+    const world = new World(fixture({ x: 3, y: 2 }), 'test', 'body', 1);
+    const monster = world.monsters[0]!;
+    monster.stats = stats({ maxHp: 1, attack: { min: 0, max: 0 } });
+    monster.hp = 1;
+    for (let uid = 0; uid < realConfig.affixes.bagCapacity; uid++) give(world, 'cloth-robe', 1000 + uid);
+    world.attack(monster);
+    run(world, 10, () => monster.hp === 0);
+    world.pickup(world.items[0]!);
+    run(world, 3);
+    expect(world.items).toHaveLength(1);
+    expect(world.player.equipment.weapon).toBeUndefined();
+  });
+
+  it('丢弃的法器保留品阶，可以捡回', () => {
+    const world = newWorld();
+    world.player.equipment.armor = give(world, 'cloth-robe', 99);
+    world.player.equipBag.length = 0;
+    const equipment = give(world, 'cloth-robe', 100, { grade: 'top', affixes: [{ stat: 'luck', value: 1 }] });
+    world.discard(100);
+    expect(world.player.equipBag).toEqual([]);
+    expect(world.items[0]?.equipment).toEqual(equipment);
+    world.pickup(world.items[0]!);
+    run(world, 5, () => world.items.length === 0);
+    expect(world.player.equipBag).toEqual([equipment]);
+  });
+
+  describe('祭炼', () => {
+    const refineWorld = (seed: number) => {
+      const world = new World(fixture(null), 'test', 'body', seed);
+      const sword = give(world, 'rusty-sword', 100);
+      world.equip(100);
+      world.player.gold = 1000;
+      world.player.bag['refine-stone'] = 10;
+      return { world, sword };
+    };
+
+    it('成功加幸运，消耗材料和灵石', () => {
+      const { world, sword } = refineWorld(1);
+      world.refine(sword.uid);
+      expect(sword.luck).toBe(1);
+      expect(world.player.stats.luck).toBe(1);
+      expect(world.player.gold).toBe(950);
+      expect(world.player.bag['refine-stone']).toBe(9);
+    });
+
+    it('失败掉幸运，且不低于 0', () => {
+      const { world, sword } = refineWorld(1);
+      sword.luck = 6;
+      const events: GameEvent[] = [];
+      for (let i = 0; i < 40 && world.player.bag['refine-stone']; i++) {
+        world.refine(sword.uid);
+        events.push(...world.drainEvents());
+      }
+      expect(events.some((event) => event.type === 'refined' && !event.success)).toBe(true);
+      expect(sword.luck).toBeGreaterThanOrEqual(0);
+    });
+
+    it('只有武器能祭炼，幸运有上限，缺材料时不消耗', () => {
+      const { world, sword } = refineWorld(1);
+      const robe = give(world, 'cloth-robe', 101);
+      world.refine(robe.uid);
+      expect(robe.luck).toBe(0);
+      sword.luck = realConfig.affixes.refine.maxLuck;
+      world.refine(sword.uid);
+      expect(sword.luck).toBe(realConfig.affixes.refine.maxLuck);
+      sword.luck = 0;
+      delete world.player.bag['refine-stone'];
+      world.refine(sword.uid);
+      expect(world.player.gold).toBe(1000);
+    });
+  });
+
+  it('法器名称包含品阶和幸运', () => {
+    const equipment: Equipment = { uid: 1, itemId: 'rusty-sword', grade: 'top', affixes: [], luck: 2 };
+    expect(equipmentName(equipment, realConfig)).toBe('极品·青铜剑 +2');
   });
 });
