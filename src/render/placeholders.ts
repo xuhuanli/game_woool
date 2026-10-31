@@ -1,4 +1,5 @@
 import type Phaser from 'phaser';
+import type { GameConfig } from '../game/config';
 
 /**
  * 占位美术：运行时画出和正式素材相同布局的精灵表。
@@ -205,12 +206,17 @@ function addImage(
   scene.textures.addCanvas(key, canvas);
 }
 
-export function createPlaceholderArt(scene: Phaser.Scene): void {
+export function createPlaceholderArt(scene: Phaser.Scene, config: GameConfig): void {
   for (const [classId, look] of Object.entries(HERO_LOOKS)) {
     addSheet(scene, classId, paintHero(look));
   }
-  addSheet(scene, 'ash-rat', paintBeast('#7d7566', '#918876'));
-  addSheet(scene, 'gold-bug', paintBeast('#c79a2e', '#e6c35c'));
+  for (const monster of Object.values(config.monsters)) {
+    addSheet(scene, monster.id, paintBeast(monster.look.fur, monster.look.head));
+  }
+  for (const npc of Object.values(config.npcs)) {
+    const look = { robe: npc.color, trim: '#efe6d0', weapon: '#d9dee6', reach: 0 };
+    addSheet(scene, `npc-${npc.id}`, paintHero(look));
+  }
 
   addImage(scene, 'rock', 64, 64, (ctx) => {
     ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
@@ -255,6 +261,16 @@ export function createPlaceholderArt(scene: Phaser.Scene): void {
     ctx.beginPath();
     ctx.arc(8, 15, 7, 0, Math.PI * 2);
     ctx.fill();
+  });
+
+  addImage(scene, 'portal', 72, 40, (ctx) => {
+    ctx.strokeStyle = '#b48cff';
+    ctx.lineWidth = 3;
+    ctx.fillStyle = 'rgba(180, 140, 255, 0.3)';
+    ctx.beginPath();
+    ctx.ellipse(36, 20, 32, 16, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
   });
 
   addImage(scene, 'item-material', 20, 20, (ctx) => {

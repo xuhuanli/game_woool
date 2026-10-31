@@ -14,7 +14,7 @@ export class Grid {
   readonly height: number;
   private readonly blocked: Uint8Array;
 
-  constructor(map: MapDef) {
+  constructor(map: MapDef, extraBlocked: readonly Cell[] = []) {
     this.width = map.width;
     this.height = map.height;
     this.blocked = new Uint8Array(map.width * map.height);
@@ -24,6 +24,9 @@ export class Grid {
           if (this.inBounds({ x, y })) this.blocked[y * this.width + x] = 1;
         }
       }
+    }
+    for (const cell of extraBlocked) {
+      if (this.inBounds(cell)) this.blocked[cell.y * this.width + cell.x] = 1;
     }
   }
 

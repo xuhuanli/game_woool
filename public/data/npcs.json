@@ -1,0 +1,19 @@
+{
+  "guide-senior": {
+    "id": "guide-senior", "name": "接引师兄", "map": "huangfeng-valley", "x": 12, "y": 11,
+    "color": "#d9b84a", "greeting": "guide-greeting"
+  },
+  "herb-keeper": {
+    "id": "herb-keeper", "name": "百药堂掌柜", "map": "huangfeng-valley", "x": 7, "y": 10,
+    "color": "#7ddc6f", "greeting": "herb-greeting",
+    "shop": ["small-potion", "small-mana", "refine-stone", "rusty-sword", "cloth-robe"]
+  },
+  "gate-steward": {
+    "id": "gate-steward", "name": "传送阵执事", "map": "huangfeng-valley", "x": 17, "y": 10,
+    "color": "#9fd0ff", "greeting": "gate-greeting",
+    "travel": [
+      { "name": "彩霞山", "map": "starter-field", "x": 5, "y": 5, "cost": 10 },
+      { "name": "太南山", "map": "taina-mountain", "x": 4, "y": 4, "cost": 50, "level": 3 }
+    ]
+  }
+}

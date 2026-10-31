@@ -22,9 +22,15 @@
           <button id="hud-open-save">存档</button>
         </div>
       </section>
+      <section class="minimap"><div id="hud-map-name"></div><canvas id="hud-minimap"></canvas></section>
+      <section class="quests" id="hud-quests"></section>
+      <section class="boss" id="hud-boss" hidden>
+        <div id="hud-boss-name"></div>
+        <div class="bar hp"><i id="hud-boss-fill"></i></div>
+      </section>
       <section class="hotbar" id="hud-hotbar"></section>
       <section class="log" id="hud-log"></section>
-      <section class="help">左键点地面移动，按住持续移动，点怪攻击，点物品拾取，F1～F8 或 1～8 用快捷栏</section>
+      <section class="help">左键点地面移动，按住持续移动，点怪攻击，点物品拾取，点 NPC 对话，F1～F8 或 1～8 用快捷栏</section>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

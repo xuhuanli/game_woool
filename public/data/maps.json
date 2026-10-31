@@ -1,35 +1,95 @@
 {
+  "huangfeng-valley": {
+    "id": "huangfeng-valley",
+    "name": "黄枫谷",
+    "safe": true,
+    "width": 24,
+    "height": 24,
+    "playerStart": {"x": 12, "y": 14},
+    "respawn": {"map": "huangfeng-valley", "x": 12, "y": 14},
+    "obstacles": [
+      {"x": 0, "y": 0, "w": 24, "h": 1},
+      {"x": 0, "y": 23, "w": 24, "h": 1},
+      {"x": 0, "y": 0, "w": 1, "h": 24},
+      {"x": 23, "y": 0, "w": 1, "h": 24},
+      {"x": 4, "y": 4, "w": 5, "h": 3},
+      {"x": 15, "y": 4, "w": 5, "h": 3},
+      {"x": 4, "y": 16, "w": 4, "h": 2},
+      {"x": 16, "y": 16, "w": 4, "h": 2}
+    ],
+    "portals": [
+      {"x": 12, "y": 21, "name": "彩霞山", "toMap": "starter-field", "toX": 5, "toY": 5}
+    ],
+    "spawns": []
+  },
   "starter-field": {
     "id": "starter-field",
     "name": "彩霞山",
     "width": 32,
     "height": 32,
-    "playerStart": { "x": 6, "y": 6 },
+    "playerStart": {"x": 5, "y": 5},
     "obstacles": [
-      { "x": 0, "y": 0, "w": 32, "h": 1 },
-      { "x": 0, "y": 31, "w": 32, "h": 1 },
-      { "x": 0, "y": 0, "w": 1, "h": 32 },
-      { "x": 31, "y": 0, "w": 1, "h": 32 },
-      { "x": 10, "y": 3, "w": 2, "h": 8 },
-      { "x": 16, "y": 8, "w": 7, "h": 2 },
-      { "x": 5, "y": 15, "w": 8, "h": 2 },
-      { "x": 20, "y": 15, "w": 2, "h": 7 },
-      { "x": 12, "y": 22, "w": 3, "h": 3 },
-      { "x": 25, "y": 5, "w": 2, "h": 2 },
-      { "x": 26, "y": 24, "w": 2, "h": 2 }
+      {"x": 0, "y": 0, "w": 32, "h": 1},
+      {"x": 0, "y": 31, "w": 32, "h": 1},
+      {"x": 0, "y": 0, "w": 1, "h": 32},
+      {"x": 31, "y": 0, "w": 1, "h": 32},
+      {"x": 10, "y": 3, "w": 2, "h": 8},
+      {"x": 16, "y": 8, "w": 7, "h": 2},
+      {"x": 5, "y": 15, "w": 8, "h": 2},
+      {"x": 20, "y": 15, "w": 2, "h": 7},
+      {"x": 12, "y": 22, "w": 3, "h": 3},
+      {"x": 25, "y": 5, "w": 2, "h": 2},
+      {"x": 26, "y": 24, "w": 2, "h": 2}
     ],
     "spawns": [
-      { "monster": "ash-rat", "x": 14, "y": 5 },
-      { "monster": "ash-rat", "x": 17, "y": 5 },
-      { "monster": "ash-rat", "x": 26, "y": 10 },
-      { "monster": "ash-rat", "x": 7, "y": 12 },
-      { "monster": "ash-rat", "x": 15, "y": 13 },
-      { "monster": "ash-rat", "x": 25, "y": 16 },
-      { "monster": "ash-rat", "x": 6, "y": 20 },
-      { "monster": "ash-rat", "x": 9, "y": 26 },
-      { "monster": "ash-rat", "x": 17, "y": 19 },
-      { "monster": "ash-rat", "x": 18, "y": 27 },
-      { "monster": "ash-rat", "x": 24, "y": 27 }
+      {"monster": "ash-rat", "x": 14, "y": 5},
+      {"monster": "ash-rat", "x": 17, "y": 5},
+      {"monster": "ash-rat", "x": 26, "y": 10},
+      {"monster": "ash-rat", "x": 7, "y": 12},
+      {"monster": "ash-rat", "x": 15, "y": 13},
+      {"monster": "ash-rat", "x": 25, "y": 16},
+      {"monster": "ash-rat", "x": 6, "y": 20},
+      {"monster": "ash-rat", "x": 9, "y": 26},
+      {"monster": "ash-rat", "x": 17, "y": 19},
+      {"monster": "ash-rat", "x": 18, "y": 27},
+      {"monster": "ash-rat", "x": 24, "y": 27}
+    ],
+    "respawn": {"map": "huangfeng-valley", "x": 12, "y": 14},
+    "portals": [
+      {"x": 3, "y": 3, "name": "黄枫谷", "toMap": "huangfeng-valley", "toX": 12, "toY": 19},
+      {"x": 29, "y": 29, "name": "太南山", "toMap": "taina-mountain", "toX": 4, "toY": 4}
+    ]
+  },
+  "taina-mountain": {
+    "id": "taina-mountain",
+    "name": "太南山",
+    "width": 28,
+    "height": 28,
+    "playerStart": {"x": 4, "y": 4},
+    "respawn": {"map": "huangfeng-valley", "x": 12, "y": 14},
+    "obstacles": [
+      {"x": 0, "y": 0, "w": 28, "h": 1},
+      {"x": 0, "y": 27, "w": 28, "h": 1},
+      {"x": 0, "y": 0, "w": 1, "h": 28},
+      {"x": 27, "y": 0, "w": 1, "h": 28},
+      {"x": 8, "y": 2, "w": 2, "h": 8},
+      {"x": 3, "y": 13, "w": 9, "h": 2},
+      {"x": 14, "y": 6, "w": 2, "h": 10},
+      {"x": 18, "y": 14, "w": 7, "h": 2},
+      {"x": 9, "y": 19, "w": 2, "h": 6}
+    ],
+    "portals": [
+      {"x": 2, "y": 2, "name": "彩霞山", "toMap": "starter-field", "toX": 28, "toY": 28}
+    ],
+    "spawns": [
+      {"monster": "mountain-ape", "x": 12, "y": 4},
+      {"monster": "mountain-ape", "x": 12, "y": 10},
+      {"monster": "mountain-ape", "x": 19, "y": 4},
+      {"monster": "mountain-ape", "x": 22, "y": 10},
+      {"monster": "mountain-ape", "x": 5, "y": 18},
+      {"monster": "mountain-ape", "x": 5, "y": 24},
+      {"monster": "mountain-ape", "x": 14, "y": 20},
+      {"monster": "flood-serpent", "x": 21, "y": 21}
     ]
   }
 }

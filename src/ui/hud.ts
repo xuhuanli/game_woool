@@ -1,9 +1,13 @@
 import type { DamageStat, GameConfig } from '../game/config';
 import { equipmentName } from '../game/equipment';
+import { cellDistance } from '../game/grid';
+import { objectiveCount, questStatus } from '../game/quests';
 import { realmName } from '../game/realm';
 import { HOTBAR_SIZE, type World } from '../game/world';
+import { Minimap } from './minimap';
 
 const LOG_LINES = 7;
+const BOSS_BAR_DISTANCE = 12;
 const STAT_NAMES: Record<DamageStat, string> = { attack: '攻击', magic: '魔法', dao: '道术' };
 
 function byId(id: string): HTMLElement {
@@ -35,10 +39,20 @@ export class Hud {
   private readonly gold = byId('hud-gold');
   private readonly weapon = byId('hud-weapon');
   private readonly logBox = byId('hud-log');
+  private readonly quests = byId('hud-quests');
+  private readonly boss = byId('hud-boss');
+  private readonly bossName = byId('hud-boss-name');
+  private readonly bossFill = byId('hud-boss-fill');
   private readonly slots: SlotView[] = [];
+  private readonly minimap: Minimap;
+  private questSignature = '';
 
-  constructor(private readonly config: GameConfig) {
+  constructor(
+    private readonly config: GameConfig,
+    world: World,
+  ) {
     byId('hud').hidden = false;
+    this.minimap = new Minimap(world);
     const hotbar = byId('hud-hotbar');
     for (let slot = 0; slot < HOTBAR_SIZE; slot++) {
       const button = document.createElement('button');
@@ -74,6 +88,52 @@ export class Hud {
     const weapon = player.equipment.weapon;
     this.weapon.textContent = weapon ? equipmentName(weapon, this.config) : '无';
     this.updateHotbar(world);
+    this.updateQuests(world);
+    this.updateBoss(world);
+    this.minimap.update();
+  }
+
+  private updateQuests(world: World): void {
+    const { player } = world;
+    const signature = JSON.stringify([player.quests, player.level, player.bag]);
+    if (signature === this.questSignature) return;
+    this.questSignature = signature;
+
+    const lines = player.quests.active.flatMap((progress) => {
+      const quest = this.config.quests[progress.id];
+      if (!quest) return [];
+      const ready = questStatus(quest, player.quests, player.level, player.bag) === 'ready';
+      const giver = this.config.npcs[quest.giver]?.name ?? '';
+      const counts = quest.objectives
+        .map((objective, index) => `${objectiveCount(quest, index, progress, player.bag)}/${objective.count}`)
+        .join(' ');
+      return [`${quest.name}：${ready ? `回去找${giver}` : `${quest.summary} ${counts}`}`];
+    });
+    if (lines.length === 0) {
+      const next = Object.values(this.config.quests).find(
+        (quest) => questStatus(quest, player.quests, player.level, player.bag) === 'available',
+      );
+      if (next) lines.push(`可接：${next.name}（${this.config.npcs[next.giver]?.name}）`);
+    }
+    this.quests.replaceChildren(
+      ...lines.map((line) => {
+        const row = document.createElement('div');
+        row.textContent = line;
+        return row;
+      }),
+    );
+  }
+
+  private updateBoss(world: World): void {
+    const { cell } = world.player;
+    const boss = world.monsters.find(
+      (monster) =>
+        monster.def.boss && monster.hp > 0 && cellDistance(monster.cell, cell) <= BOSS_BAR_DISTANCE,
+    );
+    this.boss.hidden = !boss;
+    if (!boss) return;
+    this.bossName.textContent = boss.name;
+    this.bossFill.style.width = `${(boss.hp / boss.stats.maxHp) * 100}%`;
   }
 
   private updateHotbar(world: World): void {

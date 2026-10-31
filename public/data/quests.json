@@ -1,0 +1,40 @@
+{
+  "join-sect": {
+    "id": "join-sect", "name": "初入黄枫谷", "giver": "guide-senior", "level": 1, "main": true,
+    "summary": "去百药堂拜见掌柜，再回来复命。",
+    "objectives": [{ "type": "talk", "target": "herb-keeper", "count": 1 }],
+    "rewards": { "exp": 40, "gold": 100, "items": [{ "item": "small-potion", "count": 5 }] },
+    "offer": "join-sect-offer", "finish": "join-sect-finish"
+  },
+  "clear-rats": {
+    "id": "clear-rats", "name": "清剿灰鳞鼠", "giver": "guide-senior", "level": 1, "main": true,
+    "prev": "join-sect",
+    "summary": "到彩霞山击败 5 只灰鳞鼠。",
+    "objectives": [{ "type": "kill", "target": "ash-rat", "count": 5 }],
+    "rewards": { "exp": 120, "gold": 150, "items": [{ "item": "small-mana", "count": 5 }] },
+    "offer": "clear-rats-offer", "finish": "clear-rats-finish"
+  },
+  "taina-meeting": {
+    "id": "taina-meeting", "name": "太南小会", "giver": "guide-senior", "level": 3, "main": true,
+    "prev": "clear-rats",
+    "summary": "前往太南山，再回谷中复命。",
+    "objectives": [{ "type": "reach", "target": "taina-mountain", "count": 1 }],
+    "rewards": { "exp": 300, "gold": 200, "items": [{ "item": "refine-stone", "count": 1 }] },
+    "offer": "taina-offer", "finish": "taina-finish"
+  },
+  "slay-serpent": {
+    "id": "slay-serpent", "name": "斩杀铁甲蛟", "giver": "guide-senior", "level": 6, "main": true,
+    "prev": "taina-meeting",
+    "summary": "击败盘踞太南山深处的铁甲蛟。",
+    "objectives": [{ "type": "kill", "target": "flood-serpent", "count": 1 }],
+    "rewards": { "exp": 1000, "gold": 800, "items": [{ "item": "refine-stone", "count": 3 }, { "item": "steel-sword", "count": 1 }] },
+    "offer": "serpent-offer", "finish": "serpent-finish"
+  },
+  "ape-fur": {
+    "id": "ape-fur", "name": "收购山魈皮", "giver": "herb-keeper", "level": 3,
+    "summary": "收集 3 张山魈皮交给百药堂掌柜。",
+    "objectives": [{ "type": "collect", "target": "ape-fur", "count": 3 }],
+    "rewards": { "exp": 200, "gold": 300, "items": [] },
+    "offer": "ape-fur-offer", "finish": "ape-fur-finish"
+  }
+}

@@ -1,13 +1,16 @@
 {
-  "gold": { "id": "gold", "name": "灵石", "kind": "gold" },
-  "small-potion": { "id": "small-potion", "name": "回春丹", "kind": "potion", "heal": 30 },
-  "small-mana": { "id": "small-mana", "name": "回气丹", "kind": "potion", "mana": 30 },
-  "refine-stone": { "id": "refine-stone", "name": "祭炼石", "kind": "material" },
-  "rusty-sword": { "id": "rusty-sword", "name": "青铜剑", "kind": "equip", "slot": "weapon", "level": 1, "bonus": { "primary": 2 } },
-  "steel-sword": { "id": "steel-sword", "name": "精钢剑", "kind": "equip", "slot": "weapon", "level": 5, "bonus": { "primary": 5 } },
-  "cloth-robe": { "id": "cloth-robe", "name": "青布道袍", "kind": "equip", "slot": "armor", "level": 1, "bonus": { "defense": 2, "maxHp": 10 } },
-  "iron-helm": { "id": "iron-helm", "name": "玄铁冠", "kind": "equip", "slot": "helmet", "level": 3, "bonus": { "defense": 1, "magicDefense": 1 } },
-  "spirit-pendant": { "id": "spirit-pendant", "name": "聚灵佩", "kind": "equip", "slot": "necklace", "level": 3, "bonus": { "maxMp": 15 } },
-  "iron-bracelet": { "id": "iron-bracelet", "name": "镇魂镯", "kind": "equip", "slot": "bracelet", "level": 2, "bonus": { "defense": 1 } },
-  "jade-ring": { "id": "jade-ring", "name": "青玉戒", "kind": "equip", "slot": "ring", "level": 2, "bonus": { "primary": 1 } }
+  "gold": {"id": "gold", "name": "灵石", "kind": "gold"},
+  "small-potion": {"id": "small-potion", "name": "回春丹", "kind": "potion", "heal": 30, "price": 20},
+  "small-mana": {"id": "small-mana", "name": "回气丹", "kind": "potion", "mana": 30, "price": 20},
+  "refine-stone": {"id": "refine-stone", "name": "祭炼石", "kind": "material", "price": 200},
+  "rusty-sword": {"id": "rusty-sword", "name": "青铜剑", "kind": "equip", "slot": "weapon", "level": 1, "bonus": {"primary": 2}, "price": 60},
+  "steel-sword": {"id": "steel-sword", "name": "精钢剑", "kind": "equip", "slot": "weapon", "level": 5, "bonus": {"primary": 5}, "price": 300},
+  "cloth-robe": {"id": "cloth-robe", "name": "青布道袍", "kind": "equip", "slot": "armor", "level": 1, "bonus": {"defense": 2, "maxHp": 10}, "price": 60},
+  "iron-helm": {"id": "iron-helm", "name": "玄铁冠", "kind": "equip", "slot": "helmet", "level": 3, "bonus": {"defense": 1, "magicDefense": 1}, "price": 90},
+  "spirit-pendant": {"id": "spirit-pendant", "name": "聚灵佩", "kind": "equip", "slot": "necklace", "level": 3, "bonus": {"maxMp": 15}, "price": 120},
+  "iron-bracelet": {"id": "iron-bracelet", "name": "镇魂镯", "kind": "equip", "slot": "bracelet", "level": 2, "bonus": {"defense": 1}, "price": 80},
+  "jade-ring": {"id": "jade-ring", "name": "青玉戒", "kind": "equip", "slot": "ring", "level": 2, "bonus": {"primary": 1}, "price": 100},
+  "ape-fur": {"id": "ape-fur", "name": "山魈皮", "kind": "material", "price": 15},
+  "serpent-scale": {"id": "serpent-scale", "name": "蛟鳞", "kind": "material", "price": 150},
+  "blue-sword": {"id": "blue-sword", "name": "青竹蜂云剑", "kind": "equip", "slot": "weapon", "level": 8, "bonus": {"primary": 9}, "price": 800}
 }

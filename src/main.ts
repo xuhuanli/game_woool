@@ -5,6 +5,7 @@ import { GameScene } from './render/GameScene';
 import { AutoSaver } from './save/autoSaver';
 import { IndexedDbSaveStore } from './save/saveStore';
 import { Hud } from './ui/hud';
+import { NpcPanel } from './ui/npcPanel';
 import { Panels } from './ui/panels';
 import { SavePanel } from './ui/savePanel';
 import { showStartScreen } from './ui/startScreen';
@@ -31,10 +32,11 @@ const seed = Date.now();
 const world =
   start.kind === 'continue'
     ? World.fromSave(config, start.save, seed)
-    : new World(config, 'starter-field', start.classId, seed, start.name);
+    : new World(config, 'huangfeng-valley', start.classId, seed, start.name);
 
-const hud = new Hud(config);
+const hud = new Hud(config, world);
 const panels = new Panels(world, config);
+const npcPanel = new NpcPanel(world, config);
 const saver = new AutoSaver(world, store, (error) => {
   console.error(error);
   hud.log('保存失败，请导出存档', 'bad');
@@ -52,7 +54,7 @@ new Phaser.Game({
   parent: 'game',
   backgroundColor: '#17140f',
   scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
-  scene: new GameScene(world, hud, panels, saver),
+  scene: new GameScene(world, hud, panels, saver, npcPanel),
 });
 
 if (import.meta.env.DEV) {

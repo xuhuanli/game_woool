@@ -93,6 +93,8 @@ export interface MonsterDef {
   exp: number;
   respawnSeconds: number;
   dropTable: string;
+  boss?: boolean;
+  look: { fur: string; head: string; scale: number };
 }
 
 export type BonusStat =
@@ -117,6 +119,7 @@ export interface ItemDef {
   slot?: 'weapon' | 'armor' | 'helmet' | 'necklace' | 'bracelet' | 'ring';
   level?: number;
   bonus?: Partial<Record<BonusStat, number>>;
+  price?: number;
 }
 
 export interface GradeDef {
@@ -125,6 +128,7 @@ export interface GradeDef {
   color: string;
   weight: number;
   affixes: number;
+  sellMultiplier: number;
 }
 
 export interface AffixDef {
@@ -148,6 +152,7 @@ export interface AffixConfig {
   pool: AffixDef[];
   refine: RefineConfig;
   bagCapacity: number;
+  sellRatio: number;
 }
 
 export interface DropEntry {
@@ -157,14 +162,70 @@ export interface DropEntry {
   max?: number;
 }
 
+export interface PortalDef {
+  x: number;
+  y: number;
+  name: string;
+  toMap: string;
+  toX: number;
+  toY: number;
+}
+
 export interface MapDef {
   id: string;
   name: string;
+  safe?: boolean;
   width: number;
   height: number;
   playerStart: Cell;
+  /** 死亡后的复活点，缺省时在本图出生点 */
+  respawn?: Cell & { map: string };
   obstacles: { x: number; y: number; w: number; h: number }[];
+  portals?: PortalDef[];
   spawns: { monster: string; x: number; y: number }[];
+}
+
+export interface TravelOption {
+  name: string;
+  map: string;
+  x: number;
+  y: number;
+  cost: number;
+  level?: number;
+}
+
+export interface NpcDef {
+  id: string;
+  name: string;
+  map: string;
+  x: number;
+  y: number;
+  color: string;
+  greeting: string;
+  shop?: string[];
+  travel?: TravelOption[];
+}
+
+export type ObjectiveType = 'kill' | 'talk' | 'reach' | 'collect';
+
+export interface QuestObjective {
+  type: ObjectiveType;
+  target: string;
+  count: number;
+}
+
+export interface QuestDef {
+  id: string;
+  name: string;
+  giver: string;
+  level: number;
+  main?: boolean;
+  prev?: string;
+  summary: string;
+  objectives: QuestObjective[];
+  rewards: { exp: number; gold: number; items: { item: string; count: number }[] };
+  offer: string;
+  finish: string;
 }
 
 export interface GameConfig {
@@ -177,6 +238,9 @@ export interface GameConfig {
   affixes: AffixConfig;
   drops: Record<string, DropEntry[]>;
   maps: Record<string, MapDef>;
+  npcs: Record<string, NpcDef>;
+  quests: Record<string, QuestDef>;
+  dialogues: Record<string, string[]>;
 }
 
 export const CONFIG_FILES = [
@@ -189,6 +253,9 @@ export const CONFIG_FILES = [
   'affixes',
   'drops',
   'maps',
+  'npcs',
+  'quests',
+  'dialogues',
 ] as const;
 
 /** 返回配置表中所有悬空引用，空数组表示配置有效。 */
@@ -209,6 +276,38 @@ export function validateConfig(config: GameConfig): string[] {
       if (!config.monsters[spawn.monster]) {
         errors.push(`地图 ${map.id} 的怪物 ${spawn.monster} 不存在`);
       }
+    }
+  }
+  for (const map of Object.values(config.maps)) {
+    for (const portal of map.portals ?? []) {
+      if (!config.maps[portal.toMap]) errors.push(`地图 ${map.id} 的传送点 ${portal.toMap} 不存在`);
+    }
+    if (map.respawn && !config.maps[map.respawn.map]) {
+      errors.push(`地图 ${map.id} 的复活地图 ${map.respawn.map} 不存在`);
+    }
+  }
+  for (const npc of Object.values(config.npcs)) {
+    if (!config.maps[npc.map]) errors.push(`NPC ${npc.id} 的地图 ${npc.map} 不存在`);
+    if (!config.dialogues[npc.greeting]) errors.push(`NPC ${npc.id} 的对话 ${npc.greeting} 不存在`);
+    for (const item of npc.shop ?? []) {
+      if (config.items[item]?.price === undefined) errors.push(`商品 ${item} 没有价格`);
+    }
+    for (const option of npc.travel ?? []) {
+      if (!config.maps[option.map]) errors.push(`传送目的地 ${option.map} 不存在`);
+    }
+  }
+  for (const quest of Object.values(config.quests)) {
+    if (!config.npcs[quest.giver]) errors.push(`任务 ${quest.id} 的 NPC ${quest.giver} 不存在`);
+    if (quest.prev && !config.quests[quest.prev]) errors.push(`任务 ${quest.id} 的前置不存在`);
+    for (const id of [quest.offer, quest.finish]) {
+      if (!config.dialogues[id]) errors.push(`任务 ${quest.id} 的对话 ${id} 不存在`);
+    }
+    for (const { item } of quest.rewards.items) {
+      if (!config.items[item]) errors.push(`任务 ${quest.id} 的奖励 ${item} 不存在`);
+    }
+    for (const { type, target } of quest.objectives) {
+      const table = { kill: config.monsters, talk: config.npcs, reach: config.maps, collect: config.items }[type];
+      if (!table[target]) errors.push(`任务 ${quest.id} 的目标 ${target} 不存在`);
     }
   }
   for (const skill of Object.values(config.skills)) {

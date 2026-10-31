@@ -6,7 +6,10 @@ import type {
   DamageStat,
   GameConfig,
   ItemDef,
+  MapDef,
   MonsterDef,
+  NpcDef,
+  PortalDef,
   SkillDef,
 } from './config';
 import {
@@ -20,6 +23,12 @@ import {
 } from './equipment';
 import { cellDistance, Grid, sameCell } from './grid';
 import { findPath } from './pathfinding';
+import {
+  emptyQuestState,
+  questStatus,
+  recordObjective,
+  type QuestState,
+} from './quests';
 import { Rng } from './rng';
 import { SAVE_VERSION, type SaveData } from '../save/saveData';
 import { needsTarget, skillArea } from './skills';
@@ -38,6 +47,8 @@ const WANDER_MAX_SECONDS = 6;
 const SUMMON_FOLLOW_DISTANCE = 2;
 const SUMMON_TELEPORT_DISTANCE = 12;
 const BAG_FULL_NOTICE_SECONDS = 3;
+const TALK_RANGE = 2;
+const INTERACT_RANGE = 4;
 
 export interface Vec {
   x: number;
@@ -87,6 +98,7 @@ export interface Monster extends Unit {
   kind: 'monster';
   def: MonsterDef;
   home: Cell;
+  spawnKey: string;
   mode: 'idle' | 'chase' | 'return';
   target: Unit | null;
   wanderLeft: number;
@@ -104,7 +116,8 @@ export type PlayerOrder =
   | { type: 'move'; cell: Cell }
   | { type: 'attack'; target: Monster }
   | { type: 'cast'; skill: SkillDef; target: Monster }
-  | { type: 'pickup'; itemId: number };
+  | { type: 'pickup'; itemId: number }
+  | { type: 'talk'; npc: NpcDef };
 
 export type HotbarEntry = { kind: 'skill'; id: string } | { kind: 'item'; id: string };
 
@@ -121,6 +134,7 @@ export interface Player extends Unit {
   skills: string[];
   skillCooldowns: Record<string, number>;
   hotbar: (HotbarEntry | null)[];
+  quests: QuestState;
   order: PlayerOrder | null;
   /** 出招途中按下的自身技能，出招结束后释放 */
   queuedSkill: SkillDef | null;
@@ -155,19 +169,26 @@ export type GameEvent =
   | { type: 'mana'; amount: number }
   | { type: 'expGained'; amount: number }
   | { type: 'levelUp'; level: number }
+  | { type: 'mapChanged' }
+  | { type: 'npcOpened'; npc: NpcDef }
+  | { type: 'questAccepted'; name: string }
+  | { type: 'questProgress'; name: string }
+  | { type: 'questCompleted'; name: string }
+  | { type: 'goldChanged'; amount: number }
   | { type: 'message'; text: string };
 
 export class World {
-  readonly grid: Grid;
+  grid: Grid;
+  mapId: string;
   readonly player: Player;
   readonly monsters: Monster[] = [];
   readonly summons: Summon[] = [];
   readonly items: GroundItem[] = [];
-  readonly mapId: string;
+  /** Boss 下次刷新的游戏内时间，切图后继续计时 */
+  bossReadyAt: Record<string, number> = {};
   time = 0;
 
   private readonly rng: Rng;
-  private readonly startCell: Cell;
   private nextId = 1;
   private bagFullNoticeAt = -Infinity;
   private events: GameEvent[] = [];
@@ -186,7 +207,6 @@ export class World {
     this.mapId = mapId;
     this.grid = new Grid(map);
     this.rng = new Rng(seed);
-    this.startCell = map.playerStart;
     const hotbar: (HotbarEntry | null)[] = Array.from({ length: HOTBAR_SIZE }, () => null);
     hotbar[HOTBAR_SIZE - 2] = { kind: 'item', id: 'small-mana' };
     hotbar[HOTBAR_SIZE - 1] = { kind: 'item', id: 'small-potion' };
@@ -203,6 +223,7 @@ export class World {
       bag: {},
       equipBag: [],
       equipment: {},
+      quests: emptyQuestState(),
       skills: [],
       skillCooldowns: {},
       hotbar,
@@ -212,21 +233,72 @@ export class World {
       lastHurtAt: -Infinity,
     };
     this.learnSkills();
-    for (const spawn of map.spawns) {
-      const def = config.monsters[spawn.monster];
+    this.loadMap(mapId);
+    this.drainEvents();
+  }
+
+  get map(): MapDef {
+    return this.config.maps[this.mapId]!;
+  }
+
+  get npcs(): NpcDef[] {
+    return Object.values(this.config.npcs).filter((npc) => npc.map === this.mapId);
+  }
+
+  get portals(): PortalDef[] {
+    return this.map.portals ?? [];
+  }
+
+  /** 载入地图：清空地面物品，重新生成怪物，NPC 所在格不可通行。 */
+  private loadMap(mapId: string): void {
+    const map = this.config.maps[mapId];
+    if (!map) throw new Error(`未知的地图：${mapId}`);
+    this.mapId = mapId;
+    this.grid = new Grid(map, this.npcs);
+    this.monsters.length = 0;
+    this.items.length = 0;
+    map.spawns.forEach((spawn, index) => {
+      const def = this.config.monsters[spawn.monster];
       if (!def) throw new Error(`未知的怪物：${spawn.monster}`);
-      this.monsters.push({
+      const spawnKey = `${mapId}:${index}`;
+      const monster: Monster = {
         ...this.createUnit(def.name, spawn, def.stats, this.monsterTiming(def)),
         kind: 'monster',
         def,
         home: { x: spawn.x, y: spawn.y },
+        spawnKey,
         mode: 'idle',
         target: null,
         wanderLeft: this.rng.next() * WANDER_MAX_SECONDS,
         respawnLeft: 0,
-      });
+      };
+      const waiting = (this.bossReadyAt[spawnKey] ?? 0) - this.time;
+      if (waiting > 0) {
+        monster.hp = 0;
+        monster.respawnLeft = waiting;
+      }
+      this.monsters.push(monster);
+    });
+  }
+
+  private changeMap(mapId: string, cell: Cell): void {
+    const player = this.player;
+    player.order = null;
+    player.path = [];
+    this.loadMap(mapId);
+    const arrival = this.grid.nearest(cell, (c) => this.isFree(c, player)) ?? cell;
+    player.cell = { ...arrival };
+    player.pos = { ...arrival };
+    for (const summon of this.summons) {
+      const near = this.grid.nearest(arrival, (c) => this.isFree(c, summon) && !sameCell(c, arrival));
+      if (!near) continue;
+      summon.cell = { ...near };
+      summon.pos = { ...near };
+      summon.path = [];
+      summon.target = null;
     }
-    this.drainEvents();
+    this.emit({ type: 'mapChanged' });
+    this.advanceQuests('reach', mapId);
   }
 
   /** 从存档恢复世界，怪物和地面物品按地图重新生成。 */
@@ -245,6 +317,7 @@ export class World {
       mapId: this.mapId,
       time: this.time,
       nextId: this.nextId,
+      bossReadyAt: this.bossReadyAt,
       player: {
         name: player.name,
         classId: player.def.id,
@@ -259,6 +332,7 @@ export class World {
         equipment: player.equipment,
         skills: player.skills,
         hotbar: player.hotbar,
+        quests: player.quests,
       },
     });
   }
@@ -271,6 +345,8 @@ export class World {
 
     this.time = save.time;
     this.nextId = Math.max(this.nextId, save.nextId);
+    this.bossReadyAt = { ...save.bossReadyAt };
+    this.loadMap(save.mapId);
     player.level = data.level;
     player.exp = data.exp;
     player.gold = data.gold;
@@ -279,6 +355,10 @@ export class World {
     player.equipment = Object.fromEntries(
       Object.entries(data.equipment).filter(([, equipment]) => known(equipment)),
     );
+    player.quests = {
+      active: data.quests.active.filter((quest) => this.config.quests[quest.id]),
+      completed: data.quests.completed,
+    };
     player.skills = data.skills.filter((id) => skills[id]);
     player.hotbar = data.hotbar.map((entry) => {
       const exists = entry?.kind === 'skill' ? skills[entry.id] : entry && items[entry.id];
@@ -291,8 +371,12 @@ export class World {
     const alive = data.hp > 0;
     player.hp = alive ? Math.min(data.hp, player.stats.maxHp) : player.stats.maxHp;
     player.mp = alive ? Math.min(data.mp, player.stats.maxMp) : player.stats.maxMp;
-    const preferred = alive ? data.cell : this.startCell;
-    const cell = this.grid.nearest(preferred, (c) => this.isFree(c, player)) ?? this.startCell;
+    if (!alive) {
+      this.respawnPlayer();
+      this.drainEvents();
+      return;
+    }
+    const cell = this.grid.nearest(data.cell, (c) => this.isFree(c, player)) ?? data.cell;
     player.cell = { ...cell };
     player.pos = { ...cell };
   }
@@ -462,6 +546,131 @@ export class World {
     return [...worn, ...this.player.equipBag].find((item) => item.uid === uid) ?? null;
   }
 
+  // ---- NPC、商店、任务 ----
+
+  talkTo(npc: NpcDef): void {
+    const player = this.player;
+    if (!player.hp || npc.map !== this.mapId) return;
+    player.order = { type: 'talk', npc };
+    const goal = this.grid.nearest(npc, (c) => this.isFree(c, player));
+    if (goal) this.planPath(player, goal, false);
+  }
+
+  private isNear(npc: NpcDef): boolean {
+    return npc.map === this.mapId && cellDistance(this.player.cell, npc) <= INTERACT_RANGE;
+  }
+
+  buy(npc: NpcDef, itemId: string): void {
+    const player = this.player;
+    const item = this.config.items[itemId];
+    if (!item?.price || !npc.shop?.includes(itemId) || !this.isNear(npc)) return;
+    if (player.gold < item.price) {
+      this.emit({ type: 'message', text: '灵石不足' });
+      return;
+    }
+    if (item.kind === 'equip') {
+      const lowest = { ...this.config.affixes, grades: this.config.affixes.grades.slice(0, 1) };
+      if (!this.takeEquipment(rollEquipment(item, lowest, this.rng, this.nextId++))) return;
+    } else {
+      this.addToBag(itemId, 1);
+    }
+    player.gold -= item.price;
+    this.emit({ type: 'goldChanged', amount: -item.price });
+  }
+
+  sellPrice(equipment: Equipment): number {
+    const { affixes, items } = this.config;
+    const grade = affixes.grades.find((candidate) => candidate.id === equipment.grade);
+    const price = items[equipment.itemId]?.price ?? 0;
+    return Math.floor(price * affixes.sellRatio * (grade?.sellMultiplier ?? 1));
+  }
+
+  sellEquipment(npc: NpcDef, uid: number): void {
+    const player = this.player;
+    const equipment = player.equipBag.find((candidate) => candidate.uid === uid);
+    if (!equipment || !npc.shop || !this.isNear(npc)) return;
+    player.equipBag.splice(player.equipBag.indexOf(equipment), 1);
+    const price = this.sellPrice(equipment);
+    player.gold += price;
+    this.emit({ type: 'goldChanged', amount: price });
+  }
+
+  sellItem(npc: NpcDef, itemId: string): void {
+    const player = this.player;
+    const price = this.config.items[itemId]?.price;
+    if (!price || !player.bag[itemId] || !npc.shop || !this.isNear(npc)) return;
+    this.removeFromBag(itemId);
+    const earned = Math.floor(price * this.config.affixes.sellRatio);
+    player.gold += earned;
+    this.emit({ type: 'goldChanged', amount: earned });
+  }
+
+  travel(npc: NpcDef, index: number): void {
+    const option = npc.travel?.[index];
+    const player = this.player;
+    if (!option || !this.isNear(npc)) return;
+    if ((option.level ?? 1) > player.level) {
+      this.emit({ type: 'message', text: `需要等级 ${option.level}` });
+      return;
+    }
+    if (player.gold < option.cost) {
+      this.emit({ type: 'message', text: '灵石不足' });
+      return;
+    }
+    player.gold -= option.cost;
+    this.changeMap(option.map, option);
+  }
+
+  acceptQuest(questId: string): void {
+    const player = this.player;
+    const quest = this.config.quests[questId];
+    if (!quest || questStatus(quest, player.quests, player.level, player.bag) !== 'available') return;
+    const counts = quest.objectives.map((objective) =>
+      objective.type === 'reach' && objective.target === this.mapId ? objective.count : 0,
+    );
+    player.quests.active.push({ id: quest.id, counts });
+    this.emit({ type: 'questAccepted', name: quest.name });
+  }
+
+  turnInQuest(questId: string): void {
+    const player = this.player;
+    const quest = this.config.quests[questId];
+    if (!quest || questStatus(quest, player.quests, player.level, player.bag) !== 'ready') return;
+
+    const rewards = quest.rewards.items.flatMap(({ item, count }) =>
+      Array.from({ length: count }, () => this.config.items[item]!),
+    );
+    const newEquipment = rewards.filter((item) => item.kind === 'equip').length;
+    if (player.equipBag.length + newEquipment > this.config.affixes.bagCapacity) {
+      this.emit({ type: 'message', text: '背包已满' });
+      return;
+    }
+
+    for (const objective of quest.objectives) {
+      if (objective.type !== 'collect') continue;
+      for (let i = 0; i < objective.count; i++) this.removeFromBag(objective.target);
+    }
+    player.quests.active = player.quests.active.filter((progress) => progress.id !== quest.id);
+    player.quests.completed.push(quest.id);
+    this.emit({ type: 'questCompleted', name: quest.name });
+
+    player.gold += quest.rewards.gold;
+    for (const item of rewards) {
+      if (item.kind === 'equip') {
+        this.takeEquipment(rollEquipment(item, this.config.affixes, this.rng, this.nextId++));
+      } else {
+        this.addToBag(item.id, 1);
+      }
+    }
+    this.gainExp(quest.rewards.exp);
+  }
+
+  private advanceQuests(type: 'kill' | 'talk' | 'reach', target: string): void {
+    for (const quest of recordObjective(this.player.quests, this.config, type, target)) {
+      this.emit({ type: 'questProgress', name: quest.name });
+    }
+  }
+
   // ---- 主循环 ----
 
   tick(dt = TICK_SECONDS): void {
@@ -508,13 +717,29 @@ export class World {
       }
     } else if (order?.type === 'pickup') {
       if (!this.items.some((item) => item.id === order.itemId)) player.order = null;
+    } else if (order?.type === 'talk' && cellDistance(player.cell, order.npc) <= TALK_RANGE) {
+      player.path = [];
+      if (!this.isStepping(player)) {
+        player.order = null;
+        this.advanceQuests('talk', order.npc.id);
+        this.emit({ type: 'npcOpened', npc: order.npc });
+      }
     }
 
     this.advance(player, dt);
     if (!this.isStepping(player)) {
       this.collectItemsAt(player.cell);
-      const current = player.order?.type;
-      if ((current === 'move' || current === 'pickup') && player.path.length === 0) {
+      const portal = this.portals.find((candidate) => sameCell(candidate, player.cell));
+      if (portal) {
+        this.changeMap(portal.toMap, { x: portal.toX, y: portal.toY });
+        return;
+      }
+      const current = player.order;
+      const walking =
+        current?.type === 'move' ||
+        current?.type === 'pickup' ||
+        (current?.type === 'talk' && cellDistance(player.cell, current.npc) > TALK_RANGE);
+      if (walking && player.path.length === 0) {
         player.order = null;
       }
     }
@@ -839,12 +1064,18 @@ export class World {
 
   private respawnPlayer(): void {
     const player = this.player;
-    const cell = this.grid.nearest(this.startCell, (c) => this.isFree(c, player)) ?? this.startCell;
-    player.cell = { ...cell };
-    player.pos = { ...cell };
+    const { respawn, playerStart } = this.map;
     player.hp = player.stats.maxHp;
     player.mp = player.stats.maxMp;
     player.lastHurtAt = this.time;
+    if (respawn && respawn.map !== this.mapId) {
+      this.changeMap(respawn.map, respawn);
+    } else {
+      const target = respawn ?? playerStart;
+      const cell = this.grid.nearest(target, (c) => this.isFree(c, player)) ?? target;
+      player.cell = { x: cell.x, y: cell.y };
+      player.pos = { x: cell.x, y: cell.y };
+    }
     this.emit({ type: 'respawn', unit: player });
   }
 
@@ -855,8 +1086,13 @@ export class World {
     monster.pending = null;
     monster.target = null;
     monster.effects = [];
+    if (monster.def.boss) {
+      this.bossReadyAt[monster.spawnKey] = this.time + monster.def.respawnSeconds;
+      this.emit({ type: 'message', text: `${monster.name}已被击败` });
+    }
     this.emit({ type: 'death', unit: monster });
     this.rollDrops(monster);
+    this.advanceQuests('kill', monster.def.id);
     this.gainExp(monster.def.exp);
   }
 

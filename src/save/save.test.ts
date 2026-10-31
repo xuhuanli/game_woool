@@ -100,7 +100,8 @@ describe('存档恢复', () => {
     world.player.hp = 0;
     const loaded = World.fromSave(config, world.toSave(1000), 2);
     expect(loaded.player.hp).toBe(loaded.player.stats.maxHp);
-    expect(loaded.player.cell).toEqual(config.maps['starter-field']!.playerStart);
+    expect(loaded.mapId).toBe('huangfeng-valley');
+    expect(loaded.player.cell).toEqual({ x: 12, y: 14 });
   });
 
   it('玩家格子被怪物占住时，换到附近空位', () => {
@@ -132,6 +133,16 @@ describe('版本迁移', () => {
 
   it('当前版本不需要迁移', () => {
     expect(migrateSave(current()).version).toBe(SAVE_VERSION);
+  });
+
+  it('第 1 版存档升级后带上任务和 Boss 状态', () => {
+    const { bossReadyAt: _boss, ...save } = current();
+    const { quests: _quests, ...player } = save.player;
+    const migrated = migrateSave({ ...save, version: 1, player });
+    expect(migrated.version).toBe(SAVE_VERSION);
+    expect(migrated.bossReadyAt).toEqual({});
+    expect(migrated.player.quests).toEqual({ active: [], completed: [] });
+    expect(() => World.fromSave(config, migrated, 1)).not.toThrow();
   });
 
   it('逐版升级旧存档', () => {

@@ -139,8 +139,8 @@ body,
 }
 
 .help {
-  top: 12px;
   right: 12px;
+  bottom: 80px;
   max-width: 320px;
   padding: 6px 10px;
   font-size: 12px;
@@ -251,6 +251,10 @@ body,
 #hud .panel-bag {
   right: 12px;
   width: 300px;
+}
+
+#hud .panel-bag {
+  top: 150px;
 }
 
 .panel-title {
@@ -405,5 +409,89 @@ body,
   background: none;
   border: 1px solid #6b5630;
   border-radius: 6px;
+}
+
+.minimap {
+  top: 12px;
+  right: 12px;
+  padding: 4px 6px;
+  text-align: center;
+  background: rgba(20, 16, 10, 0.78);
+  border: 1px solid #6b5630;
+  border-radius: 6px;
+}
+
+#hud-map-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f0cf7a;
+}
+
+#hud-minimap {
+  display: block;
+  width: 190px;
+  height: 110px;
+}
+
+.quests {
+  top: 226px;
+  left: 12px;
+  width: 240px;
+  font-size: 12px;
+  color: #f0e4b8;
+}
+
+.boss {
+  top: 12px;
+  left: 50%;
+  width: 300px;
+  text-align: center;
+  transform: translateX(-50%);
+}
+
+#hud .boss[hidden] {
+  display: none;
+}
+
+#hud-boss-name {
+  font-weight: 600;
+  color: #ff9a8a;
+}
+
+#hud .panel-npc {
+  left: 50%;
+  width: 320px;
+  transform: translateX(-50%);
+}
+
+.npc-body {
+  display: grid;
+  gap: 6px;
+}
+
+.npc-line {
+  margin: 0;
+  line-height: 1.6;
+}
+
+.npc-quest {
+  margin: 0;
+  font-weight: 600;
+  color: #f0cf7a;
+}
+
+.npc-option {
+  padding: 5px 8px;
+  font: inherit;
+  color: #efe6d0;
+  text-align: left;
+  cursor: pointer;
+  background: #2b2418;
+  border: 1px solid #6b5630;
+  border-radius: 4px;
+}
+
+.npc-option:hover {
+  border-color: #f0cf7a;
 }
 

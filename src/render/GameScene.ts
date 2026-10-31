@@ -1,7 +1,8 @@
 import Phaser from 'phaser';
-import type { Cell, SkillDef } from '../game/config';
+import type { Cell, NpcDef, SkillDef } from '../game/config';
 import { equipmentColor, equipmentName } from '../game/equipment';
 import { cellDistance, sameCell } from '../game/grid';
+import { questsForNpc, questStatus } from '../game/quests';
 import {
   TICK_SECONDS,
   type GameEvent,
@@ -14,6 +15,7 @@ import {
 } from '../game/world';
 import type { AutoSaver } from '../save/autoSaver';
 import type { Hud } from '../ui/hud';
+import type { NpcPanel } from '../ui/npcPanel';
 import type { Panels } from '../ui/panels';
 import { directionRow, TILE_H, TILE_W, toCell, toScreen } from './iso';
 import { createPlaceholderArt, SHEET } from './placeholders';
@@ -35,6 +37,11 @@ interface UnitView {
   attacking: boolean;
 }
 
+interface NpcView {
+  npc: NpcDef;
+  marker: Phaser.GameObjects.Text;
+}
+
 interface ItemView {
   sprite: Phaser.GameObjects.Image;
   label: Phaser.GameObjects.Text;
@@ -43,6 +50,8 @@ interface ItemView {
 export class GameScene extends Phaser.Scene {
   private readonly unitViews = new Map<Unit, UnitView>();
   private readonly itemViews = new Map<GroundItem, ItemView>();
+  private npcViews: NpcView[] = [];
+  private mapObjects: { destroy(): void }[] = [];
   private accumulator = 0;
   private holding = false;
   private holdTimer = 0;
@@ -54,17 +63,17 @@ export class GameScene extends Phaser.Scene {
     private readonly hud: Hud,
     private readonly panels: Panels,
     private readonly saver: AutoSaver,
+    private readonly npcPanel: NpcPanel,
   ) {
     super('game');
   }
 
   create(): void {
-    createPlaceholderArt(this);
-    this.drawGround();
+    createPlaceholderArt(this, this.world.config);
 
     this.tileCursor = this.add.graphics().setDepth(1);
     this.addUnitView(this.world.player, this.world.player.def.id);
-    for (const monster of this.world.monsters) this.addUnitView(monster, monster.def.id);
+    this.buildMap();
 
     const follow = this.unitViews.get(this.world.player)!.sprite;
     this.cameras.main.startFollow(follow, true, 0.12, 0.12);
@@ -82,7 +91,7 @@ export class GameScene extends Phaser.Scene {
     });
     this.hud.onSlot = (slot) => this.useSlot(slot);
 
-    this.hud.log('击败灰鳞鼠，捡起它们的掉落');
+    this.hud.log(`来到${this.world.map.name}`);
   }
 
   override update(_time: number, delta: number): void {
@@ -104,31 +113,99 @@ export class GameScene extends Phaser.Scene {
     for (const view of this.unitViews.values()) this.syncUnit(view, alpha);
 
     this.updatePointer(delta);
+    this.updateNpcMarkers();
     this.hud.update(this.world);
     this.panels.update();
+    this.npcPanel.update();
   }
 
   // ---- 场景搭建 ----
 
+  /** 按当前地图重建地面、NPC、传送点和怪物显示。 */
+  private buildMap(): void {
+    for (const object of this.mapObjects) object.destroy();
+    this.mapObjects = [];
+    this.npcViews = [];
+    for (const view of [...this.unitViews.values()]) {
+      if ((view.unit as Monster).kind === 'monster') this.removeUnitView(view);
+    }
+    for (const item of [...this.itemViews.keys()]) this.removeItemView(item);
+
+    this.drawGround();
+    for (const portal of this.world.portals) this.addPortal(portal.x, portal.y, portal.name);
+    for (const npc of this.world.npcs) this.addNpc(npc);
+    for (const monster of this.world.monsters) {
+      this.addUnitView(monster, monster.def.id, monster.def.look.scale);
+      if (!monster.hp) this.unitViews.get(monster)!.sprite.setAlpha(0);
+    }
+    for (const view of this.unitViews.values()) view.previous = { ...view.unit.pos };
+  }
+
   private drawGround(): void {
     const { grid } = this.world;
+    const safe = this.world.map.safe;
+    const palette = safe ? [0x5d6650, 0x59624c, 0x626b55] : [0x4a5a34, 0x46552f, 0x4f6038];
     const ground = this.add.graphics().setDepth(0);
+    this.mapObjects.push(ground);
     for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
         const { x: sx, y: sy } = toScreen({ x, y });
-        const shade = (x * 7 + y * 13) % 3;
-        ground.fillStyle([0x4a5a34, 0x46552f, 0x4f6038][shade]!, 1);
+        ground.fillStyle(palette[(x * 7 + y * 13) % 3]!, 1);
         ground.fillPoints(diamond(sx, sy), true);
-        if (!grid.isWalkable({ x, y })) {
-          this.add.image(sx, sy, 'rock').setOrigin(0.5, 0.75).setDepth(sy);
+        const isNpc = this.world.npcs.some((npc) => npc.x === x && npc.y === y);
+        if (!grid.isWalkable({ x, y }) && !isNpc) {
+          this.mapObjects.push(this.add.image(sx, sy, 'rock').setOrigin(0.5, 0.75).setDepth(sy));
         }
       }
     }
   }
 
-  private addUnitView(unit: Unit, texture: string): void {
+  private addPortal(x: number, y: number, name: string): void {
+    const screen = toScreen({ x, y });
+    const ring = this.add.image(screen.x, screen.y, 'portal').setDepth(2);
+    this.tweens.add({ targets: ring, alpha: 0.5, duration: 800, yoyo: true, repeat: -1 });
+    this.mapObjects.push(ring, this.addLabel(screen.x, screen.y - 22, name, '#d9c8ff'));
+  }
+
+  private addNpc(npc: NpcDef): void {
+    const { x, y } = toScreen(npc);
+    const sprite = this.add
+      .sprite(x, y, `npc-${npc.id}`, SHEET.columns * 2)
+      .setOrigin(0.5, SHEET.originY)
+      .setDepth(y);
+    const label = this.addLabel(x, y - 66, npc.name, '#9fe0ff');
+    const marker = this.addLabel(x, y - 84, '', '#ffd84a').setFontSize(22);
+    this.mapObjects.push(sprite, label, marker);
+    this.npcViews.push({ npc, marker });
+  }
+
+  private addLabel(x: number, y: number, text: string, color: string): Phaser.GameObjects.Text {
+    return this.add
+      .text(x, y, text, {
+        fontFamily: FONT,
+        fontSize: '13px',
+        color,
+        stroke: '#000000',
+        strokeThickness: 3,
+      })
+      .setOrigin(0.5, 1)
+      .setDepth(UI_DEPTH - 2);
+  }
+
+  private updateNpcMarkers(): void {
+    const { player, config } = this.world;
+    for (const { npc, marker } of this.npcViews) {
+      const statuses = questsForNpc(config, npc.id).map((quest) =>
+        questStatus(quest, player.quests, player.level, player.bag),
+      );
+      const text = statuses.includes('ready') ? '?' : statuses.includes('available') ? '!' : '';
+      if (marker.text !== text) marker.setText(text);
+    }
+  }
+
+  private addUnitView(unit: Unit, texture: string, scale = 1): void {
     const { x, y } = toScreen(unit.pos);
-    const sprite = this.add.sprite(x, y, texture, 0).setOrigin(0.5, SHEET.originY);
+    const sprite = this.add.sprite(x, y, texture, 0).setOrigin(0.5, SHEET.originY).setScale(scale);
     const hpBar = unit === this.world.player ? null : this.add.graphics().setDepth(UI_DEPTH - 1);
     this.unitViews.set(unit, {
       unit,
@@ -160,7 +237,7 @@ export class GameScene extends Phaser.Scene {
       if (unit.hp > 0 && unit.hp < unit.stats.maxHp) {
         const width = 40;
         const left = screen.x - width / 2;
-        const barY = screen.y - 44;
+        const barY = screen.y - 44 * view.sprite.scale;
         view.hpBar.fillStyle(0x000000, 0.7).fillRect(left - 1, barY - 1, width + 2, 6);
         view.hpBar.fillStyle(0xd83a30, 1).fillRect(left, barY, (width * unit.hp) / unit.stats.maxHp, 4);
       }
@@ -178,7 +255,8 @@ export class GameScene extends Phaser.Scene {
       hoveredView?.sprite.setTint(HOVER_TINT);
       this.hovered = hoveredView;
     }
-    this.input.setDefaultCursor(hovered || this.itemAt(world.x, world.y) ? 'pointer' : 'default');
+    const clickable = hovered || this.npcAt(world.x, world.y) || this.itemAt(world.x, world.y);
+    this.input.setDefaultCursor(clickable ? 'pointer' : 'default');
 
     const cell = toCell(world.x, world.y);
     this.tileCursor.clear();
@@ -205,6 +283,11 @@ export class GameScene extends Phaser.Scene {
     const monster = this.monsterAt(world.x, world.y);
     if (monster) {
       this.world.attack(monster);
+      return;
+    }
+    const npc = this.npcAt(world.x, world.y);
+    if (npc) {
+      this.world.talkTo(npc);
       return;
     }
     const item = this.itemAt(world.x, world.y);
@@ -240,6 +323,15 @@ export class GameScene extends Phaser.Scene {
       }
     }
     return best;
+  }
+
+  private npcAt(worldX: number, worldY: number): NpcDef | null {
+    for (const npc of this.world.npcs) {
+      const screen = toScreen(npc);
+      const distance = Phaser.Math.Distance.Between(worldX, worldY, screen.x, screen.y - 30);
+      if (distance < TARGET_RADIUS) return npc;
+    }
+    return null;
   }
 
   private itemAt(worldX: number, worldY: number): GroundItem | null {
@@ -302,6 +394,25 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'mana':
         this.floatText(this.world.player, `+${event.amount}`, '#7bb8ff', 18);
+        break;
+      case 'mapChanged':
+        this.buildMap();
+        this.hud.log(`来到${this.world.map.name}`);
+        break;
+      case 'npcOpened':
+        this.npcPanel.open(event.npc);
+        break;
+      case 'questAccepted':
+        this.hud.log(`接受任务：${event.name}`, 'gain');
+        break;
+      case 'questProgress':
+        this.hud.log(`任务进度：${event.name}`);
+        break;
+      case 'questCompleted':
+        this.hud.log(`完成任务：${event.name}`, 'gain');
+        break;
+      case 'goldChanged':
+        this.hud.log(`灵石 ${event.amount > 0 ? '+' : ''}${event.amount}`);
         break;
       case 'expGained':
         this.hud.log(`获得 ${event.amount} 点经验`);

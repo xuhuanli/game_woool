@@ -11,6 +11,10 @@ const IMPORTANT_EVENTS = new Set<GameEvent['type']>([
   'levelUp',
   'skillLearned',
   'death',
+  'mapChanged',
+  'questAccepted',
+  'questCompleted',
+  'goldChanged',
 ]);
 
 export class AutoSaver {

@@ -5,11 +5,26 @@
     "stats": {
       "maxHp": 18,
       "maxMp": 0,
-      "attack": { "min": 2, "max": 5 },
-      "magic": { "min": 0, "max": 0 },
-      "dao": { "min": 0, "max": 0 },
-      "defense": { "min": 0, "max": 1 },
-      "magicDefense": { "min": 0, "max": 1 },
+      "attack": {
+        "min": 2,
+        "max": 5
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 0,
+        "max": 1
+      },
+      "magicDefense": {
+        "min": 0,
+        "max": 1
+      },
       "accuracy": 8,
       "evasion": 2,
       "luck": 0
@@ -22,7 +37,12 @@
     "wanderRadius": 3,
     "exp": 12,
     "respawnSeconds": 12,
-    "dropTable": "ash-rat"
+    "dropTable": "ash-rat",
+    "look": {
+      "fur": "#7d7566",
+      "head": "#918876",
+      "scale": 1
+    }
   },
   "gold-bug": {
     "id": "gold-bug",
@@ -30,11 +50,26 @@
     "stats": {
       "maxHp": 30,
       "maxMp": 0,
-      "attack": { "min": 2, "max": 4 },
-      "magic": { "min": 0, "max": 0 },
-      "dao": { "min": 0, "max": 0 },
-      "defense": { "min": 1, "max": 2 },
-      "magicDefense": { "min": 1, "max": 2 },
+      "attack": {
+        "min": 2,
+        "max": 4
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 1,
+        "max": 2
+      },
+      "magicDefense": {
+        "min": 1,
+        "max": 2
+      },
       "accuracy": 10,
       "evasion": 2,
       "luck": 0
@@ -47,6 +82,102 @@
     "wanderRadius": 0,
     "exp": 0,
     "respawnSeconds": 0,
-    "dropTable": "none"
+    "dropTable": "none",
+    "look": {
+      "fur": "#c79a2e",
+      "head": "#e6c35c",
+      "scale": 0.8
+    }
+  },
+  "mountain-ape": {
+    "id": "mountain-ape",
+    "name": "山魈",
+    "stats": {
+      "maxHp": 60,
+      "maxMp": 0,
+      "attack": {
+        "min": 6,
+        "max": 11
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 1,
+        "max": 3
+      },
+      "magicDefense": {
+        "min": 1,
+        "max": 2
+      },
+      "accuracy": 10,
+      "evasion": 3,
+      "luck": 0
+    },
+    "moveSpeed": 2.2,
+    "attackInterval": 1.3,
+    "attackWindup": 0.35,
+    "aggroRange": 5,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 40,
+    "respawnSeconds": 15,
+    "dropTable": "mountain-ape",
+    "look": {
+      "fur": "#5a4634",
+      "head": "#7a5f45",
+      "scale": 1.3
+    }
+  },
+  "flood-serpent": {
+    "id": "flood-serpent",
+    "name": "铁甲蛟",
+    "boss": true,
+    "stats": {
+      "maxHp": 600,
+      "maxMp": 0,
+      "attack": {
+        "min": 14,
+        "max": 24
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 4,
+        "max": 7
+      },
+      "magicDefense": {
+        "min": 3,
+        "max": 6
+      },
+      "accuracy": 14,
+      "evasion": 4,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.6,
+    "attackWindup": 0.5,
+    "aggroRange": 7,
+    "leashRange": 12,
+    "wanderRadius": 2,
+    "exp": 800,
+    "respawnSeconds": 180,
+    "dropTable": "flood-serpent",
+    "look": {
+      "fur": "#2f6b6b",
+      "head": "#3f8f8f",
+      "scale": 2.2
+    }
   }
 }

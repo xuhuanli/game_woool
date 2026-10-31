@@ -26,7 +26,7 @@ const realConfig = Object.fromEntries(
 /** 只有下品的品阶表，让法器属性固定。 */
 const plainGrades: AffixConfig = {
   ...realConfig.affixes,
-  grades: [{ id: 'low', name: '下品', color: '#fff', weight: 1, affixes: 0 }],
+  grades: [{ id: 'low', name: '下品', color: '#fff', weight: 1, affixes: 0, sellMultiplier: 1 }],
 };
 
 const realmConfig = () => realConfig.realms;

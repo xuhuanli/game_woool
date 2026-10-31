@@ -1,8 +1,9 @@
 import type { Cell } from '../game/config';
 import type { EquipSlot, Equipment } from '../game/equipment';
+import type { QuestState } from '../game/quests';
 import type { HotbarEntry } from '../game/world';
 
-export const SAVE_VERSION = 1;
+export const SAVE_VERSION = 2;
 
 export interface SavedPlayer {
   name: string;
@@ -18,6 +19,7 @@ export interface SavedPlayer {
   equipment: Partial<Record<EquipSlot, Equipment>>;
   skills: string[];
   hotbar: (HotbarEntry | null)[];
+  quests: QuestState;
 }
 
 export interface SaveData {
@@ -28,6 +30,8 @@ export interface SaveData {
   /** 游戏内累计时间（秒） */
   time: number;
   nextId: number;
+  /** Boss 下次刷新的游戏内时间，键是 地图:刷怪点序号 */
+  bossReadyAt: Record<string, number>;
   player: SavedPlayer;
 }
 
@@ -36,7 +40,13 @@ type RawSave = Record<string, unknown>;
 /** 键是旧版本号，函数把该版本的存档升级到下一版。 */
 export type Migrations = Record<number, (save: RawSave) => RawSave>;
 
-export const MIGRATIONS: Migrations = {};
+export const MIGRATIONS: Migrations = {
+  1: (save) => ({
+    ...save,
+    bossReadyAt: {},
+    player: { ...(save.player as object), quests: { active: [], completed: [] } },
+  }),
+};
 
 export class SaveError extends Error {}
 
