@@ -1,6 +1,7 @@
 /** 烘焙名单：每个角色用哪个模型、怎么改色、输出哪些动作。 */
 
 const ADVENTURERS = '/kaykit/adventurers/addons/kaykit_character_pack_adventures';
+const SKELETONS = '/kaykit/skeletons/addons/kaykit_character_pack_skeletons';
 const ENEMIES = '/quaternius/easy-enemies/Easy Animated Enemy Pack - Jan 2019/FBX';
 const MONSTERS = '/quaternius/monsters/FBX';
 
@@ -167,6 +168,12 @@ export const ROSTER: Entry[] = [
   npc('forbidden-guard', '#d9b84a', '#7a2a22'),
   npc('nangong-wan', '#eef2f8', '#6a8ac8'),
   npc('li-huayuan', '#3f4a6a', '#a8342a'),
+  npc('dong-xuaner', '#f0b8c8', '#c86a8a'),
+  npc('yan-host', '#8a6a3a', '#4a3a2a'),
+  npc('mine-steward', '#6a7a8a', '#3a4a5a'),
+  npc('front-commander', '#c8a24a', '#7a2a22'),
+  npc('dong-xuaner-fort', '#f0b8c8', '#c86a8a'),
+  npc('li-huayuan-front', '#3f4a6a', '#a8342a'),
 
   {
     key: 'ash-rat',
@@ -255,6 +262,113 @@ export const ROSTER: Entry[] = [
     size: 1.9,
     humanoid: true,
     hide: ['1H_Sword_Offhand', 'Badge_Shield', 'Rectangle_Shield', 'Round_Shield', 'Spike_Shield', '1H_Sword', 'Knight_Helmet'],
+  },
+  {
+    key: 'yin-soul',
+    model: `${SKELETONS}/Characters/gltf/Skeleton_Minion.glb`,
+    frame: 128,
+    clips: humanoidEnemyClips('Unarmed_Melee_Attack_Punch_A'),
+    size: 1.5,
+    humanoid: true,
+  },
+  {
+    key: 'corpse-puppet',
+    model: `${SKELETONS}/Characters/gltf/Skeleton_Warrior.glb`,
+    frame: 128,
+    clips: humanoidEnemyClips('1H_Melee_Attack_Chop'),
+    size: 1.7,
+    humanoid: true,
+  },
+  {
+    key: 'ghost-disciple',
+    model: `${ADVENTURERS}/Characters/gltf/Mage.glb`,
+    frame: 128,
+    clips: humanoidEnemyClips('Spellcast_Shoot'),
+    size: 1.8,
+    humanoid: true,
+    headScale: 0.84,
+    topknot: true,
+    hide: MAGE_HIDDEN,
+    recolor: robe('#3a2a4a', '#1a1a2a', '#8a7aa0', '#6a5a80'),
+  },
+  {
+    key: 'wang-chan',
+    model: `${ADVENTURERS}/Characters/gltf/Rogue_Hooded.glb`,
+    frame: 192,
+    clips: humanoidEnemyClips('Spellcast_Shoot'),
+    size: 1.9,
+    humanoid: true,
+    hide: ['Knife_Offhand', '1H_Crossbow', '2H_Crossbow', 'Knife', 'Throwable'],
+    recolor: [
+      { col: 0, row: 1, span: 2, color: '#4a3468' },
+      { col: 1, row: 2, color: '#8a1a2a' },
+    ],
+  },
+  {
+    key: 'demon-cultist',
+    model: `${ADVENTURERS}/Characters/gltf/Rogue.glb`,
+    frame: 128,
+    clips: humanoidEnemyClips('1H_Melee_Attack_Stab'),
+    size: 1.7,
+    humanoid: true,
+    hide: ['Knife_Offhand', '1H_Crossbow', '2H_Crossbow', 'Throwable'],
+    recolor: [
+      { col: 0, row: 1, span: 2, color: '#2a1a1a' },
+      { col: 1, row: 2, color: '#8a1a1a' },
+    ],
+  },
+  {
+    key: 'blood-bat',
+    model: `${MONSTERS}/Bat.fbx`,
+    frame: 128,
+    clips: beastClips('_Flying', '_Flying'),
+    size: 1.2,
+    materials: { Main: '#5a1a1a', Belly: '#8a3a2a' },
+  },
+  {
+    key: 'blood-guardian',
+    model: `${ADVENTURERS}/Characters/gltf/Barbarian.glb`,
+    frame: 192,
+    clips: humanoidEnemyClips('2H_Melee_Attack_Chop'),
+    size: 2,
+    humanoid: true,
+    hide: ['Barbarian_Hat', 'Barbarian_Round_Shield', '1H_Axe', '1H_Axe_Offhand', 'Mug'],
+    recolor: [
+      { col: 0, row: 1, span: 2, color: '#6a1010' },
+      { col: 2, row: 2, color: '#3a0a0a' },
+    ],
+  },
+  {
+    key: 'demon-swordsman',
+    model: `${ADVENTURERS}/Characters/gltf/Knight.glb`,
+    frame: 128,
+    clips: humanoidEnemyClips('1H_Melee_Attack_Slice_Diagonal'),
+    size: 1.7,
+    humanoid: true,
+    hide: ['1H_Sword_Offhand', 'Badge_Shield', 'Rectangle_Shield', 'Round_Shield', 'Spike_Shield', '2H_Sword'],
+  },
+  {
+    key: 'poison-toad',
+    model: `${ENEMIES}/Frog.fbx`,
+    frame: 128,
+    clips: beastClips('_Idle', '_Jump'),
+    size: 1.3,
+  },
+  {
+    key: 'demon-sorcerer',
+    model: `${SKELETONS}/Characters/gltf/Skeleton_Mage.glb`,
+    frame: 128,
+    clips: humanoidEnemyClips('Spellcast_Shoot'),
+    size: 1.7,
+    humanoid: true,
+  },
+  {
+    key: 'demon-commander',
+    model: `${SKELETONS}/Characters/gltf/Skeleton_Warrior.glb`,
+    frame: 192,
+    clips: humanoidEnemyClips('2H_Melee_Attack_Spin'),
+    size: 2.1,
+    humanoid: true,
   },
   {
     key: 'flood-serpent',

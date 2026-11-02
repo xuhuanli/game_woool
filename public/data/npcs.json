@@ -56,6 +56,8 @@
     "shop": [
       "small-potion",
       "small-mana",
+      "mid-potion",
+      "mid-mana",
       "refine-stone",
       "recall-scroll",
       "random-scroll",
@@ -96,6 +98,33 @@
         "y": 12,
         "cost": 50,
         "level": 3
+      },
+      {
+        "name": "燕翎堡",
+        "map": "yanling-fort",
+        "x": 12,
+        "y": 12,
+        "cost": 120,
+        "level": 14,
+        "requires": "ch4-invite"
+      },
+      {
+        "name": "灵矿",
+        "map": "spirit-mine",
+        "x": 12,
+        "y": 12,
+        "cost": 200,
+        "level": 18,
+        "requires": "ch4-mine"
+      },
+      {
+        "name": "金鼓原",
+        "map": "jingu-plain",
+        "x": 12,
+        "y": 12,
+        "cost": 300,
+        "level": 21,
+        "requires": "ch4-array"
       }
     ]
   },
@@ -181,5 +210,60 @@
     "y": 15,
     "color": "#3f4a6a",
     "greeting": "li-hy-greeting"
+  },
+  "dong-xuaner": {
+    "id": "dong-xuaner",
+    "name": "董萱儿",
+    "map": "huangfeng-valley",
+    "x": 16,
+    "y": 19,
+    "color": "#f0b8c8",
+    "greeting": "dong-greeting",
+    "hiddenAfter": "ch4-invite"
+  },
+  "dong-xuaner-fort": {
+    "id": "dong-xuaner-fort",
+    "name": "董萱儿",
+    "map": "yanling-fort",
+    "x": 15,
+    "y": 12,
+    "color": "#f0b8c8",
+    "greeting": "dong-fort-greeting"
+  },
+  "yan-host": {
+    "id": "yan-host",
+    "name": "燕家主事",
+    "map": "yanling-fort",
+    "x": 12,
+    "y": 15,
+    "color": "#8a6a3a",
+    "greeting": "yan-greeting"
+  },
+  "mine-steward": {
+    "id": "mine-steward",
+    "name": "灵矿管事",
+    "map": "spirit-mine",
+    "x": 14,
+    "y": 11,
+    "color": "#6a7a8a",
+    "greeting": "mine-greeting"
+  },
+  "front-commander": {
+    "id": "front-commander",
+    "name": "七派统领",
+    "map": "jingu-plain",
+    "x": 15,
+    "y": 11,
+    "color": "#c8a24a",
+    "greeting": "front-greeting"
+  },
+  "li-huayuan-front": {
+    "id": "li-huayuan-front",
+    "name": "李化元",
+    "map": "jingu-plain",
+    "x": 11,
+    "y": 15,
+    "color": "#3f4a6a",
+    "greeting": "li-front-greeting"
   }
 }

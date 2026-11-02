@@ -1017,6 +1017,27 @@ describe('40 级内容', () => {
   });
 });
 
+describe('Boss 仇恨', () => {
+  it('召唤物打 Boss 时，Boss 仍然追玩家；小怪会被召唤物拉走', () => {
+    const world = new World(config, 'taina-mountain', 'spirit', 1);
+    world.player.skills.push('spirit-summon');
+    world.player.mp = world.player.stats.maxMp;
+    world.castSkill('spirit-summon');
+    run(world, 0.6);
+    const [summon] = world.summons;
+    expect(summon).toBeDefined();
+    const boss = world.monsters.find((monster) => monster.def.id === 'flood-serpent')!;
+    const ape = world.monsters.find((monster) => monster.def.id === 'mountain-ape')!;
+    const hit = (monster: typeof boss) =>
+      (world as unknown as { dealDamage(source: unknown, target: unknown, amount: number, max: boolean): void })
+        .dealDamage(summon, monster, 1, false);
+    hit(boss);
+    hit(ape);
+    expect(boss.target).toBe(world.player);
+    expect(ape.target).toBe(summon);
+  });
+});
+
 describe('怪物种类', () => {
   const fight = (monsterId: string) => {
     const setup = structuredClone(config);
@@ -1384,6 +1405,62 @@ describe('章节主线', () => {
     const nangong = config.npcs['nangong-wan']!;
     const boss = config.maps['blood-forbidden']!.spawns.find((spawn) => spawn.monster === 'mo-jiao')!;
     expect(Math.hypot(nangong.x - boss.x, nangong.y - boss.y) - 2).toBeGreaterThan(config.monsters['mo-jiao']!.aggroRange);
+  });
+
+  it('第 4 章：燕翎堡、灵矿、金鼓原，拿到大挪移令后被当作弃子', () => {
+    const world = passChapterOne(new World(config, 'huangfeng-valley', 'body', 1));
+    world.player.quests.completed.push('join-sect', 'ch3-master');
+    world.player.realmPassed.push('qi');
+    const reach = (level: number) => {
+      while (world.player.level < level) {
+        world.player.exp = world.expToNext!;
+        (world as unknown as { gainExp(amount: number): void }).gainExp(0);
+      }
+    };
+    const steps: [string, string?][] = [
+      ['ch4-invite', 'yanling-fort'],
+      ['ch4-souls'],
+      ['ch4-wedding'],
+      ['ch4-breakout'],
+      ['ch4-wangchan', 'huangfeng-valley'],
+      ['ch4-mine', 'spirit-mine'],
+      ['ch4-corpse'],
+      ['ch4-raid'],
+      ['ch4-deep'],
+      ['ch4-array', 'jingu-plain'],
+      ['ch4-front'],
+      ['ch4-toads'],
+      ['ch4-night'],
+      ['ch4-commander'],
+      ['ch4-abandon'],
+    ];
+    for (const [questId, mapId] of steps) {
+      reach(config.quests[questId]!.level);
+      if (questId === 'ch4-array') world.player.bag['great-transfer-token'] = 1;
+      finish(world, questId);
+      if (mapId) expect(world.mapId, questId).toBe(mapId);
+    }
+    expect(world.player.bag['great-transfer-token']).toBe(1);
+    expect(world.npcs.map((npc) => npc.id)).toContain('li-huayuan-front');
+  });
+
+  it('第 4 章的经验大约四成来自任务，Boss 都离 NPC 足够远', () => {
+    const levels = config.levels.expToNext.slice(13, 25).reduce((sum, exp) => sum + exp, 0);
+    const quests = Object.values(config.quests)
+      .filter((quest) => quest.id.startsWith('ch4'))
+      .reduce((sum, quest) => sum + quest.rewards.exp, 0);
+    expect(quests / levels).toBeGreaterThan(0.3);
+    expect(quests / levels).toBeLessThan(0.5);
+    for (const [mapId, bossId] of [
+      ['yanling-fort', 'wang-chan'],
+      ['spirit-mine', 'blood-guardian'],
+      ['jingu-plain', 'demon-commander'],
+    ] as const) {
+      const boss = config.maps[mapId]!.spawns.find((spawn) => spawn.monster === bossId)!;
+      for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === mapId)) {
+        expect(Math.hypot(npc.x - boss.x, npc.y - boss.y) - 2, npc.id).toBeGreaterThan(config.monsters[bossId]!.aggroRange);
+      }
+    }
   });
 
   it('万小山带路后离开，太南谷的传送点要先过第二个任务', () => {

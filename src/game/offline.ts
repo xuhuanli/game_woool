@@ -1,12 +1,26 @@
 import { hitChance } from './combat';
-import type { CombatStats, GameConfig, MapDef } from './config';
+import type { CombatStats, GameConfig, MapDef, MonsterDef, SkillDef } from './config';
 
 export const OFFLINE_MAX_SECONDS = 8 * 3600;
 export const OFFLINE_EFFICIENCY = 0.5;
 export const OFFLINE_MIN_SECONDS = 60;
 export const OFFLINE_MAX_EQUIPMENT = 10;
-/** 每杀一只怪在路上和拾取花的时间 */
-const TRAVEL_SECONDS = 1.5;
+/** 每杀一只怪在路上和拾取花的时间，大地图上怪物稀疏，路要走得久一些 */
+const TRAVEL_SECONDS = 4;
+/** 和 world.ts 的灵力回复一致 */
+const MANA_REGEN_PER_SECOND = 0.03;
+/** 挂机时功法不会每次都在冷却结束就放，召唤物也会死，按模拟实测打折 */
+const SKILL_UPTIME = 0.7;
+const SUMMON_UPTIME = 0.2;
+
+/** 估算收益要用到的角色数据。 */
+export interface Fighter {
+  stats: CombatStats;
+  primary: 'attack' | 'magic' | 'dao';
+  attackInterval: number;
+  /** 已学会的功法和它的威力倍数 */
+  skills: { skill: SkillDef; power: number }[];
+}
 
 export interface IncomeRates {
   expPerSecond: number;
@@ -20,14 +34,50 @@ function average(range: { min: number; max: number }): number {
   return (range.min + range.max) / 2;
 }
 
-/** 按普攻估算在这张地图挂机的每秒收益，不算 Boss 和技能。 */
-export function estimateIncome(
-  config: GameConfig,
-  map: MapDef,
-  stats: CombatStats,
-  primary: 'attack' | 'magic' | 'dao',
-  attackInterval: number,
-): IncomeRates {
+/**
+ * 估算对一只怪的每秒伤害：普攻加上功法。
+ * 功法按每点灵力的伤害从高到低排，灵力回复跟不上时少放；放功法的时间不再普攻。
+ */
+function damagePerSecond(config: GameConfig, fighter: Fighter, monster: MonsterDef): number {
+  const { stats, primary, attackInterval } = fighter;
+  const defenseOf = (stat: 'attack' | 'magic' | 'dao') =>
+    average(stat === 'attack' ? monster.stats.defense : monster.stats.magicDefense);
+  const hit = hitChance(stats, monster.stats);
+  const basic = (Math.max(1, average(stats[primary]) - defenseOf(primary)) * hit) / attackInterval;
+
+  let summon = 0;
+  const casts: { damage: number; rate: number; mana: number }[] = [];
+  for (const { skill, power } of fighter.skills) {
+    const { effect } = skill;
+    if (effect.type === 'damage') {
+      const damage = Math.max(1, average(stats[effect.stat]) * effect.multiplier * power - defenseOf(effect.stat)) * hit;
+      casts.push({ damage, rate: 1 / Math.max(skill.cooldown, attackInterval), mana: skill.mpCost });
+    } else if (effect.type === 'dot') {
+      const damage = stats[effect.stat].max * effect.multiplier * power * (effect.duration / effect.interval);
+      casts.push({ damage, rate: 1 / Math.max(skill.cooldown, effect.duration), mana: skill.mpCost });
+    } else if (effect.type === 'summon') {
+      const pet = config.monsters[effect.monster];
+      if (!pet) continue;
+      const perHit = Math.max(1, average(stats.dao) - average(monster.stats.defense));
+      summon = Math.max(summon, (perHit * hitChance(stats, monster.stats)) / pet.attackInterval);
+    }
+  }
+
+  let mana = stats.maxMp * MANA_REGEN_PER_SECOND;
+  let busy = 0;
+  let skillDamage = 0;
+  casts.sort((a, b) => b.damage / Math.max(1, b.mana) - a.damage / Math.max(1, a.mana));
+  for (const cast of casts) {
+    const rate = cast.mana > 0 ? Math.min(cast.rate, mana / cast.mana) : cast.rate;
+    mana -= rate * cast.mana;
+    busy += rate * attackInterval;
+    skillDamage += rate * cast.damage;
+  }
+  return basic * Math.max(0, 1 - busy) + skillDamage * SKILL_UPTIME + summon * SUMMON_UPTIME;
+}
+
+/** 估算在这张地图挂机的每秒收益，不算 Boss。 */
+export function estimateIncome(config: GameConfig, map: MapDef, fighter: Fighter): IncomeRates {
   let seconds = 0;
   let exp = 0;
   let gold = 0;
@@ -36,10 +86,7 @@ export function estimateIncome(
   for (const spawn of map.spawns) {
     const monster = config.monsters[spawn.monster];
     if (!monster || monster.boss) continue;
-    const defense = primary === 'attack' ? monster.stats.defense : monster.stats.magicDefense;
-    const perHit = Math.max(1, average(stats[primary]) - average(defense));
-    const perSecond = (perHit * hitChance(stats, monster.stats)) / attackInterval;
-    seconds += monster.stats.maxHp / perSecond + TRAVEL_SECONDS;
+    seconds += monster.stats.maxHp / damagePerSecond(config, fighter, monster) + TRAVEL_SECONDS;
     exp += monster.exp;
     kills += 1;
     for (const entry of config.drops[monster.dropTable] ?? []) {

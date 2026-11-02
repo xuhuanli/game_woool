@@ -455,5 +455,327 @@
       "item": "guard-ring",
       "chance": 0.1
     }
+  ],
+  "yan-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 15,
+      "max": 26
+    },
+    {
+      "item": "mid-potion",
+      "chance": 0.15
+    },
+    {
+      "item": "mid-mana",
+      "chance": 0.12
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.02
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.012
+    },
+    {
+      "item": "sword-14",
+      "chance": 0.004
+    },
+    {
+      "item": "robe-14",
+      "chance": 0.006
+    },
+    {
+      "item": "crown-14",
+      "chance": 0.006
+    },
+    {
+      "item": "pendant-14",
+      "chance": 0.006
+    },
+    {
+      "item": "bracelet-14",
+      "chance": 0.006
+    },
+    {
+      "item": "ring-14",
+      "chance": 0.006
+    }
+  ],
+  "mine-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 24,
+      "max": 38
+    },
+    {
+      "item": "mid-potion",
+      "chance": 0.15
+    },
+    {
+      "item": "mid-mana",
+      "chance": 0.12
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.02
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.012
+    },
+    {
+      "item": "sword-14",
+      "chance": 0.0064
+    },
+    {
+      "item": "robe-14",
+      "chance": 0.009600000000000001
+    },
+    {
+      "item": "crown-14",
+      "chance": 0.009600000000000001
+    },
+    {
+      "item": "pendant-14",
+      "chance": 0.009600000000000001
+    },
+    {
+      "item": "bracelet-14",
+      "chance": 0.009600000000000001
+    },
+    {
+      "item": "ring-14",
+      "chance": 0.009600000000000001
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    }
+  ],
+  "front-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 32,
+      "max": 50
+    },
+    {
+      "item": "mid-potion",
+      "chance": 0.15
+    },
+    {
+      "item": "mid-mana",
+      "chance": 0.12
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.02
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.012
+    },
+    {
+      "item": "sword-14",
+      "chance": 0.0064
+    },
+    {
+      "item": "robe-14",
+      "chance": 0.009600000000000001
+    },
+    {
+      "item": "crown-14",
+      "chance": 0.009600000000000001
+    },
+    {
+      "item": "pendant-14",
+      "chance": 0.009600000000000001
+    },
+    {
+      "item": "bracelet-14",
+      "chance": 0.009600000000000001
+    },
+    {
+      "item": "ring-14",
+      "chance": 0.009600000000000001
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "sword-27",
+      "chance": 0.002
+    },
+    {
+      "item": "robe-27",
+      "chance": 0.002
+    },
+    {
+      "item": "crown-27",
+      "chance": 0.002
+    },
+    {
+      "item": "pendant-27",
+      "chance": 0.002
+    },
+    {
+      "item": "bracelet-27",
+      "chance": 0.002
+    },
+    {
+      "item": "ring-27",
+      "chance": 0.002
+    }
+  ],
+  "wang-chan": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 800,
+      "max": 1400
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 2,
+      "max": 3
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.8
+    },
+    {
+      "item": "sword-14",
+      "chance": 0.3
+    },
+    {
+      "item": "robe-14",
+      "chance": 0.3
+    },
+    {
+      "item": "crown-14",
+      "chance": 0.3
+    },
+    {
+      "item": "pendant-14",
+      "chance": 0.3
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.12
+    }
+  ],
+  "blood-guardian": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 1200,
+      "max": 2000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 2,
+      "max": 3
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.8
+    },
+    {
+      "item": "great-transfer-token",
+      "chance": 1
+    },
+    {
+      "item": "bracelet-14",
+      "chance": 0.3
+    },
+    {
+      "item": "ring-14",
+      "chance": 0.3
+    },
+    {
+      "item": "sword-14",
+      "chance": 0.3
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.1
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.1
+    }
+  ],
+  "demon-commander": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 2000,
+      "max": 3200
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 2,
+      "max": 3
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.8
+    },
+    {
+      "item": "sword-27",
+      "chance": 0.15
+    },
+    {
+      "item": "robe-27",
+      "chance": 0.15
+    },
+    {
+      "item": "crown-27",
+      "chance": 0.15
+    },
+    {
+      "item": "ring-27",
+      "chance": 0.15
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.1
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.1
+    }
   ]
 }

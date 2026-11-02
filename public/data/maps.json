@@ -85,5 +85,47 @@
       "color": "#c84a3a",
       "alpha": 0.14
     }
+  },
+  "yanling-fort": {
+    "id": "yanling-fort",
+    "name": "燕翎堡",
+    "tiled": "yanling-fort.tmj",
+    "respawn": {
+      "map": "huangfeng-valley",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#9a7aa0",
+      "alpha": 0.08
+    }
+  },
+  "spirit-mine": {
+    "id": "spirit-mine",
+    "name": "灵矿",
+    "tiled": "spirit-mine.tmj",
+    "respawn": {
+      "map": "huangfeng-valley",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#6a7a9a",
+      "alpha": 0.12
+    }
+  },
+  "jingu-plain": {
+    "id": "jingu-plain",
+    "name": "金鼓原",
+    "tiled": "jingu-plain.tmj",
+    "respawn": {
+      "map": "huangfeng-valley",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#c8a06a",
+      "alpha": 0.08
+    }
   }
 }

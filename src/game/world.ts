@@ -18,6 +18,7 @@ import { cellDistance, Grid, sameCell } from './grid';
 import { Inventory } from './inventory';
 import {
   estimateIncome,
+  type Fighter,
   OFFLINE_EFFICIENCY,
   OFFLINE_MAX_EQUIPMENT,
   OFFLINE_MAX_SECONDS,
@@ -461,7 +462,21 @@ export class World {
     return running && (order?.type === 'move' || order?.type === 'talk' || order?.type === 'pickup');
   }
 
-  /** 结算闭关收益：最多 8 小时，效率为在线的一半，只有经验和灵石。 */
+  /** 闭关估算用的角色数据：属性、普攻和已学会的功法。 */
+  offlineFighter(): Fighter {
+    const { player, config } = this;
+    return {
+      stats: player.stats,
+      primary: player.def.primaryStat,
+      attackInterval: player.attackInterval,
+      skills: player.skills.flatMap((id) => {
+        const skill = config.skills[id];
+        return skill ? [{ skill, power: this.inventory.skillPower(id) }] : [];
+      }),
+    };
+  }
+
+  /** 结算闭关收益：最多 8 小时，效率为在线的一半，有经验、灵石和普通法器。 */
   settleOffline(savedAt: number, now: number): OfflineReport | null {
     const player = this.player;
     const seconds = Math.min((now - savedAt) / 1000, OFFLINE_MAX_SECONDS);
@@ -470,13 +485,7 @@ export class World {
     const mapId = player.lastFieldMap ?? Object.values(this.config.maps).find((map) => !map.safe)?.id;
     const map = mapId ? this.config.maps[mapId] : undefined;
     if (!map) return null;
-    const income = estimateIncome(
-      this.config,
-      map,
-      player.stats,
-      player.def.primaryStat,
-      player.attackInterval,
-    );
+    const income = estimateIncome(this.config, map, this.offlineFighter());
     const { expPerSecond, goldPerSecond } = income;
     const exp = Math.floor(expPerSecond * seconds * OFFLINE_EFFICIENCY);
     let gold = Math.floor(goldPerSecond * seconds * OFFLINE_EFFICIENCY);
@@ -1311,7 +1320,12 @@ export class World {
     const monster = this.monsters.find((candidate) => candidate === target);
     if (!monster || monster.mode === 'return') return;
     monster.mode = 'chase';
-    monster.target = source;
+    monster.target = this.ignoresSummons(monster) && source !== this.player ? this.player : source;
+  }
+
+  /** Boss 只盯着玩家，召唤物抢不走仇恨。 */
+  private ignoresSummons(monster: Monster): boolean {
+    return !!monster.def.boss && this.player.hp > 0;
   }
 
   /** 死亡时按概率随机掉 1 件身上的法器，低等级和短时间内连死不掉。 */
@@ -1565,7 +1579,8 @@ export class World {
   private nearestHostile(monster: Monster): Unit | null {
     let best: Unit | null = null;
     let bestDistance = monster.def.aggroRange + 1;
-    for (const unit of [this.player, ...this.summons]) {
+    const candidates = this.ignoresSummons(monster) ? [this.player] : [this.player, ...this.summons];
+    for (const unit of candidates) {
       const distance = cellDistance(monster.cell, unit.cell);
       if (unit.hp > 0 && distance < bestDistance) {
         best = unit;

@@ -3,15 +3,25 @@
  * 用法：npm run sim
  */
 import { estimateIncome, OFFLINE_EFFICIENCY } from '../src/game/offline';
+import { pendingBreakthrough } from '../src/game/realm';
 import { loadConfigFromDisk } from '../src/game/testConfig';
 import { TICK_SECONDS, World } from '../src/game/world';
 
-const MAX_HOURS = 12;
-const TARGET_LEVEL = 13;
+const MAX_HOURS = 24;
+const TARGET_LEVEL = 26;
 const SEEDS = [1, 2, 3];
-const FIELD_LEVEL = 6;
+/** 按等级选挂机地图，和各章节的等级段一致 */
+const FIELDS: [number, string][] = [
+  [22, 'jingu-plain'],
+  [18, 'spirit-mine'],
+  [14, 'yanling-fort'],
+  [11, 'blood-forbidden'],
+  [6, 'taina-mountain'],
+  [1, 'starter-field'],
+];
 const POTIONS_PER_TRIP = 10;
-const POTION_ID = 'small-potion';
+/** 14 级起改买养元丹，回春丹到燕翎堡就不够用了。 */
+const potionFor = (level: number) => (level >= 14 ? 'mid-potion' : 'small-potion');
 
 const config = await loadConfigFromDisk();
 
@@ -31,7 +41,7 @@ interface Result {
 }
 
 function bestField(world: World): string {
-  return world.player.level >= FIELD_LEVEL ? 'taina-mountain' : 'starter-field';
+  return FIELDS.find(([level]) => world.player.level >= level)![1];
 }
 
 function primaryBonus(world: World, itemId: string): number {
@@ -41,10 +51,11 @@ function primaryBonus(world: World, itemId: string): number {
 /** 回城补给：买药，把背包里更好的武器换上。 */
 function resupply(world: World): void {
   const { player, inventory } = world;
-  const price = config.items[POTION_ID]?.price ?? 0;
-  while ((player.bag[POTION_ID] ?? 0) < POTIONS_PER_TRIP && player.gold >= price) {
+  const potionId = potionFor(player.level);
+  const price = config.items[potionId]?.price ?? 0;
+  while ((player.bag[potionId] ?? 0) < POTIONS_PER_TRIP && player.gold >= price) {
     player.gold -= price;
-    inventory.addToBag(POTION_ID, 1);
+    inventory.addToBag(potionId, 1);
   }
   for (const equipment of [...player.equipBag]) {
     const worn = player.equipment.weapon;
@@ -58,6 +69,17 @@ function resupply(world: World): void {
     player.equipBag.pop();
     player.gold += world.sellPrice(equipment);
   }
+}
+
+/** 修为圆满时补齐突破材料并冲关，主线里这些材料都能拿到。 */
+function breakThrough(world: World): void {
+  const { player } = world;
+  const realm = pendingBreakthrough(config.realms, player.level, player.realmPassed);
+  if (!realm?.breakthrough || world.expToNext === null || player.exp < world.expToNext) return;
+  for (const { item, count } of realm.breakthrough.requires) {
+    player.bag[item] = Math.max(player.bag[item] ?? 0, count);
+  }
+  world.attemptBreakthrough();
 }
 
 function simulate(classId: string, seed: number): Result {
@@ -93,6 +115,7 @@ function simulate(classId: string, seed: number): Result {
     windowSeconds += TICK_SECONDS;
 
     if (!player.hp) continue;
+    breakThrough(world);
     if (world.map.safe) {
       recalls += player.auto.enabled ? 0 : 1;
       player.hp = player.stats.maxHp;
@@ -106,7 +129,7 @@ function simulate(classId: string, seed: number): Result {
   }
 
   const map = config.maps[bestField(world)]!;
-  const estimate = estimateIncome(config, map, player.stats, player.def.primaryStat, player.attackInterval);
+  const estimate = estimateIncome(config, map, world.offlineFighter());
   const hours = world.time / 3600;
   return {
     classId,
@@ -128,18 +151,18 @@ const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0)
 const round = (value: number) => Math.round(value).toLocaleString('en-US');
 
 console.log(`模拟：挂机到 ${TARGET_LEVEL} 级，最多 ${MAX_HOURS} 小时，每职业 ${SEEDS.length} 个种子。\n`);
-console.log('| 职业 | 到 5 级（分） | 到 10 级（分） | 到 13 级（分） | 总时长（时） | 死亡 | 回城 | 法器 | 经验/时 | 灵石/时 |');
-console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+console.log('| 职业 | 到 5 级 | 到 10 级 | 到 13 级 | 到 18 级 | 到 22 级 | 到 26 级 | 死亡 | 回城 | 法器 | 经验/时 | 灵石/时 |');
+console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
 const rows: Result[][] = [];
 for (const classId of Object.keys(config.classes)) {
   const runs = SEEDS.map((seed) => simulate(classId, seed));
   rows.push(runs);
   const at = (level: number) => {
     const times = runs.map((run) => run.levelTimes.get(level)).filter((time) => time !== undefined);
-    return times.length === runs.length ? round(mean(times) / 60) : '未到';
+    return times.length === runs.length ? `${(mean(times) / 3600).toFixed(1)} 时` : '未到';
   };
   console.log(
-    `| ${config.classes[classId]!.name} | ${at(5)} | ${at(10)} | ${at(13)} | ${mean(runs.map((run) => run.hours)).toFixed(1)} | ` +
+    `| ${config.classes[classId]!.name} | ${at(5)} | ${at(10)} | ${at(13)} | ${at(18)} | ${at(22)} | ${at(26)} | ` +
       `${round(mean(runs.map((run) => run.deaths)))} | ${round(mean(runs.map((run) => run.recalls)))} | ` +
       `${round(mean(runs.map((run) => run.equipment)))} | ${round(mean(runs.map((run) => run.expPerHour)))} | ` +
       `${round(mean(runs.map((run) => run.goldPerHour)))} |`,

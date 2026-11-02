@@ -1102,5 +1102,701 @@
         "message": "墨蛟蜕下旧鳞，凶性大发"
       }
     ]
+  },
+  "yin-soul": {
+    "id": "yin-soul",
+    "name": "阴魂",
+    "stats": {
+      "maxHp": 150,
+      "maxMp": 0,
+      "attack": {
+        "min": 14,
+        "max": 19
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 4,
+        "max": 6
+      },
+      "magicDefense": {
+        "min": 4,
+        "max": 6
+      },
+      "accuracy": 25,
+      "evasion": 6,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.0,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 190,
+    "respawnSeconds": 20,
+    "dropTable": "yan-band",
+    "look": {
+      "fur": "#8a9aa0",
+      "head": "#c8d8e0",
+      "scale": 1
+    }
+  },
+  "ghost-disciple": {
+    "id": "ghost-disciple",
+    "name": "鬼灵门弟子",
+    "stats": {
+      "maxHp": 140,
+      "maxMp": 0,
+      "attack": {
+        "min": 14,
+        "max": 20
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 4,
+        "max": 6
+      },
+      "magicDefense": {
+        "min": 4,
+        "max": 6
+      },
+      "accuracy": 26,
+      "evasion": 7,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 210,
+    "respawnSeconds": 20,
+    "dropTable": "yan-band",
+    "look": {
+      "fur": "#3a2a4a",
+      "head": "#8a7aa0",
+      "scale": 1
+    },
+    "attackRange": 4,
+    "abilities": [
+      {
+        "id": "ghost-bolt",
+        "name": "鬼火",
+        "cooldown": 7,
+        "windup": 0.7,
+        "color": "#7aa0ff",
+        "range": 5,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.2
+      }
+    ]
+  },
+  "wang-chan": {
+    "id": "wang-chan",
+    "name": "王蝉",
+    "stats": {
+      "maxHp": 1800,
+      "maxMp": 0,
+      "attack": {
+        "min": 17,
+        "max": 24
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 6,
+        "max": 9
+      },
+      "magicDefense": {
+        "min": 6,
+        "max": 9
+      },
+      "accuracy": 27,
+      "evasion": 7,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 9000,
+    "respawnSeconds": 300,
+    "dropTable": "wang-chan",
+    "look": {
+      "fur": "#1a1a24",
+      "head": "#5a1a2a",
+      "scale": 1.1
+    },
+    "attackRange": 4,
+    "abilities": [
+      {
+        "id": "blood-art",
+        "name": "血灵大法",
+        "cooldown": 7,
+        "windup": 0.9,
+        "color": "#c83a3a",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.3
+      },
+      {
+        "id": "yin-fire",
+        "name": "阴火阵",
+        "cooldown": 12,
+        "windup": 1.1,
+        "color": "#7a5aff",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.5
+      },
+      {
+        "id": "call-soul",
+        "name": "招魂",
+        "cooldown": 18,
+        "windup": 0.8,
+        "color": "#b48cff",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "yin-soul",
+          "count": 2
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.3,
+        "attackMultiplier": 1.3,
+        "message": "王蝉催动血灵大法，煞气冲天"
+      }
+    ]
+  },
+  "corpse-puppet": {
+    "id": "corpse-puppet",
+    "name": "尸傀",
+    "stats": {
+      "maxHp": 240,
+      "maxMp": 0,
+      "attack": {
+        "min": 19,
+        "max": 26
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 8,
+        "max": 10
+      },
+      "magicDefense": {
+        "min": 8,
+        "max": 10
+      },
+      "accuracy": 29,
+      "evasion": 7,
+      "luck": 0
+    },
+    "moveSpeed": 2.0,
+    "attackInterval": 1.4,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 300,
+    "respawnSeconds": 20,
+    "dropTable": "mine-band",
+    "look": {
+      "fur": "#c8c0b0",
+      "head": "#e0d8c8",
+      "scale": 1
+    }
+  },
+  "demon-cultist": {
+    "id": "demon-cultist",
+    "name": "魔道修士",
+    "stats": {
+      "maxHp": 210,
+      "maxMp": 0,
+      "attack": {
+        "min": 20,
+        "max": 27
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 7,
+        "max": 9
+      },
+      "magicDefense": {
+        "min": 7,
+        "max": 9
+      },
+      "accuracy": 30,
+      "evasion": 8,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 320,
+    "respawnSeconds": 20,
+    "dropTable": "mine-band",
+    "look": {
+      "fur": "#2a1a1a",
+      "head": "#8a1a1a",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "cultist-charge",
+        "name": "突袭",
+        "cooldown": 9,
+        "windup": 0.7,
+        "color": "#ffb347",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.3,
+        "charge": true
+      }
+    ]
+  },
+  "blood-bat": {
+    "id": "blood-bat",
+    "name": "血蝠",
+    "stats": {
+      "maxHp": 170,
+      "maxMp": 0,
+      "attack": {
+        "min": 18,
+        "max": 24
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 6,
+        "max": 8
+      },
+      "magicDefense": {
+        "min": 6,
+        "max": 8
+      },
+      "accuracy": 30,
+      "evasion": 8,
+      "luck": 0
+    },
+    "moveSpeed": 3.2,
+    "attackInterval": 0.9,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 290,
+    "respawnSeconds": 20,
+    "dropTable": "mine-band",
+    "look": {
+      "fur": "#5a1a1a",
+      "head": "#8a3a2a",
+      "scale": 1
+    }
+  },
+  "blood-guardian": {
+    "id": "blood-guardian",
+    "name": "血煞护法",
+    "stats": {
+      "maxHp": 2400,
+      "maxMp": 0,
+      "attack": {
+        "min": 21,
+        "max": 28
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 8,
+        "max": 11
+      },
+      "magicDefense": {
+        "min": 8,
+        "max": 11
+      },
+      "accuracy": 31,
+      "evasion": 8,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 14000,
+    "respawnSeconds": 300,
+    "dropTable": "blood-guardian",
+    "look": {
+      "fur": "#6a1010",
+      "head": "#3a0a0a",
+      "scale": 1.15
+    },
+    "abilities": [
+      {
+        "id": "blood-charge",
+        "name": "血煞冲",
+        "cooldown": 8,
+        "windup": 0.7,
+        "color": "#ff4a3a",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.3,
+        "charge": true
+      },
+      {
+        "id": "blood-quake",
+        "name": "裂地",
+        "cooldown": 11,
+        "windup": 1.1,
+        "color": "#c83a3a",
+        "range": 2,
+        "shape": "around",
+        "size": 3,
+        "multiplier": 1.4
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.35,
+        "attackMultiplier": 1.3,
+        "message": "血煞护法血气翻涌"
+      }
+    ]
+  },
+  "demon-swordsman": {
+    "id": "demon-swordsman",
+    "name": "魔道剑修",
+    "stats": {
+      "maxHp": 300,
+      "maxMp": 0,
+      "attack": {
+        "min": 25,
+        "max": 33
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 10,
+        "max": 12
+      },
+      "magicDefense": {
+        "min": 10,
+        "max": 12
+      },
+      "accuracy": 33,
+      "evasion": 8,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 430,
+    "respawnSeconds": 20,
+    "dropTable": "front-band",
+    "look": {
+      "fur": "#8d939c",
+      "head": "#d0d4da",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "sword-rush",
+        "name": "剑气",
+        "cooldown": 8,
+        "windup": 0.7,
+        "color": "#d0e0ff",
+        "range": 4,
+        "shape": "line",
+        "size": 4,
+        "multiplier": 1.3
+      }
+    ]
+  },
+  "poison-toad": {
+    "id": "poison-toad",
+    "name": "毒蟾",
+    "stats": {
+      "maxHp": 280,
+      "maxMp": 0,
+      "attack": {
+        "min": 22,
+        "max": 30
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 9,
+        "max": 11
+      },
+      "magicDefense": {
+        "min": 9,
+        "max": 11
+      },
+      "accuracy": 33,
+      "evasion": 8,
+      "luck": 0
+    },
+    "moveSpeed": 2.0,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 410,
+    "respawnSeconds": 20,
+    "dropTable": "front-band",
+    "look": {
+      "fur": "#4a7a3a",
+      "head": "#8ab86a",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "toad-spit",
+        "name": "毒涎",
+        "cooldown": 7,
+        "windup": 0.6,
+        "color": "#7ddc6f",
+        "range": 4,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 0.9,
+        "poison": {
+          "damage": 8,
+          "duration": 6
+        }
+      }
+    ]
+  },
+  "demon-sorcerer": {
+    "id": "demon-sorcerer",
+    "name": "魔道法修",
+    "stats": {
+      "maxHp": 260,
+      "maxMp": 0,
+      "attack": {
+        "min": 25,
+        "max": 34
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 8,
+        "max": 10
+      },
+      "magicDefense": {
+        "min": 12,
+        "max": 15
+      },
+      "accuracy": 34,
+      "evasion": 9,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 450,
+    "respawnSeconds": 20,
+    "dropTable": "front-band",
+    "look": {
+      "fur": "#d0d0c0",
+      "head": "#7a5aff",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "dark-bolt",
+        "name": "魔焰",
+        "cooldown": 7,
+        "windup": 0.8,
+        "color": "#a05aff",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.2
+      }
+    ]
+  },
+  "demon-commander": {
+    "id": "demon-commander",
+    "name": "魔道统领",
+    "stats": {
+      "maxHp": 3200,
+      "maxMp": 0,
+      "attack": {
+        "min": 25,
+        "max": 33
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 10,
+        "max": 13
+      },
+      "magicDefense": {
+        "min": 10,
+        "max": 13
+      },
+      "accuracy": 35,
+      "evasion": 9,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 22000,
+    "respawnSeconds": 300,
+    "dropTable": "demon-commander",
+    "look": {
+      "fur": "#c8c0b0",
+      "head": "#3a2a4a",
+      "scale": 1.2
+    },
+    "abilities": [
+      {
+        "id": "spin-slash",
+        "name": "旋斩",
+        "cooldown": 9,
+        "windup": 1.0,
+        "color": "#ff6a4a",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.4
+      },
+      {
+        "id": "war-charge",
+        "name": "冲阵",
+        "cooldown": 10,
+        "windup": 0.7,
+        "color": "#ffb347",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.3,
+        "charge": true
+      },
+      {
+        "id": "call-guard",
+        "name": "召兵",
+        "cooldown": 20,
+        "windup": 0.8,
+        "color": "#b48cff",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "corpse-puppet",
+          "count": 2
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.3,
+        "attackMultiplier": 1.3,
+        "message": "魔道统领杀红了眼"
+      }
+    ]
   }
 }

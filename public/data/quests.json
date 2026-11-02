@@ -646,6 +646,411 @@
     "finish": "ch3-master-finish",
     "prev": "ch3-serpent"
   },
+  "ch4-invite": {
+    "id": "ch4-invite",
+    "name": "燕翎堡之约",
+    "giver": "dong-xuaner",
+    "level": 14,
+    "main": true,
+    "summary": "去李化元师父那里说一声，再随董萱儿去燕翎堡。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "li-huayuan",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 3500,
+      "gold": 300,
+      "items": [],
+      "teleport": {
+        "map": "yanling-fort",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch4-invite-offer",
+    "finish": "ch4-invite-finish",
+    "prev": "ch3-master"
+  },
+  "ch4-souls": {
+    "id": "ch4-souls",
+    "name": "堡外阴魂",
+    "giver": "yan-host",
+    "level": 14,
+    "main": true,
+    "summary": "击败堡外游荡的 8 只阴魂。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "yin-soul",
+        "count": 8
+      }
+    ],
+    "rewards": {
+      "exp": 7000,
+      "gold": 500,
+      "items": [
+        {
+          "item": "mid-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch4-souls-offer",
+    "finish": "ch4-souls-finish",
+    "prev": "ch4-invite"
+  },
+  "ch4-wedding": {
+    "id": "ch4-wedding",
+    "name": "夺宝大会",
+    "giver": "dong-xuaner-fort",
+    "level": 15,
+    "main": true,
+    "summary": "去燕家主事那里打听婚礼和大会的安排。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "yan-host",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 4500,
+      "gold": 300,
+      "items": []
+    },
+    "offer": "ch4-wedding-offer",
+    "finish": "ch4-wedding-finish",
+    "prev": "ch4-souls"
+  },
+  "ch4-breakout": {
+    "id": "ch4-breakout",
+    "name": "血祭突围",
+    "giver": "dong-xuaner-fort",
+    "level": 15,
+    "main": true,
+    "summary": "击败 10 名布阵的鬼灵门弟子，杀出燕翎堡。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "ghost-disciple",
+        "count": 10
+      }
+    ],
+    "rewards": {
+      "exp": 11500,
+      "gold": 800,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "ch4-breakout-offer",
+    "finish": "ch4-breakout-finish",
+    "prev": "ch4-wedding"
+  },
+  "ch4-wangchan": {
+    "id": "ch4-wangchan",
+    "name": "王蝉追杀",
+    "giver": "dong-xuaner-fort",
+    "level": 16,
+    "main": true,
+    "summary": "击退追杀而来的鬼灵门少主王蝉。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "wang-chan",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 16000,
+      "gold": 1500,
+      "items": [],
+      "teleport": {
+        "map": "huangfeng-valley",
+        "x": 20,
+        "y": 24
+      }
+    },
+    "offer": "ch4-wangchan-offer",
+    "finish": "ch4-wangchan-finish",
+    "prev": "ch4-breakout"
+  },
+  "ch4-mine": {
+    "id": "ch4-mine",
+    "name": "镇守灵矿",
+    "giver": "li-huayuan",
+    "level": 17,
+    "main": true,
+    "summary": "魔道已经入侵，去传送阵执事处领灵矿的差事。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "gate-steward",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 5500,
+      "gold": 500,
+      "items": [
+        {
+          "item": "mid-potion",
+          "count": 10
+        }
+      ],
+      "teleport": {
+        "map": "spirit-mine",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch4-mine-offer",
+    "finish": "ch4-mine-finish",
+    "prev": "ch4-wangchan"
+  },
+  "ch4-corpse": {
+    "id": "ch4-corpse",
+    "name": "矿道尸傀",
+    "giver": "mine-steward",
+    "level": 17,
+    "main": true,
+    "summary": "清理矿道里的 10 具尸傀。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "corpse-puppet",
+        "count": 10
+      }
+    ],
+    "rewards": {
+      "exp": 18000,
+      "gold": 1000,
+      "items": []
+    },
+    "offer": "ch4-corpse-offer",
+    "finish": "ch4-corpse-finish",
+    "prev": "ch4-mine"
+  },
+  "ch4-raid": {
+    "id": "ch4-raid",
+    "name": "魔道袭矿",
+    "giver": "mine-steward",
+    "level": 18,
+    "main": true,
+    "summary": "击退 10 名来抢灵石的魔道修士。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "demon-cultist",
+        "count": 10
+      }
+    ],
+    "rewards": {
+      "exp": 22500,
+      "gold": 1200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "ch4-raid-offer",
+    "finish": "ch4-raid-finish",
+    "prev": "ch4-corpse"
+  },
+  "ch4-deep": {
+    "id": "ch4-deep",
+    "name": "地底血蝠",
+    "giver": "mine-steward",
+    "level": 19,
+    "main": true,
+    "summary": "深入矿底，击败 10 只血蝠。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "blood-bat",
+        "count": 10
+      }
+    ],
+    "rewards": {
+      "exp": 25000,
+      "gold": 1200,
+      "items": []
+    },
+    "offer": "ch4-deep-offer",
+    "finish": "ch4-deep-finish",
+    "prev": "ch4-raid"
+  },
+  "ch4-array": {
+    "id": "ch4-array",
+    "name": "地底古阵",
+    "giver": "mine-steward",
+    "level": 20,
+    "main": true,
+    "summary": "击败守在古传送阵旁的血煞护法，带回大挪移令。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "blood-guardian",
+        "count": 1
+      },
+      {
+        "type": "collect",
+        "target": "great-transfer-token",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 31500,
+      "gold": 2500,
+      "items": [
+        {
+          "item": "great-transfer-token",
+          "count": 1
+        }
+      ],
+      "teleport": {
+        "map": "jingu-plain",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch4-array-offer",
+    "finish": "ch4-array-finish",
+    "prev": "ch4-deep"
+  },
+  "ch4-front": {
+    "id": "ch4-front",
+    "name": "金鼓原",
+    "giver": "front-commander",
+    "level": 21,
+    "main": true,
+    "summary": "七派在金鼓原布防，先击退 12 名魔道剑修。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "demon-swordsman",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 36000,
+      "gold": 2000,
+      "items": [
+        {
+          "item": "mid-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch4-front-offer",
+    "finish": "ch4-front-finish",
+    "prev": "ch4-array"
+  },
+  "ch4-toads": {
+    "id": "ch4-toads",
+    "name": "毒蟾阵",
+    "giver": "front-commander",
+    "level": 22,
+    "main": true,
+    "summary": "魔道驱使毒蟾冲阵，击败 12 只毒蟾。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "poison-toad",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 40500,
+      "gold": 2200,
+      "items": []
+    },
+    "offer": "ch4-toads-offer",
+    "finish": "ch4-toads-finish",
+    "prev": "ch4-front"
+  },
+  "ch4-night": {
+    "id": "ch4-night",
+    "name": "夜袭魔营",
+    "giver": "front-commander",
+    "level": 23,
+    "main": true,
+    "summary": "夜袭魔道营地，击败 12 名魔道法修。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "demon-sorcerer",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 45000,
+      "gold": 2500,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch4-night-offer",
+    "finish": "ch4-night-finish",
+    "prev": "ch4-toads"
+  },
+  "ch4-commander": {
+    "id": "ch4-commander",
+    "name": "魔道统领",
+    "giver": "front-commander",
+    "level": 24,
+    "main": true,
+    "summary": "击败坐镇魔营的魔道统领。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "demon-commander",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 49500,
+      "gold": 4000,
+      "items": []
+    },
+    "offer": "ch4-commander-offer",
+    "finish": "ch4-commander-finish",
+    "prev": "ch4-night"
+  },
+  "ch4-abandon": {
+    "id": "ch4-abandon",
+    "name": "弃子",
+    "giver": "li-huayuan-front",
+    "level": 25,
+    "main": true,
+    "summary": "七派要撤离越国，去问李化元师父如何安排。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "front-commander",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 18000,
+      "gold": 2000,
+      "items": []
+    },
+    "offer": "ch4-abandon-offer",
+    "finish": "ch4-abandon-finish",
+    "prev": "ch4-commander"
+  },
   "ape-fur": {
     "id": "ape-fur",
     "name": "收购山魈皮",
