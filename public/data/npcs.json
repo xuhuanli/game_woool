@@ -92,11 +92,66 @@
       {
         "name": "太南山",
         "map": "taina-mountain",
-        "x": 4,
-        "y": 4,
+        "x": 12,
+        "y": 12,
         "cost": 50,
         "level": 3
       }
     ]
+  },
+  "wan-xiaoshan": {
+    "id": "wan-xiaoshan",
+    "name": "万小山",
+    "map": "taina-mountain",
+    "x": 15,
+    "y": 12,
+    "color": "#7fb0d0",
+    "greeting": "wan-greeting",
+    "hiddenAfter": "ch2-enter"
+  },
+  "qingyan-elder": {
+    "id": "qingyan-elder",
+    "name": "青颜真人",
+    "map": "taina-valley",
+    "x": 20,
+    "y": 13,
+    "color": "#e6e6f0",
+    "greeting": "qingyan-greeting"
+  },
+  "han-yunzhi": {
+    "id": "han-yunzhi",
+    "name": "菡云芝",
+    "map": "taina-valley",
+    "x": 27,
+    "y": 19,
+    "color": "#e8a0b8",
+    "greeting": "han-greeting"
+  },
+  "valley-merchant": {
+    "id": "valley-merchant",
+    "name": "坊市摊主",
+    "map": "taina-valley",
+    "x": 13,
+    "y": 19,
+    "color": "#c9a24a",
+    "greeting": "merchant-greeting",
+    "storage": true,
+    "shop": [
+      "small-potion",
+      "small-mana",
+      "refine-stone",
+      "recall-scroll",
+      "random-scroll",
+      "steel-sword"
+    ]
+  },
+  "sect-judge": {
+    "id": "sect-judge",
+    "name": "七派执事",
+    "map": "taina-mountain",
+    "x": 62,
+    "y": 84,
+    "color": "#5a5a6a",
+    "greeting": "judge-greeting"
   }
 }

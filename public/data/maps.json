@@ -46,124 +46,30 @@
   "taina-mountain": {
     "id": "taina-mountain",
     "name": "太南山",
-    "width": 28,
-    "height": 28,
-    "playerStart": {
-      "x": 4,
-      "y": 4
-    },
+    "tiled": "taina-mountain.tmj",
     "respawn": {
-      "map": "huangfeng-valley",
+      "map": "taina-valley",
       "x": 20,
       "y": 24
     },
-    "obstacles": [
-      {
-        "x": 0,
-        "y": 0,
-        "w": 28,
-        "h": 1
-      },
-      {
-        "x": 0,
-        "y": 27,
-        "w": 28,
-        "h": 1
-      },
-      {
-        "x": 0,
-        "y": 0,
-        "w": 1,
-        "h": 28
-      },
-      {
-        "x": 27,
-        "y": 0,
-        "w": 1,
-        "h": 28
-      },
-      {
-        "x": 8,
-        "y": 2,
-        "w": 2,
-        "h": 8
-      },
-      {
-        "x": 3,
-        "y": 13,
-        "w": 9,
-        "h": 2
-      },
-      {
-        "x": 14,
-        "y": 6,
-        "w": 2,
-        "h": 10
-      },
-      {
-        "x": 18,
-        "y": 14,
-        "w": 7,
-        "h": 2
-      },
-      {
-        "x": 9,
-        "y": 19,
-        "w": 2,
-        "h": 6
-      }
-    ],
-    "portals": [
-      {
-        "x": 2,
-        "y": 2,
-        "name": "彩霞山",
-        "toMap": "starter-field",
-        "toX": 108,
-        "toY": 108
-      }
-    ],
-    "spawns": [
-      {
-        "monster": "mountain-ape",
-        "x": 12,
-        "y": 4
-      },
-      {
-        "monster": "mountain-ape",
-        "x": 12,
-        "y": 10
-      },
-      {
-        "monster": "wolf-rider",
-        "x": 19,
-        "y": 4
-      },
-      {
-        "monster": "wolf-rider",
-        "x": 22,
-        "y": 10
-      },
-      {
-        "monster": "mountain-ape",
-        "x": 5,
-        "y": 18
-      },
-      {
-        "monster": "ape-shaman",
-        "x": 5,
-        "y": 24
-      },
-      {
-        "monster": "mountain-ape",
-        "x": 14,
-        "y": 20
-      },
-      {
-        "monster": "flood-serpent",
-        "x": 21,
-        "y": 21
-      }
-    ]
+    "tone": {
+      "color": "#8fb4c8",
+      "alpha": 0.07
+    }
+  },
+  "taina-valley": {
+    "id": "taina-valley",
+    "name": "太南谷",
+    "safe": true,
+    "tiled": "taina-valley.tmj",
+    "respawn": {
+      "map": "taina-valley",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#ffc88a",
+      "alpha": 0.06
+    }
   }
 }

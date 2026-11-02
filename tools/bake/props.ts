@@ -92,6 +92,7 @@ const BUILDINGS: Prop[] = [
   building('bld-pavilion-sect', () => pavilion(SECT)),
   building('bld-gate-plain', () => gate(PLAIN, '七玄门')),
   building('bld-gate-sect', () => gate(SECT, '黄枫谷')),
+  building('bld-gate-taina', () => gate(PLAIN, '太南谷')),
   building('bld-wall-plain', () => wall(PLAIN)),
   building('bld-wall-sect', () => wall(SECT)),
   building('obj-lantern', () => lantern(PLAIN)),

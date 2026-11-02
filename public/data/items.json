@@ -428,5 +428,10 @@
   "id": "ascension-token",
   "name": "升仙令",
   "kind": "material"
+ },
+ "jinzhu-brush": {
+  "id": "jinzhu-brush",
+  "name": "金竺笔",
+  "kind": "material"
  }
 }

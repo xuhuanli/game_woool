@@ -37,6 +37,14 @@ const BAKED_SPRITES = [
   'npc-mo-doctor',
   'npc-li-feiyu',
   'npc-qixuan-steward',
+  'npc-wan-xiaoshan',
+  'npc-qingyan-elder',
+  'npc-han-yunzhi',
+  'npc-sect-judge',
+  'npc-valley-merchant',
+  'green-snake',
+  'night-bat',
+  'qingwen-daoren',
 ];
 
 function loadConfig(): Promise<GameConfig> {

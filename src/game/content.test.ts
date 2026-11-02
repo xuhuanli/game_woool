@@ -13,9 +13,9 @@ import { TICK_SECONDS, World, type GameEvent } from './world';
 const config = await loadConfigFromDisk();
 
 const npc = (id: string) => config.npcs[id]!;
-/** 第 1 章已通关，能进入黄枫谷和太南山。 */
+/** 前两章已通关，能进入黄枫谷和太南山。 */
 const passChapterOne = (world: World) => {
-  world.player.quests.completed.push('ch1-boss');
+  world.player.quests.completed.push('ch1-boss', 'ch2-enter', 'ch2-token');
   return world;
 };
 const town = () => passChapterOne(new World(config, 'huangfeng-valley', 'body', 1));
@@ -116,7 +116,7 @@ describe('切图', () => {
 describe('Boss', () => {
   const lair = () => {
     const world = new World(config, 'taina-mountain', 'body', 1);
-    return { world, boss: world.monsters.find((monster) => monster.def.boss)! };
+    return { world, boss: world.monsters.find((monster) => monster.def.id === 'flood-serpent')! };
   };
   const kill = (world: World, boss: World['monsters'][number]) => {
     boss.hp = 1;
@@ -142,7 +142,7 @@ describe('Boss', () => {
     world.moveTo({ x: 111, y: 111 });
     run(world, 2, () => world.mapId === 'taina-mountain');
     expect(world.mapId).toBe('taina-mountain');
-    expect(world.monsters.find((monster) => monster.def.boss)!.hp).toBe(0);
+    expect(world.monsters.find((monster) => monster.def.id === 'flood-serpent')!.hp).toBe(0);
   });
 
   it('Boss 到时间重生，并且刷新时间写入存档', () => {
@@ -151,11 +151,11 @@ describe('Boss', () => {
     const save = world.toSave(1);
     expect(Object.keys(save.bossReadyAt)).toHaveLength(1);
     const loaded = World.fromSave(config, save, 2);
-    const again = loaded.monsters.find((monster) => monster.def.boss)!;
+    const again = loaded.monsters.find((monster) => monster.def.id === 'flood-serpent')!;
     expect(again.hp).toBe(0);
     for (const monster of loaded.monsters) monster.def = { ...monster.def, aggroRange: 0 };
     run(loaded, boss.def.respawnSeconds + 1);
-    expect(loaded.monsters.find((monster) => monster.def.boss)!.hp).toBeGreaterThan(0);
+    expect(loaded.monsters.find((monster) => monster.def.id === 'flood-serpent')!.hp).toBeGreaterThan(0);
   });
 });
 
@@ -214,7 +214,7 @@ describe('任务', () => {
   it('对话任务：接取、拜见、回来交付、解锁下一个', () => {
     const world = town();
     expect(status(world, 'join-sect')).toBe('available');
-    expect(status(world, 'clear-rats')).toBe('locked');
+    expect(status(world, 'slay-serpent')).toBe('locked');
 
     world.acceptQuest('join-sect');
     expect(status(world, 'join-sect')).toBe('active');
@@ -226,7 +226,9 @@ describe('任务', () => {
     expect(world.player.gold).toBe(100);
     expect(world.player.bag['small-potion']).toBe(5);
     expect(world.player.level).toBe(2);
-    expect(status(world, 'clear-rats')).toBe('available');
+    expect(status(world, 'slay-serpent')).toBe('locked');
+    world.player.level = 6;
+    expect(status(world, 'slay-serpent')).toBe('available');
   });
 
   it('未完成时不能交付，已完成的不能重复领奖', () => {
@@ -245,8 +247,8 @@ describe('任务', () => {
 
   it('击杀任务累计进度，不超过目标数', () => {
     const world = new World(config, 'starter-field', 'body', 4);
-    world.player.quests.completed.push('join-sect');
-    world.acceptQuest('clear-rats');
+    world.player.quests.completed.push('ch1-enter');
+    world.acceptQuest('ch1-herbs');
     world.drainEvents();
     const events: GameEvent[] = [];
     for (const monster of world.monsters.slice(0, 7)) {
@@ -261,20 +263,25 @@ describe('任务', () => {
     }
     expect(world.player.quests.active[0]?.counts).toEqual([5]);
     expect(events.filter((event) => event.type === 'questProgress')).toHaveLength(5);
-    expect(status(world, 'clear-rats')).toBe('ready');
+    expect(status(world, 'ch1-herbs')).toBe('ready');
   });
 
   it('到达任务：已在目标地图时接取即完成', () => {
-    const world = new World(config, 'taina-mountain', 'body', 1);
-    world.player.level = 3;
-    world.player.quests.completed.push('clear-rats');
-    world.acceptQuest('taina-meeting');
-    expect(status(world, 'taina-meeting')).toBe('ready');
+    const setup = structuredClone(config);
+    setup.quests['arrive'] = {
+      ...config.quests['ch1-enter']!,
+      id: 'arrive',
+      objectives: [{ type: 'reach', target: 'taina-mountain', count: 1 }],
+    };
+    const world = new World(setup, 'taina-mountain', 'body', 1);
+    world.acceptQuest('arrive');
+    expect(world.player.quests.active[0]?.counts).toEqual([1]);
   });
 
   it('收集任务按背包计算，交付时扣除材料', () => {
     const world = town();
     world.player.level = 3;
+    world.player.quests.completed.push('join-sect');
     world.acceptQuest('ape-fur');
     world.player.bag['ape-fur'] = 2;
     expect(status(world, 'ape-fur')).toBe('active');
@@ -287,7 +294,7 @@ describe('任务', () => {
   it('背包放不下法器奖励时不能交付', () => {
     const world = town();
     world.player.level = 6;
-    world.player.quests.completed.push('taina-meeting');
+    world.player.quests.completed.push('join-sect');
     world.player.quests.active.push({ id: 'slay-serpent', counts: [1] });
     for (let uid = 0; uid < config.affixes.bagCapacity; uid++) {
       world.player.equipBag.push({ uid: 1000 + uid, itemId: 'cloth-robe', grade: 'low', affixes: [], luck: 0 });
@@ -592,7 +599,7 @@ describe('拾取', () => {
 describe('怪物技能', () => {
   const lair = () => {
     const world = new World(config, 'taina-mountain', 'body', 1);
-    const boss = world.monsters.find((monster) => monster.def.boss)!;
+    const boss = world.monsters.find((monster) => monster.def.id === 'flood-serpent')!;
     for (const monster of world.monsters) {
       if (monster !== boss) {
         monster.hp = 0;
@@ -1215,7 +1222,8 @@ describe('符、仓库、批量卖出', () => {
 describe('Boss 刷新提示', () => {
   it('在别的地图也能收到提示，只提示一次', () => {
     const world = town();
-    world.bossReadyAt['taina-mountain:7'] = world.time + 1;
+    const serpent = config.maps['taina-mountain']!.spawns.findIndex((spawn) => spawn.monster === 'flood-serpent');
+    world.bossReadyAt[`taina-mountain:${serpent}`] = world.time + 1;
     const events: GameEvent[] = [];
     run(world, 3, () => {
       events.push(...world.drainEvents());
@@ -1229,10 +1237,10 @@ describe('Boss 刷新提示', () => {
 describe('自动寻路', () => {
   it('跨两张地图走到目的地', () => {
     const world = town();
-    world.navigate({ mapId: 'taina-mountain', cell: { x: 6, y: 6 } });
+    world.navigate({ mapId: 'taina-mountain', cell: { x: 13, y: 13 } });
     run(world, 120, () => world.player.route === null && world.player.order === null);
     expect(world.mapId).toBe('taina-mountain');
-    expect(world.player.cell).toEqual({ x: 6, y: 6 });
+    expect(world.player.cell).toEqual({ x: 13, y: 13 });
   });
 
   it('到达后自动和 NPC 对话', () => {
@@ -1258,10 +1266,10 @@ describe('自动寻路', () => {
   it('任务目的地：击杀去刷怪点，收集去掉落地图，完成后回 NPC', () => {
     const world = town();
     world.player.level = 3;
-    world.player.quests.completed.push('join-sect');
-    world.acceptQuest('clear-rats');
+    world.player.quests.completed.push('ch1-enter', 'join-sect');
+    world.acceptQuest('ch1-herbs');
     world.acceptQuest('ape-fur');
-    expect(questDestination(world, config.quests['clear-rats']!, world.player)?.mapId).toBe('starter-field');
+    expect(questDestination(world, config.quests['ch1-herbs']!, world.player)?.mapId).toBe('starter-field');
     expect(questDestination(world, config.quests['ape-fur']!, world.player)?.mapId).toBe('taina-mountain');
     world.player.bag['ape-fur'] = 3;
     expect(questDestination(world, config.quests['ape-fur']!, world.player)?.npc?.id).toBe('herb-keeper');
@@ -1269,41 +1277,85 @@ describe('自动寻路', () => {
 });
 
 
-describe('第 1 章', () => {
+describe('章节主线', () => {
   const finish = (world: World, questId: string) => {
+    expect(status(world, questId), questId).toBe('available');
     world.acceptQuest(questId);
     const quest = config.quests[questId]!;
     const progress = world.player.quests.active.find((active) => active.id === questId)!;
     progress.counts = quest.objectives.map((objective) => objective.count);
     world.turnInQuest(questId);
+    expect(status(world, questId), questId).toBe('done');
   };
+  const CHAPTER_ONE = ['ch1-enter', 'ch1-herbs', 'ch1-spider', 'ch1-friend', 'ch1-wolves', 'ch1-report', 'ch1-boss'];
 
-  it('开局在七玄门，通关前去不了黄枫谷和太南山', () => {
+  it('开局在七玄门，按章节解锁太南山和黄枫谷', () => {
     expect(config.game.startMap).toBe('qixuan-gate');
     const world = new World(config, 'starter-field', 'body', 1);
-    for (const name of ['黄枫谷', '太南山']) {
-      expect(world.portals.find((portal) => portal.name === name)?.requires).toBe('ch1-boss');
-    }
+    const requires = (name: string) => world.portals.find((portal) => portal.name === name)?.requires;
+    expect(requires('太南山')).toBe('ch1-boss');
+    expect(requires('黄枫谷')).toBe('ch2-token');
     expect(status(world, 'join-sect')).toBe('locked');
   });
 
-  it('七个任务串完后升到 7 级，拿到升仙令并到黄枫谷', () => {
+  it('第 1 章结束升到 7 级，带着升仙令到太南山', () => {
     const world = new World(config, 'qixuan-gate', 'body', 1);
-    for (const questId of [
-      'ch1-enter',
-      'ch1-herbs',
-      'ch1-spider',
-      'ch1-friend',
-      'ch1-wolves',
-      'ch1-report',
-      'ch1-boss',
-    ]) {
-      expect(status(world, questId), questId).toBe('available');
-      finish(world, questId);
-    }
+    for (const questId of CHAPTER_ONE) finish(world, questId);
     expect(world.player.level).toBe(7);
     expect(world.player.bag['ascension-token']).toBe(1);
+    expect(world.mapId).toBe('taina-mountain');
+    expect(status(world, 'ch2-road')).toBe('available');
+  });
+
+  it('第 2 章结束升到 11 级，交出升仙令换筑基丹，到黄枫谷', () => {
+    const world = new World(config, 'qixuan-gate', 'body', 1);
+    for (const questId of CHAPTER_ONE) finish(world, questId);
+    expect(world.npcs.map((npc) => npc.id)).toContain('wan-xiaoshan');
+    finish(world, 'ch2-road');
+    finish(world, 'ch2-enter');
+    expect(world.mapId).toBe('taina-valley');
+
+    finish(world, 'ch2-market');
+    world.player.bag['ape-fur'] = 4;
+    finish(world, 'ch2-brush');
+    expect(world.player.bag['ape-fur']).toBeUndefined();
+    expect(world.player.bag['jinzhu-brush']).toBe(1);
+    finish(world, 'ch2-watch');
+    finish(world, 'ch2-signup');
+    finish(world, 'ch2-arena');
+    finish(world, 'ch2-token');
+
+    expect(world.player.level).toBe(11);
+    expect(world.player.bag['ascension-token']).toBeUndefined();
+    expect(world.player.bag['foundation-pill']).toBe(1);
     expect(world.mapId).toBe('huangfeng-valley');
     expect(status(world, 'join-sect')).toBe('available');
+  });
+
+  it('野外地图的复活点都在有商店的安全地图', () => {
+    const shopMaps = new Set(Object.values(config.npcs).filter((npc) => npc.shop).map((npc) => npc.map));
+    for (const map of Object.values(config.maps)) {
+      if (map.safe) continue;
+      expect(config.maps[map.respawn!.map]?.safe, map.id).toBe(true);
+      expect(shopMaps.has(map.respawn!.map), map.id).toBe(true);
+    }
+  });
+
+  it('七派执事离擂台足够远，报名时不会惊动青纹道人', () => {
+    const judge = config.npcs['sect-judge']!;
+    const boss = config.maps['taina-mountain']!.spawns.find((spawn) => spawn.monster === 'qingwen-daoren')!;
+    const talkRange = 2;
+    expect(Math.hypot(judge.x - boss.x, judge.y - boss.y) - talkRange).toBeGreaterThan(
+      config.monsters['qingwen-daoren']!.aggroRange,
+    );
+  });
+
+  it('万小山带路后离开，太南谷的传送点要先过第二个任务', () => {
+    const world = new World(config, 'taina-mountain', 'body', 1);
+    const valley = world.portals.find((portal) => portal.name === '太南谷')!;
+    expect(valley.requires).toBe('ch2-enter');
+    world.player.quests.completed.push('ch2-enter');
+    expect(world.npcs.map((npc) => npc.id)).not.toContain('wan-xiaoshan');
+    expect(world.npcs.map((npc) => npc.id)).toContain('sect-judge');
   });
 });

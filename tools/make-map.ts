@@ -77,7 +77,8 @@ interface MapPlan {
   buildings?: Building[];
   /** 必须走得到的格子，比如 NPC 身边 */
   required?: Point[];
-  edge: { base: number; spread: number; outcrops: boolean };
+  /** outcrops 是石坡的噪声阈值，越小石坡越多，0 表示没有 */
+  edge: { base: number; spread: number; outcrops: number };
   /** 树的密度：factor 随噪声变化，least 是最低密度 */
   forest: { factor: number; least?: number; denseArea?: Circle };
   foliage: number[];
@@ -123,8 +124,8 @@ const MAPS: MapPlan[] = [
     start: [12, 12],
     portals: [
       { cell: [9, 9], label: '七玄门', toMap: 'qixuan-gate', to: [20, 33] },
-      { cell: [15, 8], label: '黄枫谷', toMap: 'huangfeng-valley', to: [20, 33], requires: 'ch1-boss' },
-      { cell: [111, 111], label: '太南山', toMap: 'taina-mountain', to: [4, 4], requires: 'ch1-boss' },
+      { cell: [15, 8], label: '黄枫谷', toMap: 'huangfeng-valley', to: [20, 33], requires: 'ch2-token' },
+      { cell: [111, 111], label: '太南山', toMap: 'taina-mountain', to: [12, 12], requires: 'ch1-boss' },
     ],
     roads: [
       [[12, 12], [30, 21], [51, 30], [66, 45], [78, 63], [90, 81], [105, 105], [111, 111]],
@@ -151,9 +152,89 @@ const MAPS: MapPlan[] = [
       { x: 102, y: 99, radius: 10 },
       { x: 111, y: 111, radius: 5 },
     ],
-    edge: { base: 3, spread: 5, outcrops: true },
+    edge: { base: 3, spread: 5, outcrops: 0.76 },
     forest: { factor: 0.6, denseArea: { x: 60, y: 93, radius: 24 } },
     foliage: [0xffffff, 0xffffff, 0xdff0b0, 0xffd27a, 0xffa86a, 0xff8a6a],
+  },
+  {
+    id: 'taina-mountain',
+    size: 120,
+    seed: 20261104,
+    start: [12, 12],
+    portals: [
+      { cell: [9, 9], label: '彩霞山', toMap: 'starter-field', to: [108, 108] },
+      { cell: [58, 58], label: '太南谷', toMap: 'taina-valley', to: [20, 33], requires: 'ch2-enter' },
+    ],
+    roads: [
+      [[12, 12], [26, 18], [40, 32], [50, 46], [58, 58], [62, 74], [62, 88]],
+      [[34, 26], [52, 22], [72, 20]],
+      [[58, 62], [74, 70], [92, 80], [104, 100]],
+      [[44, 40], [30, 54], [20, 72]],
+    ],
+    roadTile: GROUND.dirt,
+    roadWidth: [0.9, 0.9],
+    river: [[-3, 40], [14, 42], [30, 38], [46, 54], [66, 62], [86, 58], [104, 66], [123, 62]],
+    ponds: [{ x: 92, y: 34, radius: 9 }],
+    zones: [
+      { monster: 'mountain-ape', x: 30, y: 20, radius: 13, count: 10 },
+      { monster: 'green-snake', x: 62, y: 22, radius: 13, count: 9 },
+      { monster: 'night-bat', x: 22, y: 74, radius: 13, count: 7 },
+      { monster: 'mountain-ape', x: 40, y: 72, radius: 9, count: 6 },
+      { monster: 'ape-shaman', x: 82, y: 76, radius: 11, count: 8 },
+      { monster: 'wolf-rider', x: 78, y: 96, radius: 9, count: 4 },
+      { monster: 'qingwen-daoren', x: 62, y: 93, radius: 0, count: 1 },
+      { monster: 'flood-serpent', x: 105, y: 102, radius: 0, count: 1 },
+    ],
+    monsterGap: 5,
+    clearings: [
+      { x: 12, y: 12, radius: 8 },
+      { x: 58, y: 58, radius: 6 },
+      { x: 62, y: 92, radius: 10 },
+      { x: 105, y: 102, radius: 9 },
+    ],
+    paved: [{ x0: 55, y0: 85, x1: 69, y1: 99 }],
+    buildings: [
+      { prop: 'bld-pavilion-plain', x: 51, y: 84 },
+      { prop: 'obj-rack', x: 57, y: 83 },
+      { prop: 'obj-rack', x: 65, y: 83 },
+      ...lanterns([55, 85], [69, 85], [55, 99], [69, 99]),
+    ],
+    required: [[62, 85], [15, 13]],
+    edge: { base: 3, spread: 6, outcrops: 0.68 },
+    forest: { factor: 0.45, denseArea: { x: 24, y: 76, radius: 18 } },
+    foliage: [0xffffff, 0xffffff, 0xd8f0d8, 0xc8e8e0],
+  },
+  {
+    id: 'taina-valley',
+    size: 40,
+    seed: 20261105,
+    start: [20, 24],
+    portals: [{ cell: [20, 36], label: '太南山', toMap: 'taina-mountain', to: [60, 56] }],
+    roads: [[[20, 37], [20, 12]]],
+    roadTile: GROUND.dirt,
+    roadWidth: [1.5, 0.4],
+    ponds: [{ x: 31, y: 33, radius: 3 }],
+    clearings: [{ x: 20, y: 36, radius: 3 }],
+    paved: [{ x0: 12, y0: 12, x1: 28, y1: 23 }],
+    buildings: [
+      { prop: 'bld-house-plain', x: 8, y: 5 },
+      { prop: 'bld-house-plain', x: 26, y: 5 },
+      { prop: 'bld-pavilion-plain', x: 19, y: 7 },
+      { prop: 'bld-house-plain', x: 7, y: 15, flip: true },
+      { prop: 'bld-house-plain', x: 7, y: 22, flip: true },
+      { prop: 'bld-house-plain', x: 30, y: 13 },
+      { prop: 'bld-house-plain', x: 30, y: 19 },
+      { prop: 'bld-gate-taina', x: 17, y: 29 },
+      { prop: 'obj-stall', x: 13, y: 15 },
+      { prop: 'obj-stall', x: 13, y: 21 },
+      { prop: 'obj-stall', x: 25, y: 15 },
+      { prop: 'obj-stall', x: 25, y: 21 },
+      ...lanterns([12, 12], [28, 12], [17, 25], [23, 25], [17, 32], [23, 32]),
+    ],
+    required: [[20, 14], [27, 20], [13, 20]],
+    edge: { base: 2, spread: 2.5, outcrops: 0 },
+    forest: { factor: 1, least: 0.05 },
+    foliage: [0xffffff, 0xffffff, 0xd8f0d8, 0xffd27a],
   },
   {
     id: 'qixuan-gate',
@@ -188,7 +269,7 @@ const MAPS: MapPlan[] = [
       ...lanterns([15, 13], [25, 13], [17, 25], [23, 25], [17, 32], [23, 32]),
     ],
     required: [[10, 12], [20, 16], [30, 26]],
-    edge: { base: 2, spread: 2.5, outcrops: false },
+    edge: { base: 2, spread: 2.5, outcrops: 0 },
     forest: { factor: 1, least: 0.05 },
     foliage: [0xffffff, 0xffffff, 0xdff0b0, 0xffd27a, 0xffa86a],
   },
@@ -222,7 +303,7 @@ const MAPS: MapPlan[] = [
       ...lanterns([15, 12], [25, 12], [17, 23], [23, 23], [17, 29], [23, 29], [17, 34], [23, 34]),
     ],
     required: [[20, 15], [30, 19], [10, 18], [13, 23]],
-    edge: { base: 2, spread: 2.5, outcrops: false },
+    edge: { base: 2, spread: 2.5, outcrops: 0 },
     forest: { factor: 2, least: 0.14 },
     foliage: [0xffffff, 0xfff0d0, 0xffe0b0],
     trees: MAPLES,
@@ -394,7 +475,7 @@ function generate(plan: MapPlan): void {
       const cell = index(x, y);
       if (ground[cell] === GROUND.water || ground[cell] === GROUND.bridge) continue;
       const onEdge = edgeDistance(x, y) < mountainDepth(x, y);
-      const outcrop = plan.edge.outcrops && noise(x + 31, y + 17, 6) > 0.76 && edgeDistance(x, y) > 8;
+      const outcrop = plan.edge.outcrops > 0 && noise(x + 31, y + 17, 6) > plan.edge.outcrops && edgeDistance(x, y) > 8;
       if ((onEdge || outcrop) && open(x, y)) {
         ground[cell] = GROUND.stone;
         blocked[cell] = true;

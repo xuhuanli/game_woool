@@ -181,5 +181,79 @@
       "item": "jade-ring",
       "chance": 0.25
     }
+  ],
+  "green-snake": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 4,
+      "max": 8
+    },
+    {
+      "item": "small-potion",
+      "chance": 0.2
+    },
+    {
+      "item": "small-mana",
+      "chance": 0.15
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.012
+    },
+    {
+      "item": "iron-helm",
+      "chance": 0.006
+    },
+    {
+      "item": "iron-bracelet",
+      "chance": 0.006
+    },
+    {
+      "item": "jade-ring",
+      "chance": 0.006
+    },
+    {
+      "item": "steel-sword",
+      "chance": 0.004
+    }
+  ],
+  "qingwen-daoren": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 300,
+      "max": 500
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 1,
+      "max": 2
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.6
+    },
+    {
+      "item": "steel-sword",
+      "chance": 0.5
+    },
+    {
+      "item": "iron-helm",
+      "chance": 0.3
+    },
+    {
+      "item": "spirit-pendant",
+      "chance": 0.3
+    },
+    {
+      "item": "iron-bracelet",
+      "chance": 0.3
+    },
+    {
+      "item": "jade-ring",
+      "chance": 0.3
+    }
   ]
 }

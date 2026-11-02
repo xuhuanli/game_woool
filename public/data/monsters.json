@@ -563,5 +563,205 @@
         "message": "金光上人祭出金光罩，出手更急"
       }
     ]
+  },
+  "green-snake": {
+    "id": "green-snake",
+    "name": "青鳞蛇",
+    "stats": {
+      "maxHp": 55,
+      "maxMp": 0,
+      "attack": {
+        "min": 6,
+        "max": 10
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 1,
+        "max": 2
+      },
+      "magicDefense": {
+        "min": 1,
+        "max": 2
+      },
+      "accuracy": 8,
+      "evasion": 3,
+      "luck": 0
+    },
+    "moveSpeed": 2.0,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 7,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 42,
+    "respawnSeconds": 12,
+    "dropTable": "green-snake",
+    "look": {
+      "fur": "#3f8a4a",
+      "head": "#6fb86a",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "snake-spit",
+        "name": "喷毒",
+        "cooldown": 8,
+        "windup": 0.6,
+        "color": "#7ddc6f",
+        "range": 4,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 0.8,
+        "poison": {
+          "damage": 3,
+          "duration": 6
+        }
+      }
+    ]
+  },
+  "night-bat": {
+    "id": "night-bat",
+    "name": "夜蝠",
+    "stats": {
+      "maxHp": 42,
+      "maxMp": 0,
+      "attack": {
+        "min": 6,
+        "max": 9
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 0,
+        "max": 2
+      },
+      "magicDefense": {
+        "min": 1,
+        "max": 2
+      },
+      "accuracy": 8,
+      "evasion": 6,
+      "luck": 0
+    },
+    "moveSpeed": 3.0,
+    "attackInterval": 1.0,
+    "attackWindup": 0.35,
+    "aggroRange": 7,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 38,
+    "respawnSeconds": 12,
+    "dropTable": "green-snake",
+    "look": {
+      "fur": "#4a3a5a",
+      "head": "#6a5a7a",
+      "scale": 1
+    }
+  },
+  "qingwen-daoren": {
+    "id": "qingwen-daoren",
+    "name": "青纹道人",
+    "stats": {
+      "maxHp": 700,
+      "maxMp": 0,
+      "attack": {
+        "min": 11,
+        "max": 17
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 3,
+        "max": 6
+      },
+      "magicDefense": {
+        "min": 3,
+        "max": 6
+      },
+      "accuracy": 14,
+      "evasion": 2,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.4,
+    "attackWindup": 0.5,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 3000,
+    "respawnSeconds": 300,
+    "dropTable": "qingwen-daoren",
+    "look": {
+      "fur": "#3f7a6a",
+      "head": "#b8d8c8",
+      "scale": 1.1
+    },
+    "abilities": [
+      {
+        "id": "talisman",
+        "name": "青纹符",
+        "cooldown": 6,
+        "windup": 0.8,
+        "color": "#7ddcc0",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.2
+      },
+      {
+        "id": "qing-burst",
+        "name": "青光阵",
+        "cooldown": 12,
+        "windup": 1.1,
+        "color": "#b8f0d8",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.4
+      },
+      {
+        "id": "call-bat",
+        "name": "御蝠",
+        "cooldown": 18,
+        "windup": 0.8,
+        "color": "#b48cff",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "night-bat",
+          "count": 2
+        }
+      }
+    ],
+    "boss": true,
+    "attackRange": 4,
+    "phases": [
+      {
+        "hpBelow": 0.35,
+        "attackMultiplier": 1.3,
+        "message": "青纹道人祭出符箓，出手更狠"
+      }
+    ]
   }
 }

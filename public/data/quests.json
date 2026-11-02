@@ -184,14 +184,238 @@
         }
       ],
       "teleport": {
-        "map": "huangfeng-valley",
-        "x": 20,
-        "y": 24
+        "map": "taina-mountain",
+        "x": 12,
+        "y": 12
       }
     },
     "offer": "ch1-boss-offer",
     "finish": "ch1-boss-finish",
     "prev": "ch1-report"
+  },
+  "ch2-road": {
+    "id": "ch2-road",
+    "name": "路遇万小山",
+    "giver": "wan-xiaoshan",
+    "level": 7,
+    "main": true,
+    "summary": "击败太南山山道上的 4 只山魈。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "mountain-ape",
+        "count": 4
+      }
+    ],
+    "rewards": {
+      "exp": 5000,
+      "gold": 200,
+      "items": [
+        {
+          "item": "small-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "ch2-road-offer",
+    "finish": "ch2-road-finish",
+    "prev": "ch1-boss"
+  },
+  "ch2-enter": {
+    "id": "ch2-enter",
+    "name": "入太南谷",
+    "giver": "wan-xiaoshan",
+    "level": 7,
+    "main": true,
+    "summary": "击败 3 条青鳞蛇，随万小山进谷。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "green-snake",
+        "count": 3
+      }
+    ],
+    "rewards": {
+      "exp": 6000,
+      "gold": 250,
+      "items": [
+        {
+          "item": "small-mana",
+          "count": 5
+        }
+      ],
+      "teleport": {
+        "map": "taina-valley",
+        "x": 20,
+        "y": 24
+      }
+    },
+    "offer": "ch2-enter-offer",
+    "finish": "ch2-enter-finish",
+    "prev": "ch2-road"
+  },
+  "ch2-market": {
+    "id": "ch2-market",
+    "name": "小会见闻",
+    "giver": "qingyan-elder",
+    "level": 8,
+    "main": true,
+    "summary": "到坊市见见卖符笔的菡云芝。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "han-yunzhi",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 4000,
+      "gold": 200,
+      "items": []
+    },
+    "offer": "ch2-market-offer",
+    "finish": "ch2-market-finish",
+    "prev": "ch2-enter"
+  },
+  "ch2-brush": {
+    "id": "ch2-brush",
+    "name": "金竺符笔",
+    "giver": "han-yunzhi",
+    "level": 8,
+    "main": true,
+    "summary": "收集 4 张山魈皮，换一支金竺笔。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "ape-fur",
+        "count": 4
+      }
+    ],
+    "rewards": {
+      "exp": 9000,
+      "gold": 300,
+      "items": [
+        {
+          "item": "jinzhu-brush",
+          "count": 1
+        }
+      ]
+    },
+    "offer": "ch2-brush-offer",
+    "finish": "ch2-brush-finish",
+    "prev": "ch2-market"
+  },
+  "ch2-watch": {
+    "id": "ch2-watch",
+    "name": "散修盯梢",
+    "giver": "qingyan-elder",
+    "level": 9,
+    "main": true,
+    "summary": "青纹道人一伙盯上了你，先去山中击败 3 只山魈巫练手。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "ape-shaman",
+        "count": 3
+      }
+    ],
+    "rewards": {
+      "exp": 10000,
+      "gold": 400,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "ch2-watch-offer",
+    "finish": "ch2-watch-finish",
+    "prev": "ch2-brush"
+  },
+  "ch2-signup": {
+    "id": "ch2-signup",
+    "name": "升仙大会",
+    "giver": "qingyan-elder",
+    "level": 10,
+    "main": true,
+    "summary": "到太南山的擂台找七派执事报名。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "sect-judge",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 4000,
+      "gold": 200,
+      "items": []
+    },
+    "offer": "ch2-signup-offer",
+    "finish": "ch2-signup-finish",
+    "prev": "ch2-watch"
+  },
+  "ch2-arena": {
+    "id": "ch2-arena",
+    "name": "擂台决胜",
+    "giver": "sect-judge",
+    "level": 10,
+    "main": true,
+    "summary": "在擂台上击败青纹道人。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "qingwen-daoren",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 11000,
+      "gold": 800,
+      "items": [
+        {
+          "item": "small-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch2-arena-offer",
+    "finish": "ch2-arena-finish",
+    "prev": "ch2-signup"
+  },
+  "ch2-token": {
+    "id": "ch2-token",
+    "name": "持令入门",
+    "giver": "sect-judge",
+    "level": 10,
+    "main": true,
+    "summary": "把升仙令交给七派执事。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "ascension-token",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 2000,
+      "gold": 500,
+      "items": [
+        {
+          "item": "foundation-pill",
+          "count": 1
+        }
+      ],
+      "teleport": {
+        "map": "huangfeng-valley",
+        "x": 20,
+        "y": 24
+      }
+    },
+    "offer": "ch2-token-offer",
+    "finish": "ch2-token-finish",
+    "prev": "ch2-arena"
   },
   "join-sect": {
     "id": "join-sect",
@@ -219,63 +443,7 @@
     },
     "offer": "join-sect-offer",
     "finish": "join-sect-finish",
-    "prev": "ch1-boss"
-  },
-  "clear-rats": {
-    "id": "clear-rats",
-    "name": "清剿灰鳞鼠",
-    "giver": "guide-senior",
-    "level": 1,
-    "main": true,
-    "prev": "join-sect",
-    "summary": "到彩霞山击败 5 只灰鳞鼠。",
-    "objectives": [
-      {
-        "type": "kill",
-        "target": "ash-rat",
-        "count": 5
-      }
-    ],
-    "rewards": {
-      "exp": 2400,
-      "gold": 150,
-      "items": [
-        {
-          "item": "small-mana",
-          "count": 5
-        }
-      ]
-    },
-    "offer": "clear-rats-offer",
-    "finish": "clear-rats-finish"
-  },
-  "taina-meeting": {
-    "id": "taina-meeting",
-    "name": "太南小会",
-    "giver": "guide-senior",
-    "level": 3,
-    "main": true,
-    "prev": "clear-rats",
-    "summary": "前往太南山，再回谷中复命。",
-    "objectives": [
-      {
-        "type": "reach",
-        "target": "taina-mountain",
-        "count": 1
-      }
-    ],
-    "rewards": {
-      "exp": 6100,
-      "gold": 200,
-      "items": [
-        {
-          "item": "refine-stone",
-          "count": 1
-        }
-      ]
-    },
-    "offer": "taina-offer",
-    "finish": "taina-finish"
+    "prev": "ch2-token"
   },
   "slay-serpent": {
     "id": "slay-serpent",
@@ -283,7 +451,7 @@
     "giver": "guide-senior",
     "level": 6,
     "main": true,
-    "prev": "taina-meeting",
+    "prev": "join-sect",
     "summary": "击败盘踞太南山深处的铁甲蛟。",
     "objectives": [
       {
@@ -328,6 +496,7 @@
       "items": []
     },
     "offer": "ape-fur-offer",
-    "finish": "ape-fur-finish"
+    "finish": "ape-fur-finish",
+    "prev": "join-sect"
   }
 }

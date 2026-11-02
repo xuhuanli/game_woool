@@ -159,6 +159,11 @@ export const ROSTER: Entry[] = [
   npc('mo-doctor', '#6e6a62', '#3a3734'),
   npc('li-feiyu', '#b85c4a', '#5a2a22'),
   npc('qixuan-steward', '#a07a4a', '#5a3f2a'),
+  npc('wan-xiaoshan', '#7fb0d0', '#3f5f7a'),
+  npc('qingyan-elder', '#e6e6f0', '#7a7a90'),
+  npc('han-yunzhi', '#e8a0b8', '#a05a70'),
+  npc('sect-judge', '#5a5a6a', '#2f2f3a'),
+  npc('valley-merchant', '#c9a24a', '#7a5a2a'),
 
   {
     key: 'ash-rat',
@@ -186,6 +191,20 @@ export const ROSTER: Entry[] = [
     model: `${MONSTERS}/Slime.fbx`,
     frame: 128,
     clips: beastClips('_Idle', '_Walk'),
+    size: 1.1,
+  },
+  {
+    key: 'green-snake',
+    model: `${ENEMIES}/Snake.fbx`,
+    frame: 128,
+    clips: beastClips('_Idle', '_Walk'),
+    size: 1.6,
+  },
+  {
+    key: 'night-bat',
+    model: `${MONSTERS}/Bat.fbx`,
+    frame: 128,
+    clips: beastClips('_Flying', '_Flying'),
     size: 1.1,
   },
   {
@@ -219,6 +238,18 @@ export const ROSTER: Entry[] = [
       { col: 0, row: 1, span: 2, color: '#5a4634' },
       { col: 1, row: 2, color: '#3a2c20' },
     ],
+  },
+  {
+    key: 'qingwen-daoren',
+    model: `${ADVENTURERS}/Characters/gltf/Mage.glb`,
+    frame: 192,
+    clips: humanoidEnemyClips('Spellcast_Shoot'),
+    size: 1.9,
+    humanoid: true,
+    headScale: 0.84,
+    topknot: true,
+    hide: MAGE_HIDDEN,
+    recolor: robe('#3f7a6a', '#1f3f3a', '#b8d8c8', '#8fb6a0'),
   },
   {
     key: 'golden-master',
