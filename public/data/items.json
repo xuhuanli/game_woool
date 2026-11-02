@@ -1,43 +1,432 @@
 {
-  "gold": {"id": "gold", "name": "灵石", "kind": "gold"},
-  "small-potion": {"id": "small-potion", "name": "回春丹", "kind": "potion", "heal": 30, "price": 20},
-  "small-mana": {"id": "small-mana", "name": "回气丹", "kind": "potion", "mana": 30, "price": 20},
-  "refine-stone": {"id": "refine-stone", "name": "祭炼石", "kind": "material", "price": 200},
-  "rusty-sword": {"id": "rusty-sword", "name": "青铜剑", "kind": "equip", "slot": "weapon", "level": 1, "bonus": {"primary": 2}, "price": 60},
-  "steel-sword": {"id": "steel-sword", "name": "精钢剑", "kind": "equip", "slot": "weapon", "level": 5, "bonus": {"primary": 5}, "price": 300},
-  "cloth-robe": {"id": "cloth-robe", "name": "青布道袍", "kind": "equip", "slot": "armor", "level": 1, "bonus": {"defense": 2, "maxHp": 10}, "price": 60},
-  "iron-helm": {"id": "iron-helm", "name": "玄铁冠", "kind": "equip", "slot": "helmet", "level": 3, "bonus": {"defense": 1, "magicDefense": 1}, "price": 90},
-  "spirit-pendant": {"id": "spirit-pendant", "name": "聚灵佩", "kind": "equip", "slot": "necklace", "level": 3, "bonus": {"maxMp": 15}, "price": 120},
-  "iron-bracelet": {"id": "iron-bracelet", "name": "镇魂镯", "kind": "equip", "slot": "bracelet", "level": 2, "bonus": {"defense": 1}, "price": 80},
-  "jade-ring": {"id": "jade-ring", "name": "青玉戒", "kind": "equip", "slot": "ring", "level": 2, "bonus": {"primary": 1}, "price": 100},
-  "foundation-pill": {"id": "foundation-pill", "name": "筑基丹", "kind": "material", "price": 2000},
-  "core-pill": {"id": "core-pill", "name": "降尘丹", "kind": "material", "price": 8000},
-  "nascent-pill": {"id": "nascent-pill", "name": "定灵丹", "kind": "material", "price": 30000},
-  "ape-fur": {"id": "ape-fur", "name": "山魈皮", "kind": "material", "price": 15},
-  "serpent-scale": {"id": "serpent-scale", "name": "蛟鳞", "kind": "material", "price": 150},
-  "sword-14": {"id": "sword-14", "name": "青元飞剑", "kind": "equip", "slot": "weapon", "level": 14, "bonus": {"primary": 14}, "price": 1200},
-  "robe-14": {"id": "robe-14", "name": "云纹法袍", "kind": "equip", "slot": "armor", "level": 14, "bonus": {"defense": 6, "maxHp": 60}, "price": 600},
-  "crown-14": {"id": "crown-14", "name": "紫玉冠", "kind": "equip", "slot": "helmet", "level": 14, "bonus": {"defense": 3, "magicDefense": 3}, "price": 600},
-  "pendant-14": {"id": "pendant-14", "name": "定魂珠", "kind": "equip", "slot": "necklace", "level": 14, "bonus": {"maxMp": 50, "magicDefense": 2}, "price": 600},
-  "bracelet-14": {"id": "bracelet-14", "name": "寒铁护腕", "kind": "equip", "slot": "bracelet", "level": 14, "bonus": {"defense": 3}, "price": 600},
-  "ring-14": {"id": "ring-14", "name": "储灵戒", "kind": "equip", "slot": "ring", "level": 14, "bonus": {"primary": 3}, "price": 600},
-  "sword-27": {"id": "sword-27", "name": "青竹蜂云剑", "kind": "equip", "slot": "weapon", "level": 27, "bonus": {"primary": 24}, "price": 5000},
-  "robe-27": {"id": "robe-27", "name": "玄冰法袍", "kind": "equip", "slot": "armor", "level": 27, "bonus": {"defense": 11, "maxHp": 140}, "price": 2500},
-  "crown-27": {"id": "crown-27", "name": "星辰冠", "kind": "equip", "slot": "helmet", "level": 27, "bonus": {"defense": 6, "magicDefense": 6}, "price": 2500},
-  "pendant-27": {"id": "pendant-27", "name": "虚天玉佩", "kind": "equip", "slot": "necklace", "level": 27, "bonus": {"maxMp": 110, "magicDefense": 4}, "price": 2500},
-  "bracelet-27": {"id": "bracelet-27", "name": "乌龙镯", "kind": "equip", "slot": "bracelet", "level": 27, "bonus": {"defense": 5, "evasion": 2}, "price": 2500},
-  "ring-27": {"id": "ring-27", "name": "火蛟戒", "kind": "equip", "slot": "ring", "level": 27, "bonus": {"primary": 6}, "price": 2500},
-  "sword-35": {"id": "sword-35", "name": "元磁神剑", "kind": "equip", "slot": "weapon", "level": 35, "bonus": {"primary": 38}, "price": 20000},
-  "robe-35": {"id": "robe-35", "name": "蛟龙宝甲", "kind": "equip", "slot": "armor", "level": 35, "bonus": {"defense": 17, "maxHp": 260}, "price": 10000},
-  "crown-35": {"id": "crown-35", "name": "紫罗天冠", "kind": "equip", "slot": "helmet", "level": 35, "bonus": {"defense": 9, "magicDefense": 9}, "price": 10000},
-  "pendant-35": {"id": "pendant-35", "name": "九曲灵参佩", "kind": "equip", "slot": "necklace", "level": 35, "bonus": {"maxMp": 190, "magicDefense": 7}, "price": 10000},
-  "bracelet-35": {"id": "bracelet-35", "name": "玄天镯", "kind": "equip", "slot": "bracelet", "level": 35, "bonus": {"defense": 8, "evasion": 4}, "price": 10000},
-  "ring-35": {"id": "ring-35", "name": "元婴戒", "kind": "equip", "slot": "ring", "level": 35, "bonus": {"primary": 10}, "price": 10000},
-  "recall-scroll": {"id": "recall-scroll", "name": "回城符", "kind": "scroll", "scroll": "recall", "price": 30},
-  "random-scroll": {"id": "random-scroll", "name": "随机传送符", "kind": "scroll", "scroll": "random", "price": 15},
-  "skill-tome": {"id": "skill-tome", "name": "功法残卷", "kind": "material", "price": 500},
-  "stun-ring": {"id": "stun-ring", "name": "定身戒", "kind": "equip", "slot": "ring", "level": 10, "bonus": {"primary": 1}, "price": 1500, "special": {"kind": "stun", "chance": 0.1, "seconds": 2}},
-  "revive-ring": {"id": "revive-ring", "name": "涅槃戒", "kind": "equip", "slot": "ring", "level": 10, "bonus": {"maxHp": 20}, "price": 1500, "special": {"kind": "revive", "ratio": 0.3, "seconds": 300}},
-  "guard-ring": {"id": "guard-ring", "name": "护身戒", "kind": "equip", "slot": "ring", "level": 10, "bonus": {"maxMp": 20}, "price": 1500, "special": {"kind": "manaShield", "ratio": 0.3}},
-  "blink-ring": {"id": "blink-ring", "name": "遁光戒", "kind": "equip", "slot": "ring", "level": 10, "bonus": {"evasion": 2}, "price": 1500, "special": {"kind": "teleport", "seconds": 30}}
+ "gold": {
+  "id": "gold",
+  "name": "灵石",
+  "kind": "gold"
+ },
+ "small-potion": {
+  "id": "small-potion",
+  "name": "回春丹",
+  "kind": "potion",
+  "heal": 30,
+  "price": 20
+ },
+ "small-mana": {
+  "id": "small-mana",
+  "name": "回气丹",
+  "kind": "potion",
+  "mana": 30,
+  "price": 20
+ },
+ "refine-stone": {
+  "id": "refine-stone",
+  "name": "祭炼石",
+  "kind": "material",
+  "price": 200
+ },
+ "rusty-sword": {
+  "id": "rusty-sword",
+  "name": "青铜剑",
+  "kind": "equip",
+  "slot": "weapon",
+  "level": 1,
+  "bonus": {
+   "primary": 2
+  },
+  "price": 60
+ },
+ "steel-sword": {
+  "id": "steel-sword",
+  "name": "精钢剑",
+  "kind": "equip",
+  "slot": "weapon",
+  "level": 5,
+  "bonus": {
+   "primary": 5
+  },
+  "price": 300
+ },
+ "cloth-robe": {
+  "id": "cloth-robe",
+  "name": "青布道袍",
+  "kind": "equip",
+  "slot": "armor",
+  "level": 1,
+  "bonus": {
+   "defense": 2,
+   "maxHp": 10
+  },
+  "price": 60
+ },
+ "iron-helm": {
+  "id": "iron-helm",
+  "name": "玄铁冠",
+  "kind": "equip",
+  "slot": "helmet",
+  "level": 3,
+  "bonus": {
+   "defense": 1,
+   "magicDefense": 1
+  },
+  "price": 90
+ },
+ "spirit-pendant": {
+  "id": "spirit-pendant",
+  "name": "聚灵佩",
+  "kind": "equip",
+  "slot": "necklace",
+  "level": 3,
+  "bonus": {
+   "maxMp": 15
+  },
+  "price": 120
+ },
+ "iron-bracelet": {
+  "id": "iron-bracelet",
+  "name": "镇魂镯",
+  "kind": "equip",
+  "slot": "bracelet",
+  "level": 2,
+  "bonus": {
+   "defense": 1
+  },
+  "price": 80
+ },
+ "jade-ring": {
+  "id": "jade-ring",
+  "name": "青玉戒",
+  "kind": "equip",
+  "slot": "ring",
+  "level": 2,
+  "bonus": {
+   "primary": 1
+  },
+  "price": 100
+ },
+ "foundation-pill": {
+  "id": "foundation-pill",
+  "name": "筑基丹",
+  "kind": "material",
+  "price": 2000
+ },
+ "core-pill": {
+  "id": "core-pill",
+  "name": "降尘丹",
+  "kind": "material",
+  "price": 8000
+ },
+ "nascent-pill": {
+  "id": "nascent-pill",
+  "name": "定灵丹",
+  "kind": "material",
+  "price": 30000
+ },
+ "ape-fur": {
+  "id": "ape-fur",
+  "name": "山魈皮",
+  "kind": "material",
+  "price": 15
+ },
+ "serpent-scale": {
+  "id": "serpent-scale",
+  "name": "蛟鳞",
+  "kind": "material",
+  "price": 150
+ },
+ "sword-14": {
+  "id": "sword-14",
+  "name": "青元飞剑",
+  "kind": "equip",
+  "slot": "weapon",
+  "level": 14,
+  "bonus": {
+   "primary": 14
+  },
+  "price": 1200
+ },
+ "robe-14": {
+  "id": "robe-14",
+  "name": "云纹法袍",
+  "kind": "equip",
+  "slot": "armor",
+  "level": 14,
+  "bonus": {
+   "defense": 6,
+   "maxHp": 60
+  },
+  "price": 600
+ },
+ "crown-14": {
+  "id": "crown-14",
+  "name": "紫玉冠",
+  "kind": "equip",
+  "slot": "helmet",
+  "level": 14,
+  "bonus": {
+   "defense": 3,
+   "magicDefense": 3
+  },
+  "price": 600
+ },
+ "pendant-14": {
+  "id": "pendant-14",
+  "name": "定魂珠",
+  "kind": "equip",
+  "slot": "necklace",
+  "level": 14,
+  "bonus": {
+   "maxMp": 50,
+   "magicDefense": 2
+  },
+  "price": 600
+ },
+ "bracelet-14": {
+  "id": "bracelet-14",
+  "name": "寒铁护腕",
+  "kind": "equip",
+  "slot": "bracelet",
+  "level": 14,
+  "bonus": {
+   "defense": 3
+  },
+  "price": 600
+ },
+ "ring-14": {
+  "id": "ring-14",
+  "name": "储灵戒",
+  "kind": "equip",
+  "slot": "ring",
+  "level": 14,
+  "bonus": {
+   "primary": 3
+  },
+  "price": 600
+ },
+ "sword-27": {
+  "id": "sword-27",
+  "name": "青竹蜂云剑",
+  "kind": "equip",
+  "slot": "weapon",
+  "level": 27,
+  "bonus": {
+   "primary": 24
+  },
+  "price": 5000
+ },
+ "robe-27": {
+  "id": "robe-27",
+  "name": "玄冰法袍",
+  "kind": "equip",
+  "slot": "armor",
+  "level": 27,
+  "bonus": {
+   "defense": 11,
+   "maxHp": 140
+  },
+  "price": 2500
+ },
+ "crown-27": {
+  "id": "crown-27",
+  "name": "星辰冠",
+  "kind": "equip",
+  "slot": "helmet",
+  "level": 27,
+  "bonus": {
+   "defense": 6,
+   "magicDefense": 6
+  },
+  "price": 2500
+ },
+ "pendant-27": {
+  "id": "pendant-27",
+  "name": "虚天玉佩",
+  "kind": "equip",
+  "slot": "necklace",
+  "level": 27,
+  "bonus": {
+   "maxMp": 110,
+   "magicDefense": 4
+  },
+  "price": 2500
+ },
+ "bracelet-27": {
+  "id": "bracelet-27",
+  "name": "乌龙镯",
+  "kind": "equip",
+  "slot": "bracelet",
+  "level": 27,
+  "bonus": {
+   "defense": 5,
+   "evasion": 2
+  },
+  "price": 2500
+ },
+ "ring-27": {
+  "id": "ring-27",
+  "name": "火蛟戒",
+  "kind": "equip",
+  "slot": "ring",
+  "level": 27,
+  "bonus": {
+   "primary": 6
+  },
+  "price": 2500
+ },
+ "sword-35": {
+  "id": "sword-35",
+  "name": "元磁神剑",
+  "kind": "equip",
+  "slot": "weapon",
+  "level": 35,
+  "bonus": {
+   "primary": 38
+  },
+  "price": 20000
+ },
+ "robe-35": {
+  "id": "robe-35",
+  "name": "蛟龙宝甲",
+  "kind": "equip",
+  "slot": "armor",
+  "level": 35,
+  "bonus": {
+   "defense": 17,
+   "maxHp": 260
+  },
+  "price": 10000
+ },
+ "crown-35": {
+  "id": "crown-35",
+  "name": "紫罗天冠",
+  "kind": "equip",
+  "slot": "helmet",
+  "level": 35,
+  "bonus": {
+   "defense": 9,
+   "magicDefense": 9
+  },
+  "price": 10000
+ },
+ "pendant-35": {
+  "id": "pendant-35",
+  "name": "九曲灵参佩",
+  "kind": "equip",
+  "slot": "necklace",
+  "level": 35,
+  "bonus": {
+   "maxMp": 190,
+   "magicDefense": 7
+  },
+  "price": 10000
+ },
+ "bracelet-35": {
+  "id": "bracelet-35",
+  "name": "玄天镯",
+  "kind": "equip",
+  "slot": "bracelet",
+  "level": 35,
+  "bonus": {
+   "defense": 8,
+   "evasion": 4
+  },
+  "price": 10000
+ },
+ "ring-35": {
+  "id": "ring-35",
+  "name": "元婴戒",
+  "kind": "equip",
+  "slot": "ring",
+  "level": 35,
+  "bonus": {
+   "primary": 10
+  },
+  "price": 10000
+ },
+ "recall-scroll": {
+  "id": "recall-scroll",
+  "name": "回城符",
+  "kind": "scroll",
+  "scroll": "recall",
+  "price": 30
+ },
+ "random-scroll": {
+  "id": "random-scroll",
+  "name": "随机传送符",
+  "kind": "scroll",
+  "scroll": "random",
+  "price": 15
+ },
+ "skill-tome": {
+  "id": "skill-tome",
+  "name": "功法残卷",
+  "kind": "material",
+  "price": 500
+ },
+ "stun-ring": {
+  "id": "stun-ring",
+  "name": "定身戒",
+  "kind": "equip",
+  "slot": "ring",
+  "level": 10,
+  "bonus": {
+   "primary": 1
+  },
+  "price": 1500,
+  "special": {
+   "kind": "stun",
+   "chance": 0.1,
+   "seconds": 2
+  }
+ },
+ "revive-ring": {
+  "id": "revive-ring",
+  "name": "涅槃戒",
+  "kind": "equip",
+  "slot": "ring",
+  "level": 10,
+  "bonus": {
+   "maxHp": 20
+  },
+  "price": 1500,
+  "special": {
+   "kind": "revive",
+   "ratio": 0.3,
+   "seconds": 300
+  }
+ },
+ "guard-ring": {
+  "id": "guard-ring",
+  "name": "护身戒",
+  "kind": "equip",
+  "slot": "ring",
+  "level": 10,
+  "bonus": {
+   "maxMp": 20
+  },
+  "price": 1500,
+  "special": {
+   "kind": "manaShield",
+   "ratio": 0.3
+  }
+ },
+ "blink-ring": {
+  "id": "blink-ring",
+  "name": "遁光戒",
+  "kind": "equip",
+  "slot": "ring",
+  "level": 10,
+  "bonus": {
+   "evasion": 2
+  },
+  "price": 1500,
+  "special": {
+   "kind": "teleport",
+   "seconds": 30
+  }
+ },
+ "ascension-token": {
+  "id": "ascension-token",
+  "name": "升仙令",
+  "kind": "material"
+ }
 }

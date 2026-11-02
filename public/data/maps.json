@@ -1,63 +1,169 @@
 {
+  "qixuan-gate": {
+    "id": "qixuan-gate",
+    "name": "七玄门",
+    "safe": true,
+    "tiled": "qixuan-gate.tmj",
+    "respawn": {
+      "map": "qixuan-gate",
+      "x": 20,
+      "y": 22
+    },
+    "tone": {
+      "color": "#ffb46a",
+      "alpha": 0.06
+    }
+  },
   "huangfeng-valley": {
     "id": "huangfeng-valley",
     "name": "黄枫谷",
     "safe": true,
-    "width": 24,
-    "height": 24,
-    "playerStart": {"x": 12, "y": 14},
-    "respawn": {"map": "huangfeng-valley", "x": 12, "y": 14},
-    "obstacles": [
-      {"x": 0, "y": 0, "w": 24, "h": 1},
-      {"x": 0, "y": 23, "w": 24, "h": 1},
-      {"x": 0, "y": 0, "w": 1, "h": 24},
-      {"x": 23, "y": 0, "w": 1, "h": 24},
-      {"x": 4, "y": 4, "w": 5, "h": 3},
-      {"x": 15, "y": 4, "w": 5, "h": 3},
-      {"x": 4, "y": 16, "w": 4, "h": 2},
-      {"x": 16, "y": 16, "w": 4, "h": 2}
-    ],
-    "portals": [
-      {"x": 12, "y": 21, "name": "彩霞山", "toMap": "starter-field", "toX": 5, "toY": 5}
-    ],
-    "spawns": []
+    "tiled": "huangfeng-valley.tmj",
+    "respawn": {
+      "map": "huangfeng-valley",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#ffc65a",
+      "alpha": 0.1
+    }
   },
   "starter-field": {
     "id": "starter-field",
     "name": "彩霞山",
     "tiled": "starter-field.tmj",
-    "respawn": {"map": "huangfeng-valley", "x": 12, "y": 14}
+    "respawn": {
+      "map": "qixuan-gate",
+      "x": 20,
+      "y": 22
+    },
+    "tone": {
+      "color": "#ff9a5a",
+      "alpha": 0.1
+    }
   },
   "taina-mountain": {
     "id": "taina-mountain",
     "name": "太南山",
     "width": 28,
     "height": 28,
-    "playerStart": {"x": 4, "y": 4},
-    "respawn": {"map": "huangfeng-valley", "x": 12, "y": 14},
+    "playerStart": {
+      "x": 4,
+      "y": 4
+    },
+    "respawn": {
+      "map": "huangfeng-valley",
+      "x": 20,
+      "y": 24
+    },
     "obstacles": [
-      {"x": 0, "y": 0, "w": 28, "h": 1},
-      {"x": 0, "y": 27, "w": 28, "h": 1},
-      {"x": 0, "y": 0, "w": 1, "h": 28},
-      {"x": 27, "y": 0, "w": 1, "h": 28},
-      {"x": 8, "y": 2, "w": 2, "h": 8},
-      {"x": 3, "y": 13, "w": 9, "h": 2},
-      {"x": 14, "y": 6, "w": 2, "h": 10},
-      {"x": 18, "y": 14, "w": 7, "h": 2},
-      {"x": 9, "y": 19, "w": 2, "h": 6}
+      {
+        "x": 0,
+        "y": 0,
+        "w": 28,
+        "h": 1
+      },
+      {
+        "x": 0,
+        "y": 27,
+        "w": 28,
+        "h": 1
+      },
+      {
+        "x": 0,
+        "y": 0,
+        "w": 1,
+        "h": 28
+      },
+      {
+        "x": 27,
+        "y": 0,
+        "w": 1,
+        "h": 28
+      },
+      {
+        "x": 8,
+        "y": 2,
+        "w": 2,
+        "h": 8
+      },
+      {
+        "x": 3,
+        "y": 13,
+        "w": 9,
+        "h": 2
+      },
+      {
+        "x": 14,
+        "y": 6,
+        "w": 2,
+        "h": 10
+      },
+      {
+        "x": 18,
+        "y": 14,
+        "w": 7,
+        "h": 2
+      },
+      {
+        "x": 9,
+        "y": 19,
+        "w": 2,
+        "h": 6
+      }
     ],
     "portals": [
-      {"x": 2, "y": 2, "name": "彩霞山", "toMap": "starter-field", "toX": 28, "toY": 28}
+      {
+        "x": 2,
+        "y": 2,
+        "name": "彩霞山",
+        "toMap": "starter-field",
+        "toX": 108,
+        "toY": 108
+      }
     ],
     "spawns": [
-      {"monster": "mountain-ape", "x": 12, "y": 4},
-      {"monster": "mountain-ape", "x": 12, "y": 10},
-      {"monster": "wolf-rider", "x": 19, "y": 4},
-      {"monster": "wolf-rider", "x": 22, "y": 10},
-      {"monster": "mountain-ape", "x": 5, "y": 18},
-      {"monster": "ape-shaman", "x": 5, "y": 24},
-      {"monster": "mountain-ape", "x": 14, "y": 20},
-      {"monster": "flood-serpent", "x": 21, "y": 21}
+      {
+        "monster": "mountain-ape",
+        "x": 12,
+        "y": 4
+      },
+      {
+        "monster": "mountain-ape",
+        "x": 12,
+        "y": 10
+      },
+      {
+        "monster": "wolf-rider",
+        "x": 19,
+        "y": 4
+      },
+      {
+        "monster": "wolf-rider",
+        "x": 22,
+        "y": 10
+      },
+      {
+        "monster": "mountain-ape",
+        "x": 5,
+        "y": 18
+      },
+      {
+        "monster": "ape-shaman",
+        "x": 5,
+        "y": 24
+      },
+      {
+        "monster": "mountain-ape",
+        "x": 14,
+        "y": 20
+      },
+      {
+        "monster": "flood-serpent",
+        "x": 21,
+        "y": 21
+      }
     ]
   }
 }

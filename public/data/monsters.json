@@ -485,5 +485,83 @@
         }
       }
     ]
+  },
+  "golden-master": {
+    "id": "golden-master",
+    "name": "金光上人",
+    "stats": {
+      "maxHp": 420,
+      "maxMp": 0,
+      "attack": {
+        "min": 9,
+        "max": 15
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 2,
+        "max": 4
+      },
+      "magicDefense": {
+        "min": 2,
+        "max": 5
+      },
+      "accuracy": 12,
+      "evasion": 2,
+      "luck": 0
+    },
+    "moveSpeed": 2.2,
+    "attackInterval": 1.4,
+    "attackWindup": 0.5,
+    "aggroRange": 7,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 1500,
+    "respawnSeconds": 240,
+    "dropTable": "golden-master",
+    "look": {
+      "fur": "#e0b63c",
+      "head": "#fff0b0",
+      "scale": 1.1
+    },
+    "abilities": [
+      {
+        "id": "gold-beam",
+        "name": "金光术",
+        "cooldown": 6,
+        "windup": 0.9,
+        "color": "#ffd84a",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.3
+      },
+      {
+        "id": "gold-burst",
+        "name": "金光爆",
+        "cooldown": 11,
+        "windup": 1.1,
+        "color": "#fff0b0",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.5
+      }
+    ],
+    "boss": true,
+    "attackRange": 4,
+    "phases": [
+      {
+        "hpBelow": 0.4,
+        "attackMultiplier": 1.3,
+        "message": "金光上人祭出金光罩，出手更急"
+      }
+    ]
   }
 }

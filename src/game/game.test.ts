@@ -570,3 +570,29 @@ describe('法器', () => {
     expect(equipmentName(equipment, realConfig)).toBe('极品·青铜剑 +2');
   });
 });
+
+describe('跑步', () => {
+  const arrival = (run: boolean) => {
+    const world = new World(fixture(null), 'test', 'body', 1);
+    world.moveTo({ x: 9, y: 2 }, run);
+    let seconds = 0;
+    while (world.player.order && seconds < 10) {
+      world.tick();
+      seconds += TICK_SECONDS;
+    }
+    return seconds;
+  };
+
+  it('右键跑步比走路快', () => {
+    expect(arrival(true)).toBeLessThan(arrival(false) * 0.7);
+  });
+
+  it('到达后不再算跑步，追怪时恢复行走', () => {
+    const world = new World(fixture({ x: 9, y: 2 }, [], 0), 'test', 'body', 1);
+    world.monsters[0]!.def = { ...world.monsters[0]!.def, aggroRange: 0 };
+    world.moveTo({ x: 5, y: 2 }, true);
+    expect(world.playerRunning).toBe(true);
+    world.attack(world.monsters[0]!);
+    expect(world.playerRunning).toBe(false);
+  });
+});

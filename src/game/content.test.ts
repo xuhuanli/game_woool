@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { validateConfig, type GameConfig } from './config';
 import type { Equipment } from './equipment';
-import { Grid } from './grid';
+import { cellDistance, Grid } from './grid';
 import { findPath } from './pathfinding';
 import { questDestination } from './navigation';
 import { questStatus } from './quests';
@@ -13,7 +13,12 @@ import { TICK_SECONDS, World, type GameEvent } from './world';
 const config = await loadConfigFromDisk();
 
 const npc = (id: string) => config.npcs[id]!;
-const town = () => new World(config, 'huangfeng-valley', 'body', 1);
+/** 第 1 章已通关，能进入黄枫谷和太南山。 */
+const passChapterOne = (world: World) => {
+  world.player.quests.completed.push('ch1-boss');
+  return world;
+};
+const town = () => passChapterOne(new World(config, 'huangfeng-valley', 'body', 1));
 
 function run(world: World, seconds: number, until?: () => boolean): void {
   for (let elapsed = 0; elapsed < seconds; elapsed += TICK_SECONDS) {
@@ -89,8 +94,8 @@ describe('切图', () => {
     monster.home = { ...monster.cell };
     run(world, 30, () => world.player.hp === 0);
     run(world, 4, () => world.player.hp > 0);
-    expect(world.mapId).toBe('huangfeng-valley');
-    expect(world.player.cell).toEqual({ x: 12, y: 14 });
+    expect(world.mapId).toBe('qixuan-gate');
+    expect(world.player.cell).toEqual({ x: 20, y: 22 });
   });
 
   it('传送阵扣灵石并到达目的地，等级和灵石不够时拒绝', () => {
@@ -125,6 +130,7 @@ describe('Boss', () => {
 
   it('切图不能重置 Boss 刷新时间', () => {
     const { world, boss } = lair();
+    passChapterOne(world);
     kill(world, boss);
     expect(boss.hp).toBe(0);
     world.player.cell = { ...world.portals[0]! };
@@ -133,7 +139,7 @@ describe('Boss', () => {
     world.moveTo(world.portals[0]!);
     run(world, 1);
     expect(world.mapId).toBe('starter-field');
-    world.moveTo({ x: 29, y: 29 });
+    world.moveTo({ x: 111, y: 111 });
     run(world, 2, () => world.mapId === 'taina-mountain');
     expect(world.mapId).toBe('taina-mountain');
     expect(world.monsters.find((monster) => monster.def.boss)!.hp).toBe(0);
@@ -473,7 +479,7 @@ describe('死亡掉装', () => {
   it('复活回城后掉落还在，回到原地能捡回', () => {
     const world = dying();
     run(world, 4, () => world.player.hp > 0);
-    expect(world.mapId).toBe('huangfeng-valley');
+    expect(world.mapId).toBe('qixuan-gate');
     expect(world.items).toEqual([]);
     expect(world.deathDrops).toHaveLength(1);
 
@@ -654,21 +660,21 @@ describe('剧情开关', () => {
         ...config.quests['join-sect']!,
         rewards: {
           ...config.quests['join-sect']!.rewards,
-          teleport: { map: 'starter-field', x: 5, y: 5 },
+          teleport: { map: 'starter-field', x: 12, y: 12 },
         },
       },
     },
   });
 
   it('任务完成后 NPC 出现或消失，并传送到下一章', () => {
-    const world = new World(withStory(), 'huangfeng-valley', 'body', 1);
+    const world = passChapterOne(new World(withStory(), 'huangfeng-valley', 'body', 1));
     expect(world.npcs.map((npc) => npc.id)).toContain('early');
     expect(world.npcs.map((npc) => npc.id)).not.toContain('hidden');
     world.player.quests.active.push({ id: 'join-sect', counts: [1] });
     world.turnInQuest('join-sect');
     expect(world.mapId).toBe('starter-field');
-    expect(world.player.cell).toEqual({ x: 5, y: 5 });
-    world.moveTo(world.portals[0]!);
+    expect(world.player.cell).toEqual({ x: 12, y: 12 });
+    world.moveTo(world.portals.find((portal) => portal.name === '黄枫谷')!);
     run(world, 10, () => world.mapId === 'huangfeng-valley');
     expect(world.npcs.map((npc) => npc.id)).toContain('hidden');
     expect(world.npcs.map((npc) => npc.id)).not.toContain('early');
@@ -687,13 +693,63 @@ describe('剧情开关', () => {
 describe('Tiled 地图', () => {
   it('彩霞山能从 Tiled 文件解析', () => {
     const map = config.maps['starter-field']!;
-    expect(map.width).toBe(32);
-    expect(map.spawns).toHaveLength(11);
-    expect(map.portals).toHaveLength(2);
-    expect(map.playerStart).toEqual({ x: 5, y: 5 });
-    expect(map.ground).toHaveLength(32 * 32);
+    expect(map.width).toBe(120);
+    expect(map.spawns).toHaveLength(44);
+    expect(map.portals).toHaveLength(3);
+    expect(map.playerStart).toEqual({ x: 12, y: 12 });
+    expect(map.ground).toHaveLength(120 * 120);
     expect(new Grid(map).isWalkable({ x: 0, y: 0 })).toBe(false);
-    expect(new Grid(map).isWalkable({ x: 5, y: 5 })).toBe(true);
+    expect(new Grid(map).isWalkable({ x: 12, y: 12 })).toBe(true);
+  });
+
+  it('景观都在地图内，树挡路，草不挡路', () => {
+    const map = config.maps['starter-field']!;
+    const grid = new Grid(map);
+    const placed = (prefix: string) => map.decor!.filter((item) => item.prop.startsWith(prefix));
+    expect(placed('tree').length).toBeGreaterThan(200);
+    for (const item of map.decor!) {
+      expect(item.x > 0 && item.y > 0 && item.x < 120 && item.y < 120).toBe(true);
+    }
+    for (const item of placed('tree')) {
+      expect(grid.isWalkable({ x: Math.floor(item.x), y: Math.floor(item.y) })).toBe(false);
+    }
+    for (const item of placed('grass')) {
+      expect(grid.isWalkable({ x: Math.floor(item.x), y: Math.floor(item.y) })).toBe(true);
+    }
+  });
+
+  it('两座主城：40×40，建筑挡路，NPC 站在能走到的地方', () => {
+    for (const mapId of ['qixuan-gate', 'huangfeng-valley']) {
+      const map = config.maps[mapId]!;
+      const grid = new Grid(map);
+      expect(map.width).toBe(40);
+      expect(map.safe).toBe(true);
+      expect(map.spawns).toHaveLength(0);
+      expect(grid.isWalkable(map.playerStart)).toBe(true);
+      expect(map.decor!.filter((item) => item.foot).length).toBeGreaterThan(3);
+      for (const { foot } of map.decor!.filter((item) => item.foot)) {
+        expect(grid.isWalkable({ x: foot!.x0, y: foot!.y0 })).toBe(false);
+      }
+      for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === mapId)) {
+        expect(grid.isWalkable(npc), npc.id).toBe(true);
+        expect(findPath(grid, map.playerStart, npc, () => true), npc.id).not.toBeNull();
+      }
+      for (const portal of map.portals!) {
+        expect(findPath(grid, map.playerStart, portal, () => true)).not.toBeNull();
+      }
+    }
+  });
+
+  it('牌楼中间能穿过，彩霞山的怪物保持间距', () => {
+    const grid = new Grid(config.maps['qixuan-gate']!);
+    expect(grid.isWalkable({ x: 20, y: 29 })).toBe(true);
+    expect(grid.isWalkable({ x: 17, y: 29 })).toBe(false);
+    const { spawns } = config.maps['starter-field']!;
+    for (const a of spawns) {
+      for (const b of spawns) {
+        if (a !== b) expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThanOrEqual(5);
+      }
+    }
   });
 });
 
@@ -739,7 +795,7 @@ describe('自动挂机', () => {
     const world = field();
     world.player.hp = 5;
     run(world, 1);
-    expect(world.mapId).toBe('huangfeng-valley');
+    expect(world.mapId).toBe('qixuan-gate');
     expect(world.player.auto.enabled).toBe(false);
   });
 
@@ -955,7 +1011,7 @@ describe('40 级内容', () => {
 describe('怪物种类', () => {
   const fight = (monsterId: string) => {
     const setup = structuredClone(config);
-    setup.maps['starter-field']!.spawns = [{ monster: monsterId, x: 9, y: 5 }];
+    setup.maps['starter-field']!.spawns = [{ monster: monsterId, x: 16, y: 12 }];
     setup.maps['starter-field']!.portals = [];
     const world = new World(setup, 'starter-field', 'body', 2);
     const { player } = world;
@@ -968,7 +1024,7 @@ describe('怪物种类', () => {
     const { world, player, monster } = fight('thorn-sprite');
     run(world, 6, () => player.hp < 900);
     expect(player.hp).toBeLessThan(900);
-    expect(Math.abs(monster.cell.x - player.cell.x)).toBeGreaterThan(1);
+    expect(cellDistance(monster.cell, player.cell)).toBeGreaterThan(1);
   });
 
   it('放毒的怪让玩家持续掉血', () => {
@@ -1124,7 +1180,7 @@ describe('符、仓库、批量卖出', () => {
     expect(world.mapId).toBe('starter-field');
     expect(world.player.cell).not.toEqual(start);
     world.inventory.useItem('recall-scroll');
-    expect(world.mapId).toBe('huangfeng-valley');
+    expect(world.mapId).toBe('qixuan-gate');
     expect(world.player.bag).toEqual({});
   });
 
@@ -1180,7 +1236,7 @@ describe('自动寻路', () => {
   });
 
   it('到达后自动和 NPC 对话', () => {
-    const world = new World(config, 'starter-field', 'body', 1);
+    const world = passChapterOne(new World(config, 'starter-field', 'body', 1));
     for (const monster of world.monsters) monster.def = { ...monster.def, aggroRange: 0 };
     const guide = npc('guide-senior');
     world.navigate({ mapId: guide.map, cell: guide, npc: guide });
@@ -1212,3 +1268,42 @@ describe('自动寻路', () => {
   });
 });
 
+
+describe('第 1 章', () => {
+  const finish = (world: World, questId: string) => {
+    world.acceptQuest(questId);
+    const quest = config.quests[questId]!;
+    const progress = world.player.quests.active.find((active) => active.id === questId)!;
+    progress.counts = quest.objectives.map((objective) => objective.count);
+    world.turnInQuest(questId);
+  };
+
+  it('开局在七玄门，通关前去不了黄枫谷和太南山', () => {
+    expect(config.game.startMap).toBe('qixuan-gate');
+    const world = new World(config, 'starter-field', 'body', 1);
+    for (const name of ['黄枫谷', '太南山']) {
+      expect(world.portals.find((portal) => portal.name === name)?.requires).toBe('ch1-boss');
+    }
+    expect(status(world, 'join-sect')).toBe('locked');
+  });
+
+  it('七个任务串完后升到 7 级，拿到升仙令并到黄枫谷', () => {
+    const world = new World(config, 'qixuan-gate', 'body', 1);
+    for (const questId of [
+      'ch1-enter',
+      'ch1-herbs',
+      'ch1-spider',
+      'ch1-friend',
+      'ch1-wolves',
+      'ch1-report',
+      'ch1-boss',
+    ]) {
+      expect(status(world, questId), questId).toBe('available');
+      finish(world, questId);
+    }
+    expect(world.player.level).toBe(7);
+    expect(world.player.bag['ascension-token']).toBe(1);
+    expect(world.mapId).toBe('huangfeng-valley');
+    expect(status(world, 'join-sect')).toBe('available');
+  });
+});

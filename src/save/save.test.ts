@@ -94,8 +94,8 @@ describe('存档恢复', () => {
     world.player.hp = 0;
     const loaded = World.fromSave(config, world.toSave(1000), 2);
     expect(loaded.player.hp).toBe(loaded.player.stats.maxHp);
-    expect(loaded.mapId).toBe('huangfeng-valley');
-    expect(loaded.player.cell).toEqual({ x: 12, y: 14 });
+    expect(loaded.mapId).toBe('qixuan-gate');
+    expect(loaded.player.cell).toEqual({ x: 20, y: 22 });
   });
 
   it('玩家格子被怪物占住时，换到附近空位', () => {

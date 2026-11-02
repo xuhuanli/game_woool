@@ -3,7 +3,7 @@ import { validateConfig, type GameConfig } from './game/config';
 import { assembleConfig } from './game/configLoader';
 import { World } from './game/world';
 import { GameScene } from './render/GameScene';
-import type { SpriteManifest, SpriteManifests } from './render/placeholders';
+import type { PropManifest, SpriteManifest, SpriteManifests } from './render/placeholders';
 import { AutoSaver } from './save/autoSaver';
 import { IndexedDbSaveStore } from './save/saveStore';
 import { AutoPanel } from './ui/autoPanel';
@@ -16,7 +16,28 @@ import { SkillPanel } from './ui/skillPanel';
 import { showStartScreen } from './ui/startScreen';
 import './ui/hud.css';
 
-const BAKED_SPRITES = ['body'];
+const BAKED_SPRITES = [
+  'body',
+  'spell',
+  'spirit',
+  'ash-rat',
+  'gold-bug',
+  'venom-spider',
+  'thorn-sprite',
+  'flood-serpent',
+  'mountain-ape',
+  'ape-shaman',
+  'iron-puppet',
+  'wolf-rider',
+  'golden-master',
+  'npc-guide-senior',
+  'npc-herb-keeper',
+  'npc-vault-keeper',
+  'npc-gate-steward',
+  'npc-mo-doctor',
+  'npc-li-feiyu',
+  'npc-qixuan-steward',
+];
 
 function loadConfig(): Promise<GameConfig> {
   const readJson = async <T>(path: string): Promise<T> => {
@@ -40,8 +61,13 @@ async function loadSpriteManifests(): Promise<SpriteManifests> {
   return manifests;
 }
 
+async function loadPropManifest(): Promise<PropManifest> {
+  const response = await fetch(`${import.meta.env.BASE_URL}assets/props/props.json`);
+  return (await response.json()) as PropManifest;
+}
+
 const config = await loadConfig();
-const sprites = await loadSpriteManifests();
+const [sprites, props] = await Promise.all([loadSpriteManifests(), loadPropManifest()]);
 const errors = validateConfig(config);
 if (errors.length > 0) throw new Error(errors.join('\n'));
 
@@ -78,7 +104,7 @@ new Phaser.Game({
   parent: 'game',
   backgroundColor: '#17140f',
   scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
-  scene: new GameScene(world, hud, panels, saver, npcPanel, autoPanel, sprites),
+  scene: new GameScene(world, hud, panels, saver, npcPanel, autoPanel, sprites, props),
 });
 
 if (import.meta.env.DEV) {

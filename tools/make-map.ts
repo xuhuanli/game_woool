@@ -1,0 +1,645 @@
+/**
+ * 生成带景观的 Tiled 地图，输出到 public/maps/。
+ * 路线、河流、建筑和怪区在 MAPS 里手工规划，地形细节和树石按固定种子生成，结果可重复。
+ * 用法：npx tsx tools/make-map.ts
+ * 重新生成会覆盖在 Tiled 里做的手工修改。
+ */
+import { writeFileSync } from 'node:fs';
+import { Rng } from '../src/game/rng';
+
+const GROUND = { grassA: 1, grassB: 2, grassC: 3, dirt: 4, stone: 5, water: 6, sand: 7, bridge: 8, paved: 9 } as const;
+const TILE_COUNT = 9;
+
+type Point = [number, number];
+
+interface Zone {
+  monster: string;
+  x: number;
+  y: number;
+  radius: number;
+  count: number;
+}
+
+interface Pond {
+  x: number;
+  y: number;
+  radius: number;
+}
+
+interface Circle {
+  x: number;
+  y: number;
+  radius: number;
+}
+
+interface Rect {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+interface PortalPlan {
+  cell: Point;
+  label: string;
+  toMap: string;
+  to: Point;
+  requires?: string;
+}
+
+interface Building {
+  prop: string;
+  /** 占地的最小格 */
+  x: number;
+  y: number;
+  /** 翻转后长边沿 y 轴，正面朝 +x */
+  flip?: boolean;
+}
+
+interface MapPlan {
+  id: string;
+  size: number;
+  seed: number;
+  start: Point;
+  portals: PortalPlan[];
+  roads: Point[][];
+  roadTile: number;
+  /** 道路半径，可随噪声变化 */
+  roadWidth: [number, number];
+  river?: Point[];
+  ponds?: Pond[];
+  zones?: Zone[];
+  /** 同一怪区里怪物的最小间距 */
+  monsterGap?: number;
+  clearings: Circle[];
+  /** 铺石地面的范围 */
+  paved?: Rect[];
+  buildings?: Building[];
+  /** 必须走得到的格子，比如 NPC 身边 */
+  required?: Point[];
+  edge: { base: number; spread: number; outcrops: boolean };
+  /** 树的密度：factor 随噪声变化，least 是最低密度 */
+  forest: { factor: number; least?: number; denseArea?: Circle };
+  foliage: number[];
+  /** 树的种类，缺省是常绿树 */
+  trees?: string[];
+}
+
+/** 建筑占地（格），要和 tools/bake/buildings.ts 的模型一致。 */
+const FOOTPRINTS: Record<string, [number, number]> = {
+  'bld-hall': [9, 6],
+  'bld-house': [6, 4],
+  'bld-tower': [5, 5],
+  'bld-pavilion': [3, 3],
+  'bld-gate': [7, 1],
+  'bld-wall': [2, 1],
+  'obj-lantern': [1, 1],
+  'obj-cauldron': [2, 2],
+  'obj-rack': [3, 1],
+  'obj-stall': [3, 2],
+};
+/** 这些建筑按占地判断前后关系，人走到后面时淡化 */
+const SOLID = ['bld-hall', 'bld-house', 'bld-tower', 'bld-pavilion'];
+
+const footprintOf = (prop: string) => {
+  const key = Object.keys(FOOTPRINTS).find((candidate) => prop.startsWith(candidate));
+  if (!key) throw new Error(`未知的建筑 ${prop}`);
+  return FOOTPRINTS[key]!;
+};
+
+const wallRow = (prop: string, y: number, from: number, to: number): Building[] =>
+  Array.from({ length: Math.floor((to - from + 1) / 2) }, (_, i) => ({ prop, x: from + i * 2, y }));
+
+const lanterns = (...cells: Point[]): Building[] =>
+  cells.map(([x, y]) => ({ prop: 'obj-lantern', x, y }));
+
+const MAPLES = ['maple-1', 'maple-2', 'maple-3', 'maple-4', 'maple-1', 'maple-2', 'maple-3', 'tree-5'];
+
+const MAPS: MapPlan[] = [
+  {
+    id: 'starter-field',
+    size: 120,
+    seed: 20261101,
+    start: [12, 12],
+    portals: [
+      { cell: [9, 9], label: '七玄门', toMap: 'qixuan-gate', to: [20, 33] },
+      { cell: [15, 8], label: '黄枫谷', toMap: 'huangfeng-valley', to: [20, 33], requires: 'ch1-boss' },
+      { cell: [111, 111], label: '太南山', toMap: 'taina-mountain', to: [4, 4], requires: 'ch1-boss' },
+    ],
+    roads: [
+      [[12, 12], [30, 21], [51, 30], [66, 45], [78, 63], [90, 81], [105, 105], [111, 111]],
+      [[42, 27], [36, 42], [24, 51]],
+      [[81, 68], [93, 63], [99, 57]],
+      [[87, 77], [72, 87], [60, 93]],
+    ],
+    roadTile: GROUND.dirt,
+    roadWidth: [0.9, 0.9],
+    river: [[102, -3], [90, 18], [75, 33], [60, 51], [45, 63], [30, 81], [15, 96], [-3, 108]],
+    ponds: [{ x: 33, y: 81, radius: 10 }],
+    zones: [
+      { monster: 'ash-rat', x: 33, y: 24, radius: 13, count: 10 },
+      { monster: 'ash-rat', x: 57, y: 21, radius: 10, count: 6 },
+      { monster: 'venom-spider', x: 24, y: 51, radius: 12, count: 10 },
+      { monster: 'thorn-sprite', x: 60, y: 93, radius: 13, count: 9 },
+      { monster: 'wolf-rider', x: 99, y: 57, radius: 10, count: 8 },
+      { monster: 'golden-master', x: 102, y: 99, radius: 0, count: 1 },
+    ],
+    monsterGap: 5,
+    clearings: [
+      { x: 12, y: 12, radius: 8 },
+      { x: 99, y: 57, radius: 10 },
+      { x: 102, y: 99, radius: 10 },
+      { x: 111, y: 111, radius: 5 },
+    ],
+    edge: { base: 3, spread: 5, outcrops: true },
+    forest: { factor: 0.6, denseArea: { x: 60, y: 93, radius: 24 } },
+    foliage: [0xffffff, 0xffffff, 0xdff0b0, 0xffd27a, 0xffa86a, 0xff8a6a],
+  },
+  {
+    id: 'qixuan-gate',
+    size: 40,
+    seed: 20261102,
+    start: [20, 22],
+    portals: [{ cell: [20, 36], label: '彩霞山', toMap: 'starter-field', to: [12, 12] }],
+    roads: [[[20, 37], [20, 14]]],
+    roadTile: GROUND.paved,
+    roadWidth: [1.6, 0],
+    ponds: [{ x: 8, y: 34, radius: 3 }],
+    clearings: [{ x: 20, y: 36, radius: 3 }],
+    paved: [
+      { x0: 13, y0: 13, x1: 27, y1: 24 },
+      { x0: 26, y0: 25, x1: 34, y1: 28 },
+    ],
+    buildings: [
+      { prop: 'bld-hall-plain', x: 16, y: 6 },
+      { prop: 'bld-tower-plain', x: 28, y: 6 },
+      { prop: 'bld-house-plain', x: 6, y: 7 },
+      { prop: 'bld-house-plain', x: 7, y: 15, flip: true },
+      { prop: 'bld-house-plain', x: 7, y: 22, flip: true },
+      { prop: 'bld-house-plain', x: 29, y: 13 },
+      { prop: 'bld-house-plain', x: 29, y: 19 },
+      { prop: 'bld-gate-plain', x: 17, y: 29 },
+      ...wallRow('bld-wall-plain', 29, 3, 16),
+      ...wallRow('bld-wall-plain', 29, 24, 37),
+      { prop: 'bld-pavilion-plain', x: 14, y: 33 },
+      { prop: 'obj-rack', x: 28, y: 25 },
+      { prop: 'obj-rack', x: 32, y: 27 },
+      { prop: 'obj-stall', x: 15, y: 20 },
+      ...lanterns([15, 13], [25, 13], [17, 25], [23, 25], [17, 32], [23, 32]),
+    ],
+    required: [[10, 12], [20, 16], [30, 26]],
+    edge: { base: 2, spread: 2.5, outcrops: false },
+    forest: { factor: 1, least: 0.05 },
+    foliage: [0xffffff, 0xffffff, 0xdff0b0, 0xffd27a, 0xffa86a],
+  },
+  {
+    id: 'huangfeng-valley',
+    size: 40,
+    seed: 20261103,
+    start: [20, 24],
+    portals: [{ cell: [20, 36], label: '彩霞山', toMap: 'starter-field', to: [12, 12] }],
+    roads: [[[20, 37], [20, 13]]],
+    roadTile: GROUND.paved,
+    roadWidth: [1.6, 0],
+    river: [[42, 25], [30, 27], [20, 26], [10, 28], [-2, 26]],
+    clearings: [{ x: 20, y: 36, radius: 3 }],
+    paved: [
+      { x0: 13, y0: 12, x1: 27, y1: 23 },
+      { x0: 9, y0: 21, x1: 15, y1: 24 },
+    ],
+    buildings: [
+      { prop: 'bld-hall-sect', x: 16, y: 5 },
+      { prop: 'bld-tower-sect', x: 7, y: 11 },
+      { prop: 'bld-house-sect', x: 28, y: 12 },
+      { prop: 'bld-house-sect', x: 29, y: 5 },
+      { prop: 'bld-house-sect', x: 5, y: 5 },
+      { prop: 'bld-gate-sect', x: 17, y: 31 },
+      ...wallRow('bld-wall-sect', 31, 3, 16),
+      ...wallRow('bld-wall-sect', 31, 24, 37),
+      { prop: 'bld-pavilion-sect', x: 31, y: 21 },
+      { prop: 'obj-cauldron', x: 25, y: 18 },
+      { prop: 'obj-stall', x: 28, y: 17 },
+      ...lanterns([15, 12], [25, 12], [17, 23], [23, 23], [17, 29], [23, 29], [17, 34], [23, 34]),
+    ],
+    required: [[20, 15], [30, 19], [10, 18], [13, 23]],
+    edge: { base: 2, spread: 2.5, outcrops: false },
+    forest: { factor: 2, least: 0.14 },
+    foliage: [0xffffff, 0xfff0d0, 0xffe0b0],
+    trees: MAPLES,
+  },
+];
+
+interface Decor {
+  prop: string;
+  x: number;
+  y: number;
+  scale: number;
+  flip: boolean;
+  tint: number;
+  foot?: Rect;
+}
+
+function generate(plan: MapPlan): void {
+  const { size: SIZE } = plan;
+  const OUTPUT = `public/maps/${plan.id}.tmj`;
+  const rng = new Rng(plan.seed);
+
+  const lattice = Array.from({ length: 64 * 64 }, () => rng.next());
+  const valueNoise = (x: number, y: number): number => {
+    const x0 = Math.floor(x);
+    const y0 = Math.floor(y);
+    const fx = x - x0;
+    const fy = y - y0;
+    const sx = fx * fx * (3 - 2 * fx);
+    const sy = fy * fy * (3 - 2 * fy);
+    const at = (i: number, j: number) => lattice[((j & 63) << 6) + (i & 63)]!;
+    const top = at(x0, y0) * (1 - sx) + at(x0 + 1, y0) * sx;
+    const bottom = at(x0, y0 + 1) * (1 - sx) + at(x0 + 1, y0 + 1) * sx;
+    return top * (1 - sy) + bottom * sy;
+  };
+  const noise = (x: number, y: number, scale: number) =>
+    valueNoise(x / scale, y / scale) * 0.65 + valueNoise((x / scale) * 2 + 9, (y / scale) * 2 + 9) * 0.35;
+
+  const index = (x: number, y: number) => y * SIZE + x;
+  const inside = (x: number, y: number) => x >= 0 && y >= 0 && x < SIZE && y < SIZE;
+
+  const ground = new Array<number>(SIZE * SIZE).fill(0);
+  const blocked = new Array<boolean>(SIZE * SIZE).fill(false);
+  /** 建筑和铺石范围，不长树也不长山 */
+  const built = new Set<number>();
+  /** 离路多远，用来给路边留空 */
+  const roadDistance = new Array<number>(SIZE * SIZE).fill(Infinity);
+
+  const stamp = (path: Point[], radius: (x: number, y: number) => number, visit: (x: number, y: number) => void) => {
+    for (const [px, py] of path) {
+      const reach = Math.ceil(radius(px, py));
+      for (let y = Math.floor(py) - reach; y <= Math.ceil(py) + reach; y++) {
+        for (let x = Math.floor(px) - reach; x <= Math.ceil(px) + reach; x++) {
+          if (inside(x, y) && Math.hypot(x - px, y - py) <= radius(px, py)) visit(x, y);
+        }
+      }
+    }
+  };
+
+  // 底层草地
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      const value = noise(x, y, 7);
+      ground[index(x, y)] = value < 0.42 ? GROUND.grassB : value > 0.58 ? GROUND.grassC : GROUND.grassA;
+    }
+  }
+
+  // 河岸和水面
+  const river = plan.river ? smooth(plan.river) : [];
+  const water = new Set<number>();
+  stamp(river, (x, y) => 2.4 + noise(x, y, 6) * 2, (x, y) => (ground[index(x, y)] = GROUND.sand));
+  stamp(river, (x, y) => 0.9 + noise(x, y, 6) * 1.7, (x, y) => water.add(index(x, y)));
+  for (const pond of plan.ponds ?? []) {
+    for (let y = 0; y < SIZE; y++) {
+      for (let x = 0; x < SIZE; x++) {
+        const distance = Math.hypot(x - pond.x, y - pond.y) + (noise(x, y, 5) - 0.5) * 5;
+        if (distance < pond.radius + 1.8) ground[index(x, y)] = GROUND.sand;
+        if (distance < pond.radius) water.add(index(x, y));
+      }
+    }
+  }
+  for (const cell of water) {
+    ground[cell] = GROUND.water;
+    blocked[cell] = true;
+  }
+
+  // 铺石地面和道路，过河的地方是桥
+  for (const area of plan.paved ?? []) {
+    for (let y = area.y0; y <= area.y1; y++) {
+      for (let x = area.x0; x <= area.x1; x++) {
+        const cell = index(x, y);
+        if (ground[cell] === GROUND.water) continue;
+        ground[cell] = GROUND.paved;
+        built.add(cell);
+      }
+    }
+  }
+  const [roadBase, roadSpread] = plan.roadWidth;
+  for (const road of plan.roads) {
+    const path = smooth(road);
+    stamp(
+      path,
+      (x, y) => roadBase + noise(x, y, 4) * roadSpread,
+      (x, y) => {
+        const cell = index(x, y);
+        if (ground[cell] === GROUND.water || ground[cell] === GROUND.bridge) {
+          ground[cell] = GROUND.bridge;
+          blocked[cell] = false;
+        } else {
+          ground[cell] = plan.roadTile;
+        }
+      },
+    );
+    stamp(path, () => 4, (x, y) => {
+      const cell = index(x, y);
+      const nearest = Math.min(...path.map(([px, py]) => Math.hypot(px - x, py - y)).filter((_, i) => i % 6 === 0));
+      roadDistance[cell] = Math.min(roadDistance[cell]!, nearest);
+    });
+  }
+
+  // 建筑
+  const decor: Decor[] = [];
+  for (const building of plan.buildings ?? []) {
+    const [length, width] = footprintOf(building.prop);
+    const w = building.flip ? width : length;
+    const d = building.flip ? length : width;
+    const { x, y } = building;
+    const gate = building.prop.startsWith('bld-gate');
+    for (let cy = y; cy < y + d; cy++) {
+      for (let cx = x; cx < x + w; cx++) {
+        const cell = index(cx, cy);
+        if (!inside(cx, cy) || blocked[cell]) throw new Error(`${plan.id} 的 ${building.prop} 压到了 ${cx},${cy}`);
+        built.add(cell);
+        // 牌楼中间三格可以穿过
+        if (gate && cx >= x + 2 && cx <= x + w - 3) continue;
+        blocked[cell] = true;
+        if (!gate && ground[cell] !== GROUND.water) ground[cell] = GROUND.paved;
+      }
+    }
+    for (let cy = y - 1; cy <= y + d; cy++) {
+      for (let cx = x - 1; cx <= x + w; cx++) {
+        if (inside(cx, cy)) built.add(index(cx, cy));
+      }
+    }
+    const solid = SOLID.some((prefix) => building.prop.startsWith(prefix));
+    decor.push({
+      prop: building.prop,
+      x: x + (w - 1) / 2,
+      y: y + (d - 1) / 2,
+      scale: 1,
+      flip: !!building.flip,
+      tint: 0xffffff,
+      foot: solid ? { x0: x, y0: y, x1: x + w - 1, y1: y + d - 1 } : undefined,
+    });
+  }
+
+  const edgeDistance = (x: number, y: number) => Math.min(x, y, SIZE - 1 - x, SIZE - 1 - y);
+  const mountainDepth = (x: number, y: number) => plan.edge.base + noise(x, y, 9) * plan.edge.spread;
+  const inClearing = (x: number, y: number) =>
+    plan.clearings.some((clearing) => Math.hypot(x - clearing.x, y - clearing.y) < clearing.radius);
+  const open = (x: number, y: number) =>
+    !inClearing(x, y) &&
+    roadDistance[index(x, y)]! > 2.5 &&
+    ground[index(x, y)] !== GROUND.water &&
+    !built.has(index(x, y));
+
+  // 边缘的山体和内部的石坡
+  for (let y = 0; y < SIZE; y++) {
+    for (let x = 0; x < SIZE; x++) {
+      const cell = index(x, y);
+      if (ground[cell] === GROUND.water || ground[cell] === GROUND.bridge) continue;
+      const onEdge = edgeDistance(x, y) < mountainDepth(x, y);
+      const outcrop = plan.edge.outcrops && noise(x + 31, y + 17, 6) > 0.76 && edgeDistance(x, y) > 8;
+      if ((onEdge || outcrop) && open(x, y)) {
+        ground[cell] = GROUND.stone;
+        blocked[cell] = true;
+      }
+    }
+  }
+
+  // 树石
+  const pick = (options: string[]) => options[rng.int(0, options.length - 1)]!;
+  const pickTint = (options: number[]) => options[rng.int(0, options.length - 1)]!;
+  const ROCK_TINT = [0xffffff, 0xe8dccb, 0xd8c8b4];
+  const add = (prop: string, x: number, y: number, scale: number, tint = 0xffffff) =>
+    decor.push({
+      prop,
+      x: Number((x + 0.5).toFixed(2)),
+      y: Number((y + 0.5).toFixed(2)),
+      scale: Number(scale.toFixed(2)),
+      flip: rng.chance(0.5),
+      tint,
+    });
+
+  for (let y = 0; y < SIZE; y += 1) {
+    for (let x = 0; x < SIZE; x += 1) {
+      if (ground[index(x, y)] !== GROUND.stone || built.has(index(x, y))) continue;
+      const deep = edgeDistance(x, y) < 3;
+      if (((x % 2 === 0 && y % 2 === 0) || deep) && rng.chance(deep ? 0.32 : 0.6)) {
+        add(pick(['peak-1', 'peak-2', 'peak-3', 'peak-4', 'peak-5']), x, y, 0.55 + rng.next() * 0.4, pickTint(ROCK_TINT));
+      }
+    }
+  }
+
+  const canPlant = (x: number, y: number) => {
+    const cell = index(x, y);
+    return (
+      inside(x, y) &&
+      !blocked[cell] &&
+      open(x, y) &&
+      ground[cell] !== GROUND.dirt &&
+      ground[cell] !== GROUND.bridge &&
+      ground[cell] !== GROUND.sand &&
+      ground[cell] !== GROUND.paved
+    );
+  };
+
+  const { factor, least = 0.01, denseArea } = plan.forest;
+  for (let y = 2; y < SIZE - 2; y++) {
+    for (let x = 2; x < SIZE - 2; x++) {
+      if (!canPlant(x, y)) continue;
+      const forest = noise(x + 11, y + 5, 11);
+      const dense = !!denseArea && Math.hypot(x - denseArea.x, y - denseArea.y) < denseArea.radius;
+      const density = Math.max(least, (forest - 0.42) * (dense ? 1.1 : factor));
+      const roll = rng.next();
+      if (roll < density) {
+        const bare = dense && rng.chance(0.25);
+        add(
+          bare ? pick(['bare-1', 'bare-2']) : plan.trees ? pick(plan.trees) : `tree-${rng.int(1, 8)}`,
+          x,
+          y,
+          0.6 + rng.next() * 0.3,
+          bare ? 0xffffff : pickTint(plan.foliage),
+        );
+        blocked[index(x, y)] = true;
+      } else if (roll < density + 0.015) {
+        add(pick(['rock-1', 'rock-2', 'rock-3', 'rock-4']), x, y, 0.8 + rng.next() * 0.9, pickTint(ROCK_TINT));
+        blocked[index(x, y)] = true;
+      } else if (roll < density + 0.05) {
+        add(`bush-${rng.int(1, 4)}`, x, y, 0.8 + rng.next() * 0.6, pickTint(plan.foliage));
+      } else if (roll < density + 0.15) {
+        add(`grass-${rng.int(1, 2)}`, x, y, 0.8 + rng.next() * 0.7);
+      }
+    }
+  }
+
+  // 校验并放置怪物
+  const reachable = new Set<number>([index(...plan.start)]);
+  const queue: Point[] = [plan.start];
+  while (queue.length > 0) {
+    const [x, y] = queue.pop()!;
+    for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]] as const) {
+      const nx = x + dx;
+      const ny = y + dy;
+      if (!inside(nx, ny) || blocked[index(nx, ny)] || reachable.has(index(nx, ny))) continue;
+      reachable.add(index(nx, ny));
+      queue.push([nx, ny]);
+    }
+  }
+
+  const required = [plan.start, ...plan.portals.map((portal) => portal.cell), ...(plan.required ?? [])];
+  for (const [x, y] of required) {
+    if (!reachable.has(index(x, y))) throw new Error(`${plan.id} 走不到 ${x},${y}`);
+  }
+
+  const spawns: { monster: string; x: number; y: number }[] = [];
+  const gap = plan.monsterGap ?? 0;
+  for (const zone of plan.zones ?? []) {
+    let placed = 0;
+    for (let attempt = 0; attempt < 2000 && placed < zone.count; attempt++) {
+      const angle = rng.next() * Math.PI * 2;
+      const distance = Math.sqrt(rng.next()) * zone.radius;
+      const x = Math.round(zone.x + Math.cos(angle) * distance);
+      const y = Math.round(zone.y + Math.sin(angle) * distance);
+      if (!inside(x, y) || !reachable.has(index(x, y))) continue;
+      if (spawns.some((spawn) => Math.hypot(spawn.x - x, spawn.y - y) < gap)) continue;
+      spawns.push({ monster: zone.monster, x, y });
+      placed += 1;
+    }
+    if (placed < zone.count) throw new Error(`${zone.monster} 只放下了 ${placed} 只`);
+  }
+
+  // 输出 Tiled 文件
+  let nextId = 1;
+  const property = (name: string, value: string | number) => ({
+    name,
+    type: typeof value === 'number' ? 'int' : 'string',
+    value,
+  });
+  const object = (type: string, cell: Point, properties: object[]) => ({
+    id: nextId++,
+    name: type,
+    type,
+    x: cell[0] * 32 + 16,
+    y: cell[1] * 32 + 16,
+    width: 0,
+    height: 0,
+    rotation: 0,
+    visible: true,
+    point: true,
+    properties,
+  });
+  const layer = (id: number, name: string, data: number[]) => ({
+    id,
+    name,
+    type: 'tilelayer',
+    width: SIZE,
+    height: SIZE,
+    x: 0,
+    y: 0,
+    opacity: 1,
+    visible: true,
+    data,
+  });
+
+  const map = {
+    type: 'map',
+    version: '1.10',
+    tiledversion: '1.10.2',
+    orientation: 'isometric',
+    renderorder: 'right-down',
+    infinite: false,
+    width: SIZE,
+    height: SIZE,
+    tilewidth: 64,
+    tileheight: 32,
+    nextlayerid: 5,
+    tilesets: [
+      {
+        firstgid: 1,
+        name: 'terrain',
+        image: 'terrain.png',
+        imagewidth: 64 * TILE_COUNT,
+        imageheight: 32,
+        tilewidth: 64,
+        tileheight: 32,
+        tilecount: TILE_COUNT,
+        columns: TILE_COUNT,
+        margin: 0,
+        spacing: 0,
+      },
+    ],
+    layers: [
+      layer(1, 'ground', ground),
+      layer(2, 'blocked', blocked.map((value) => (value ? GROUND.stone : 0))),
+      {
+        id: 3,
+        name: 'objects',
+        type: 'objectgroup',
+        objects: [
+          object('start', plan.start, []),
+          ...plan.portals.map((portal) =>
+            object('portal', portal.cell, [
+              property('label', portal.label),
+              property('toMap', portal.toMap),
+              property('toX', portal.to[0]),
+              property('toY', portal.to[1]),
+              ...(portal.requires ? [property('requires', portal.requires)] : []),
+            ]),
+          ),
+          ...spawns.map((spawn) => object('spawn', [spawn.x, spawn.y], [property('monster', spawn.monster)])),
+        ],
+      },
+      {
+        id: 4,
+        name: 'decor',
+        type: 'objectgroup',
+        objects: decor.map((item) => ({
+          id: nextId++,
+          name: item.prop,
+          type: 'decor',
+          x: item.x * 32,
+          y: item.y * 32,
+          width: 0,
+          height: 0,
+          rotation: 0,
+          visible: true,
+          point: true,
+          properties: [
+            { name: 'scale', type: 'float', value: item.scale },
+            { name: 'flip', type: 'bool', value: item.flip },
+            { name: 'tint', type: 'int', value: item.tint },
+            ...(item.foot
+              ? [{ name: 'foot', type: 'string', value: [item.foot.x0, item.foot.y0, item.foot.x1, item.foot.y1].join(',') }]
+              : []),
+          ],
+        })),
+      },
+    ],
+  };
+  writeFileSync(OUTPUT, JSON.stringify(map));
+
+  const trees = decor.filter((item) => /^(tree|bare|maple)/.test(item.prop)).length;
+  const perMonster = spawns.length ? Math.round(reachable.size / spawns.length) : 0;
+  console.log(
+    `${plan.id}：${SIZE}×${SIZE}，可走 ${reachable.size} 格，水 ${water.size} 格，树 ${trees}，物件 ${decor.length}，` +
+      `怪物 ${spawns.length}，每只占 ${perMonster} 格`,
+  );
+}
+
+/** Catmull-Rom 插值，把折线点变成连续的曲线。 */
+function smooth(points: Point[]): Point[] {
+  const result: Point[] = [];
+  for (let i = 0; i < points.length - 1; i++) {
+    const p0 = points[Math.max(i - 1, 0)]!;
+    const p1 = points[i]!;
+    const p2 = points[i + 1]!;
+    const p3 = points[Math.min(i + 2, points.length - 1)]!;
+    const steps = Math.ceil(Math.hypot(p2[0] - p1[0], p2[1] - p1[1]) * 3);
+    for (let s = 0; s < steps; s++) {
+      const t = s / steps;
+      const blend = (a: number, b: number, c: number, d: number) =>
+        0.5 * (2 * b + (c - a) * t + (2 * a - 5 * b + 4 * c - d) * t * t + (3 * b - a - 3 * c + d) * t * t * t);
+      result.push([blend(p0[0], p1[0], p2[0], p3[0]), blend(p0[1], p1[1], p2[1], p3[1])]);
+    }
+  }
+  result.push(points.at(-1)!);
+  return result;
+}
+
+for (const plan of MAPS) generate(plan);

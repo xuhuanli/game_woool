@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import type { Cell, NpcDef, SkillDef } from '../game/config';
+import type { Cell, DecorDef, NpcDef, SkillDef } from '../game/config';
 import { equipmentColor, equipmentName } from '../game/equipment';
 import { cellDistance, sameCell } from '../game/grid';
 import { questsForNpc, questStatus } from '../game/quests';
@@ -24,8 +24,10 @@ import {
   createPlaceholderArt,
   createSpriteAnimations,
   SHEET,
+  type PropManifest,
   type SpriteManifests,
 } from './placeholders';
+import { paintGround } from './groundPainter';
 
 const FONT = '"PingFang SC", "Microsoft YaHei", sans-serif';
 const HOLD_REPATH_MS = 200;
@@ -34,6 +36,13 @@ const UI_DEPTH = 1_000_000;
 const TARGET_RADIUS = 34;
 const TARGET_CENTER_OFFSET = 20;
 const HOVER_TINT = 0xffc0a0;
+/** 景观精灵按两倍精度烘焙 */
+const PROP_DISPLAY_SCALE = 0.5;
+const TONE_SIZE = 4000;
+const DECOR_FADE_MS = 120;
+const DECOR_FADED_ALPHA = 0.4;
+const PLAYER_HEIGHT = 60;
+const SOLID_NEAR_CELLS = 3;
 const DIRT_COLOR = 0x7a6a4a;
 const GOLD_MERGE_MS = 1000;
 const PILLAR_HEIGHT = 150;
@@ -69,10 +78,14 @@ export class GameScene extends Phaser.Scene {
   private mapObjects: { destroy(): void }[] = [];
   private accumulator = 0;
   private holding = false;
+  private holdRunning = false;
   private holdTimer = 0;
   private pendingGold = 0;
   private readonly audio = new GameAudio();
   private hovered: UnitView | null = null;
+  private tallDecor: Phaser.GameObjects.Image[] = [];
+  private solidDecor: { image: Phaser.GameObjects.Image; foot: NonNullable<DecorDef['foot']> }[] = [];
+  private fadeTimer = 0;
   private tileCursor!: Phaser.GameObjects.Graphics;
 
   constructor(
@@ -83,6 +96,7 @@ export class GameScene extends Phaser.Scene {
     private readonly npcPanel: NpcPanel,
     private readonly autoPanel: AutoPanel,
     private readonly sprites: SpriteManifests,
+    private readonly props: PropManifest,
   ) {
     super('game');
   }
@@ -93,6 +107,9 @@ export class GameScene extends Phaser.Scene {
         frameWidth: manifest.frameW,
         frameHeight: manifest.frameH,
       });
+    }
+    for (const key of Object.keys(this.props)) {
+      this.load.image(`prop-${key}`, `${import.meta.env.BASE_URL}assets/props/${key}.png`);
     }
   }
 
@@ -108,6 +125,7 @@ export class GameScene extends Phaser.Scene {
     this.cameras.main.startFollow(follow, true, 0.12, 0.12);
     this.cameras.main.centerOn(follow.x, follow.y);
 
+    this.input.mouse?.disableContextMenu();
     this.input.on('pointerdown', this.onPointerDown, this);
     this.input.on('pointerup', () => (this.holding = false));
 
@@ -151,6 +169,7 @@ export class GameScene extends Phaser.Scene {
     for (const view of this.unitViews.values()) this.syncUnit(view, alpha);
 
     this.updatePointer(delta);
+    this.fadeDecorAroundPlayer(delta);
     this.updateNpcMarkers();
     this.hud.update(this.world);
     this.panels.update();
@@ -182,6 +201,10 @@ export class GameScene extends Phaser.Scene {
   }
 
   private drawGround(): void {
+    if (this.world.map.decor?.length) {
+      this.drawScenery();
+      return;
+    }
     const { grid } = this.world;
     const { safe, ground: tiles } = this.world.map;
     const palette = safe
@@ -203,6 +226,104 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
+  /** 大地图：预渲染地表，摆放树石，再叠上色调和飘叶。 */
+  private drawScenery(): void {
+    const { map } = this.world;
+    const painted = paintGround(this, map);
+    const ground = this.add.image(painted.x, painted.y, painted.key).setOrigin(0).setDepth(0);
+    const shimmer = this.add
+      .image(painted.x, painted.y, painted.shimmerKey)
+      .setOrigin(0)
+      .setScale(2)
+      .setDepth(0.5)
+      .setAlpha(0.25);
+    this.tweens.add({ targets: shimmer, alpha: 0.75, duration: 1400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.mapObjects.push(ground, shimmer);
+
+    this.tallDecor = [];
+    this.solidDecor = [];
+    for (const item of map.decor ?? []) {
+      const placement = this.props[item.prop];
+      if (!placement) continue;
+      const { x, y } = toScreen(item);
+      const image = this.add
+        .image(x, y, `prop-${item.prop}`)
+        .setOrigin(item.flip ? 1 - placement.ox : placement.ox, placement.oy)
+        .setScale(item.scale * PROP_DISPLAY_SCALE)
+        .setFlipX(item.flip)
+        .setTint(item.tint)
+        .setDepth(y);
+      this.mapObjects.push(image);
+      if (item.foot) this.solidDecor.push({ image, foot: item.foot });
+      else if (/^(tree|bare|maple|peak)/.test(item.prop)) this.tallDecor.push(image);
+    }
+
+    if (map.tone) {
+      const color = Phaser.Display.Color.HexStringToColor(map.tone.color).color;
+      this.mapObjects.push(
+        this.add
+          .rectangle(0, 0, TONE_SIZE, TONE_SIZE, color, map.tone.alpha)
+          .setOrigin(0)
+          .setScrollFactor(0)
+          .setDepth(UI_DEPTH - 5),
+      );
+    }
+    if (!this.textures.exists('leaf')) {
+      const leaf = this.add.graphics();
+      leaf.fillStyle(0xffffff, 1).fillEllipse(5, 3, 10, 5);
+      leaf.generateTexture('leaf', 10, 6);
+      leaf.destroy();
+    }
+    this.mapObjects.push(
+      this.add
+        .particles(0, 0, 'leaf', {
+          x: { min: 0, max: TONE_SIZE / 2 },
+          y: -20,
+          lifespan: 12000,
+          speedY: { min: 30, max: 60 },
+          speedX: { min: -40, max: 20 },
+          rotate: { start: 0, end: 540 },
+          scale: { min: 0.5, max: 1 },
+          alpha: { start: 0.85, end: 0 },
+          tint: [0xffb45a, 0xff8a4a, 0xe6c84a],
+          frequency: 500,
+        })
+        .setScrollFactor(0)
+        .setDepth(UI_DEPTH - 4),
+    );
+  }
+
+  /** 人走到树和山后面时把它们变透明，免得看不见角色。 */
+  private fadeDecorAroundPlayer(delta: number): void {
+    this.fadeTimer -= delta;
+    if (this.fadeTimer > 0) return;
+    this.fadeTimer = DECOR_FADE_MS;
+    const { pos } = this.world.player;
+    const { x: px, y: py } = toScreen(pos);
+    // 大建筑按占地判断前后，只调整玩家附近的，其余保持原有排序
+    for (const { image, foot } of this.solidDecor) {
+      const near =
+        pos.x >= foot.x0 - SOLID_NEAR_CELLS &&
+        pos.x <= foot.x1 + SOLID_NEAR_CELLS &&
+        pos.y >= foot.y0 - SOLID_NEAR_CELLS &&
+        pos.y <= foot.y1 + SOLID_NEAR_CELLS;
+      const behind = near && pos.x <= foot.x1 + 0.5 && pos.y <= foot.y1 + 0.5;
+      const baseDepth = toScreen({ x: (foot.x0 + foot.x1) / 2, y: (foot.y0 + foot.y1) / 2 }).y;
+      image.setDepth(near ? (behind ? py + 1 : py - 1) : baseDepth);
+      const alpha = behind ? DECOR_FADED_ALPHA : 1;
+      if (image.alpha !== alpha) image.setAlpha(alpha);
+    }
+    for (const image of this.tallDecor) {
+      const behind =
+        py < image.y &&
+        py - PLAYER_HEIGHT < image.y &&
+        py > image.y - image.displayHeight * image.originY &&
+        Math.abs(px - image.x) < image.displayWidth * 0.45;
+      const alpha = behind ? DECOR_FADED_ALPHA : 1;
+      if (image.alpha !== alpha) image.setAlpha(alpha);
+    }
+  }
+
   private addPortal(x: number, y: number, name: string): void {
     const screen = toScreen({ x, y });
     const ring = this.add.image(screen.x, screen.y, 'portal').setDepth(2);
@@ -212,10 +333,14 @@ export class GameScene extends Phaser.Scene {
 
   private addNpc(npc: NpcDef): void {
     const { x, y } = toScreen(npc);
+    const key = `npc-${npc.id}`;
+    const manifest = this.sprites[key];
     const sprite = this.add
-      .sprite(x, y, `npc-${npc.id}`, SHEET.columns * 2)
-      .setOrigin(0.5, SHEET.originY)
+      .sprite(x, y, key, (manifest?.columns ?? SHEET.columns) * 2)
+      .setOrigin(0.5, manifest?.originY ?? SHEET.originY)
+      .setScale(manifest?.displayScale ?? 1)
       .setDepth(y);
+    if (manifest) sprite.play(`${key}-idle-2`);
     const label = this.addLabel(x, y - 66, npc.name, '#9fe0ff');
     const marker = this.addLabel(x, y - 84, '', '#ffd84a').setFontSize(22);
     this.mapObjects.push(sprite, label, marker);
@@ -276,7 +401,9 @@ export class GameScene extends Phaser.Scene {
 
     if (unit.hp > 0 && !view.attacking) {
       const moving = unit.path.length > 0 || unit.pos.x !== unit.cell.x || unit.pos.y !== unit.cell.y;
-      sprite.play(`${view.texture}-${moving ? 'walk' : 'idle'}-${directionRow(unit.facing)}`, true);
+      const running = unit === this.world.player && this.world.playerRunning;
+      const clip = moving ? (running && this.anims.exists(`${view.texture}-run-0`) ? 'run' : 'walk') : 'idle';
+      sprite.play(`${view.texture}-${clip}-${directionRow(unit.facing)}`, true);
     }
 
     if (view.hpBar) {
@@ -316,7 +443,7 @@ export class GameScene extends Phaser.Scene {
       this.holdTimer -= delta;
       if (this.holdTimer <= 0) {
         this.holdTimer = HOLD_REPATH_MS;
-        this.world.moveTo(cell);
+        this.world.moveTo(cell, this.holdRunning);
       }
     }
   }
@@ -324,8 +451,12 @@ export class GameScene extends Phaser.Scene {
   // ---- 输入 ----
 
   private onPointerDown(pointer: Phaser.Input.Pointer): void {
-    if (!pointer.leftButtonDown()) return;
     const world = pointer.positionToCamera(this.cameras.main) as Phaser.Math.Vector2;
+    if (pointer.rightButtonDown()) {
+      this.startMoving(toCell(world.x, world.y), true);
+      return;
+    }
+    if (!pointer.leftButtonDown()) return;
 
     const monster = this.monsterAt(world.x, world.y);
     if (monster) {
@@ -342,9 +473,14 @@ export class GameScene extends Phaser.Scene {
       this.world.pickup(item);
       return;
     }
+    this.startMoving(toCell(world.x, world.y), false);
+  }
+
+  private startMoving(cell: Cell, run: boolean): void {
     this.holding = true;
+    this.holdRunning = run;
     this.holdTimer = HOLD_REPATH_MS;
-    this.world.moveTo(toCell(world.x, world.y));
+    this.world.moveTo(cell, run);
   }
 
   private useSlot(slot: number): void {

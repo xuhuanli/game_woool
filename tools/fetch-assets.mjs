@@ -44,14 +44,11 @@ const POLYHAVEN_PICKS = [
   'coastal_cliff_04',
   'sand_rocks_small_01',
   // 树木
+  // 注意：Poly Haven 的树是照片扫描的百万面模型（单个 .bin 动辄 900 MB），
+  // 渲染成 96px 精灵毫无意义。树木请改用 Quaternius 的 Stylized Nature（低模）。
+  // 这里只保留体积正常的枯木和树桩。
   'dead_tree_trunk_02',
   'tree_stump_01',
-  'tree_small_02',
-  'fir_tree_01',
-  'pine_tree_01',
-  'island_tree_02',
-  'jacaranda_tree',
-  'quiver_tree_01',
   // 草木
   'grass_medium_01',
   'shrub_01',
@@ -85,7 +82,7 @@ const POLYHAVEN_PICKS = [
   'Barrel_01',
   'barrel_03',
   'wooden_crate_01',
-  'wooden_barrel_01',
+  'wooden_barrels_01',
   'planter_pot_clay',
   'wine_barrel_01',
   // 兵器

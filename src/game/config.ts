@@ -237,6 +237,17 @@ export interface PortalDef {
   requires?: string;
 }
 
+export interface DecorDef {
+  prop: string;
+  x: number;
+  y: number;
+  scale: number;
+  flip: boolean;
+  tint: number;
+  /** 建筑占地，用来判断人在建筑前面还是后面 */
+  foot?: { x0: number; y0: number; x1: number; y1: number };
+}
+
 export interface MapDef {
   id: string;
   name: string;
@@ -245,6 +256,10 @@ export interface MapDef {
   tiled?: string;
   /** 地形编号，来自 Tiled 的 ground 图层 */
   ground?: number[];
+  /** 树石等景观，有它时地面走预渲染 */
+  decor?: DecorDef[];
+  /** 画面色调和浓度 */
+  tone?: { color: string; alpha: number };
   width: number;
   height: number;
   playerStart: Cell;
@@ -312,6 +327,8 @@ export interface QuestDef {
 
 export interface GameSettings {
   startMap: string;
+  /** 跑步相对行走的速度倍数 */
+  runMultiplier: number;
   /** 突破失败后属性降低的比例 */
   weakFactor: number;
   weakSeconds: number;

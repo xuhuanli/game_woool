@@ -1,40 +1,333 @@
 {
+  "ch1-enter": {
+    "id": "ch1-enter",
+    "name": "入门神手谷",
+    "giver": "qixuan-steward",
+    "level": 1,
+    "main": true,
+    "summary": "去见墨大夫，拜入神手谷学艺。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "mo-doctor",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 800,
+      "gold": 50,
+      "items": [
+        {
+          "item": "small-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "ch1-enter-offer",
+    "finish": "ch1-enter-finish"
+  },
+  "ch1-herbs": {
+    "id": "ch1-herbs",
+    "name": "护药驱鼠",
+    "giver": "mo-doctor",
+    "level": 1,
+    "main": true,
+    "summary": "到彩霞山击败 5 只灰鳞鼠。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "ash-rat",
+        "count": 5
+      }
+    ],
+    "rewards": {
+      "exp": 1400,
+      "gold": 100,
+      "items": [
+        {
+          "item": "small-mana",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch1-herbs-offer",
+    "finish": "ch1-herbs-finish",
+    "prev": "ch1-enter"
+  },
+  "ch1-spider": {
+    "id": "ch1-spider",
+    "name": "毒蛛试手",
+    "giver": "mo-doctor",
+    "level": 2,
+    "main": true,
+    "summary": "到彩霞山击败 3 只毒蛛。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "venom-spider",
+        "count": 3
+      }
+    ],
+    "rewards": {
+      "exp": 2200,
+      "gold": 150,
+      "items": [
+        {
+          "item": "small-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "ch1-spider-offer",
+    "finish": "ch1-spider-finish",
+    "prev": "ch1-herbs"
+  },
+  "ch1-friend": {
+    "id": "ch1-friend",
+    "name": "结识厉飞雨",
+    "giver": "mo-doctor",
+    "level": 3,
+    "main": true,
+    "summary": "去见厉飞雨，听听门中近况。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "li-feiyu",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 800,
+      "gold": 50,
+      "items": []
+    },
+    "offer": "ch1-friend-offer",
+    "finish": "ch1-friend-finish",
+    "prev": "ch1-spider"
+  },
+  "ch1-wolves": {
+    "id": "ch1-wolves",
+    "name": "野狼帮来犯",
+    "giver": "li-feiyu",
+    "level": 3,
+    "main": true,
+    "summary": "到彩霞山深处击退 3 名野狼帮众。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "wolf-rider",
+        "count": 3
+      }
+    ],
+    "rewards": {
+      "exp": 4000,
+      "gold": 200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 1
+        }
+      ]
+    },
+    "offer": "ch1-wolves-offer",
+    "finish": "ch1-wolves-finish",
+    "prev": "ch1-friend"
+  },
+  "ch1-report": {
+    "id": "ch1-report",
+    "name": "回禀执事",
+    "giver": "li-feiyu",
+    "level": 4,
+    "main": true,
+    "summary": "把野狼帮的动向告诉七玄门执事。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "qixuan-steward",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 1000,
+      "gold": 100,
+      "items": []
+    },
+    "offer": "ch1-report-offer",
+    "finish": "ch1-report-finish",
+    "prev": "ch1-wolves"
+  },
+  "ch1-boss": {
+    "id": "ch1-boss",
+    "name": "金光上人",
+    "giver": "qixuan-steward",
+    "level": 5,
+    "main": true,
+    "summary": "击败野狼帮请来的修仙者金光上人。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "golden-master",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 8000,
+      "gold": 500,
+      "items": [
+        {
+          "item": "ascension-token",
+          "count": 1
+        },
+        {
+          "item": "small-potion",
+          "count": 5
+        }
+      ],
+      "teleport": {
+        "map": "huangfeng-valley",
+        "x": 20,
+        "y": 24
+      }
+    },
+    "offer": "ch1-boss-offer",
+    "finish": "ch1-boss-finish",
+    "prev": "ch1-report"
+  },
   "join-sect": {
-    "id": "join-sect", "name": "初入黄枫谷", "giver": "guide-senior", "level": 1, "main": true,
+    "id": "join-sect",
+    "name": "初入黄枫谷",
+    "giver": "guide-senior",
+    "level": 1,
+    "main": true,
     "summary": "去百药堂拜见掌柜，再回来复命。",
-    "objectives": [{ "type": "talk", "target": "herb-keeper", "count": 1 }],
-    "rewards": { "exp": 800, "gold": 100, "items": [{ "item": "small-potion", "count": 5 }] },
-    "offer": "join-sect-offer", "finish": "join-sect-finish"
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "herb-keeper",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 800,
+      "gold": 100,
+      "items": [
+        {
+          "item": "small-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "join-sect-offer",
+    "finish": "join-sect-finish",
+    "prev": "ch1-boss"
   },
   "clear-rats": {
-    "id": "clear-rats", "name": "清剿灰鳞鼠", "giver": "guide-senior", "level": 1, "main": true,
+    "id": "clear-rats",
+    "name": "清剿灰鳞鼠",
+    "giver": "guide-senior",
+    "level": 1,
+    "main": true,
     "prev": "join-sect",
     "summary": "到彩霞山击败 5 只灰鳞鼠。",
-    "objectives": [{ "type": "kill", "target": "ash-rat", "count": 5 }],
-    "rewards": { "exp": 2400, "gold": 150, "items": [{ "item": "small-mana", "count": 5 }] },
-    "offer": "clear-rats-offer", "finish": "clear-rats-finish"
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "ash-rat",
+        "count": 5
+      }
+    ],
+    "rewards": {
+      "exp": 2400,
+      "gold": 150,
+      "items": [
+        {
+          "item": "small-mana",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "clear-rats-offer",
+    "finish": "clear-rats-finish"
   },
   "taina-meeting": {
-    "id": "taina-meeting", "name": "太南小会", "giver": "guide-senior", "level": 3, "main": true,
+    "id": "taina-meeting",
+    "name": "太南小会",
+    "giver": "guide-senior",
+    "level": 3,
+    "main": true,
     "prev": "clear-rats",
     "summary": "前往太南山，再回谷中复命。",
-    "objectives": [{ "type": "reach", "target": "taina-mountain", "count": 1 }],
-    "rewards": { "exp": 6100, "gold": 200, "items": [{ "item": "refine-stone", "count": 1 }] },
-    "offer": "taina-offer", "finish": "taina-finish"
+    "objectives": [
+      {
+        "type": "reach",
+        "target": "taina-mountain",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 6100,
+      "gold": 200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 1
+        }
+      ]
+    },
+    "offer": "taina-offer",
+    "finish": "taina-finish"
   },
   "slay-serpent": {
-    "id": "slay-serpent", "name": "斩杀铁甲蛟", "giver": "guide-senior", "level": 6, "main": true,
+    "id": "slay-serpent",
+    "name": "斩杀铁甲蛟",
+    "giver": "guide-senior",
+    "level": 6,
+    "main": true,
     "prev": "taina-meeting",
     "summary": "击败盘踞太南山深处的铁甲蛟。",
-    "objectives": [{ "type": "kill", "target": "flood-serpent", "count": 1 }],
-    "rewards": { "exp": 20200, "gold": 800, "items": [{ "item": "refine-stone", "count": 3 }, { "item": "steel-sword", "count": 1 }] },
-    "offer": "serpent-offer", "finish": "serpent-finish"
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "flood-serpent",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 20200,
+      "gold": 800,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        },
+        {
+          "item": "steel-sword",
+          "count": 1
+        }
+      ]
+    },
+    "offer": "serpent-offer",
+    "finish": "serpent-finish"
   },
   "ape-fur": {
-    "id": "ape-fur", "name": "收购山魈皮", "giver": "herb-keeper", "level": 3,
+    "id": "ape-fur",
+    "name": "收购山魈皮",
+    "giver": "herb-keeper",
+    "level": 3,
     "summary": "收集 3 张山魈皮交给百药堂掌柜。",
-    "objectives": [{ "type": "collect", "target": "ape-fur", "count": 3 }],
-    "rewards": { "exp": 4100, "gold": 300, "items": [] },
-    "offer": "ape-fur-offer", "finish": "ape-fur-finish"
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "ape-fur",
+        "count": 3
+      }
+    ],
+    "rewards": {
+      "exp": 4100,
+      "gold": 300,
+      "items": []
+    },
+    "offer": "ape-fur-offer",
+    "finish": "ape-fur-finish"
   }
 }

@@ -129,6 +129,7 @@ export class World {
       skillCooldowns: {},
       hotbar,
       order: null,
+      running: false,
       queuedSkill: null,
       respawnLeft: 0,
       lastHurtAt: -Infinity,
@@ -357,10 +358,11 @@ export class World {
 
   // ---- 玩家指令 ----
 
-  moveTo(cell: Cell): void {
+  moveTo(cell: Cell, run = false): void {
     const goal = this.grid.nearest(cell, (c) => this.grid.isWalkable(c));
     if (!goal || !this.player.hp) return;
     this.player.order = { type: 'move', cell: goal };
+    this.player.running = run;
     this.player.route = null;
     this.player.repathLeft = 0;
     this.planPath(this.player, goal, false);
@@ -449,7 +451,14 @@ export class World {
     const goal = this.grid.nearest(cell, (c) => this.grid.isWalkable(c));
     if (!goal) return;
     this.player.order = { type: 'move', cell: goal };
+    this.player.running = true;
     this.planPath(this.player, goal, false);
+  }
+
+  /** 跑步只作用于赶路，追怪和放技能时恢复行走。 */
+  get playerRunning(): boolean {
+    const { running, order } = this.player;
+    return running && (order?.type === 'move' || order?.type === 'talk' || order?.type === 'pickup');
   }
 
   /** 结算闭关收益：最多 8 小时，效率为在线的一半，只有经验和灵石。 */
@@ -1585,7 +1594,8 @@ export class World {
 
   /** 沿路径前进，本帧走不完的距离留到下一格继续用。 */
   private advance(unit: Unit, dt: number): void {
-    let budget = unit.moveSpeed * dt;
+    const speed = unit === this.player && this.playerRunning ? this.config.game.runMultiplier : 1;
+    let budget = unit.moveSpeed * speed * dt;
     while (budget > 0) {
       if (!this.isStepping(unit)) {
         const next = unit.path[0];

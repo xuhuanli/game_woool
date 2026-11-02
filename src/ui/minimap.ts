@@ -3,6 +3,16 @@ import type { World } from '../game/world';
 const WIDTH = 190;
 const HEIGHT = 110;
 const MARGIN = 6;
+const WATER_TILE = 6;
+/** 地形编号的颜色：泥路、岩石、水面、河岸、木桥、石板 */
+const TERRAIN_COLORS: Record<number, string> = {
+  4: '#94805a',
+  5: '#2b2a26',
+  6: '#3a7fa0',
+  7: '#a89a72',
+  8: '#7a5533',
+  9: '#8f8b80',
+};
 
 /** 小地图：和主画面一样的斜 45 度朝向，地形只在切图时重画。 */
 export class Minimap {
@@ -52,7 +62,10 @@ export class Minimap {
     for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
         const { px, py } = this.project({ x, y });
-        context.fillStyle = grid.isWalkable({ x, y }) ? '#4f6038' : '#2b2a26';
+        const tile = world.map.ground?.[y * grid.width + x] ?? 0;
+        const walkable = grid.isWalkable({ x, y });
+        const open = walkable || tile === WATER_TILE;
+        context.fillStyle = open ? (TERRAIN_COLORS[tile] ?? '#4f6038') : '#2b2a26';
         context.beginPath();
         context.moveTo(px, py - this.scale / 2);
         context.lineTo(px + this.scale, py);

@@ -28,6 +28,9 @@ export interface SpriteManifest {
 
 export type SpriteManifests = Record<string, SpriteManifest>;
 
+/** 景观物件的说明，由 tools/bake/props.ts 生成，ox、oy 是脚底位置。 */
+export type PropManifest = Record<string, { w: number; h: number; ox: number; oy: number }>;
+
 /** 为已加载的正式精灵表注册动画，动画名和占位图一致。 */
 export function createSpriteAnimations(scene: Phaser.Scene, manifests: SpriteManifests): void {
   for (const [key, manifest] of Object.entries(manifests)) {
@@ -243,9 +246,10 @@ export function createPlaceholderArt(
     if (!manifests[classId]) addSheet(scene, classId, paintHero(look));
   }
   for (const monster of Object.values(config.monsters)) {
-    addSheet(scene, monster.id, paintBeast(monster.look.fur, monster.look.head));
+    if (!manifests[monster.id]) addSheet(scene, monster.id, paintBeast(monster.look.fur, monster.look.head));
   }
   for (const npc of Object.values(config.npcs)) {
+    if (manifests[`npc-${npc.id}`]) continue;
     const look = { robe: npc.color, trim: '#efe6d0', weapon: '#d9dee6', reach: 0 };
     addSheet(scene, `npc-${npc.id}`, paintHero(look));
   }

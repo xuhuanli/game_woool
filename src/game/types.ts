@@ -141,6 +141,8 @@ export interface Player extends Unit {
   /** 闭关收益按最后到过的野外地图计算 */
   lastFieldMap: string | null;
   order: PlayerOrder | null;
+  /** 本次移动是否跑步 */
+  running: boolean;
   /** 出招途中按下的自身技能，出招结束后释放 */
   queuedSkill: SkillDef | null;
   respawnLeft: number;
