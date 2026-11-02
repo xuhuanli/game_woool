@@ -19,6 +19,18 @@ export interface Style {
   gold: number;
 }
 
+/** 禁地石殿：青石柱、石瓦，年久失修 */
+export const STONE: Style = {
+  roof: 0x6a625a,
+  roofDark: 0x544c46,
+  ridge: 0x3a3430,
+  column: 0x8a8278,
+  wall: 0x9a9288,
+  beam: 0x5a524a,
+  stone: 0x7a7268,
+  gold: 0x8a7a5a,
+};
+
 /** 七玄门是江湖门派，灰瓦木柱 */
 export const PLAIN: Style = {
   roof: 0x5d6670,
@@ -227,7 +239,7 @@ export function hall(style: Style, name: string, cellsW = 9, cellsD = 6): THREE.
   roof(group, coreW + 1.6, coreD + 1.6, 0.8, 2.3, style, 0.34);
   box(group, [coreW * 0.72, 0.7, coreD * 0.62], [0, 3.15, 0], style.beam);
   roof(group, coreW * 0.72 + 1.1, coreD * 0.62 + 1.1, 1.3, 3.5, style, 0.36);
-  plaque(group, name, 2.4, 3.12, (coreD * 0.62) / 2 + 0.03, style);
+  if (name) plaque(group, name, 2.4, 3.12, (coreD * 0.62) / 2 + 0.03, style);
   return group;
 }
 

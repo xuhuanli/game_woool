@@ -153,5 +153,33 @@
     "y": 84,
     "color": "#5a5a6a",
     "greeting": "judge-greeting"
+  },
+  "forbidden-guard": {
+    "id": "forbidden-guard",
+    "name": "黄枫谷护法",
+    "map": "blood-forbidden",
+    "x": 13,
+    "y": 10,
+    "color": "#d9b84a",
+    "greeting": "guard-greeting"
+  },
+  "nangong-wan": {
+    "id": "nangong-wan",
+    "name": "南宫婉",
+    "map": "blood-forbidden",
+    "x": 61,
+    "y": 80,
+    "color": "#eef2f8",
+    "greeting": "nangong-greeting",
+    "hiddenAfter": "ch3-serpent"
+  },
+  "li-huayuan": {
+    "id": "li-huayuan",
+    "name": "李化元",
+    "map": "huangfeng-valley",
+    "x": 24,
+    "y": 15,
+    "color": "#3f4a6a",
+    "greeting": "li-hy-greeting"
   }
 }

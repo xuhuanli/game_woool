@@ -433,5 +433,23 @@
   "id": "jinzhu-brush",
   "name": "金竺笔",
   "kind": "material"
+ },
+ "jade-marrow": {
+  "id": "jade-marrow",
+  "name": "玉髓芝",
+  "kind": "material",
+  "price": 120
+ },
+ "purple-monkey": {
+  "id": "purple-monkey",
+  "name": "紫猴花",
+  "kind": "material",
+  "price": 120
+ },
+ "sky-fruit": {
+  "id": "sky-fruit",
+  "name": "天灵果",
+  "kind": "material",
+  "price": 150
  }
 }

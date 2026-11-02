@@ -11,6 +11,7 @@ import {
   PLAIN,
   SECT,
   stall,
+  STONE,
   tower,
   wall,
   weaponRack,
@@ -84,6 +85,9 @@ const building = (key: string, build: () => THREE.Object3D): Prop => ({
 const BUILDINGS: Prop[] = [
   building('bld-hall-plain', () => hall(PLAIN, '聚义堂')),
   building('bld-hall-sect', () => hall(SECT, '黄枫殿')),
+  building('bld-hall-stone', () => hall(STONE, '')),
+  building('bld-wall-stone', () => wall(STONE)),
+  building('obj-lantern-stone', () => lantern(STONE)),
   building('bld-house-plain', () => house(PLAIN)),
   building('bld-house-sect', () => house(SECT)),
   building('bld-tower-plain', () => tower(PLAIN, '藏书阁')),

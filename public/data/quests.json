@@ -445,37 +445,206 @@
     "finish": "join-sect-finish",
     "prev": "ch2-token"
   },
-  "slay-serpent": {
-    "id": "slay-serpent",
-    "name": "斩杀铁甲蛟",
+  "ch3-trial": {
+    "id": "ch3-trial",
+    "name": "血色试炼",
     "giver": "guide-senior",
-    "level": 6,
+    "level": 11,
     "main": true,
-    "prev": "join-sect",
-    "summary": "击败盘踞太南山深处的铁甲蛟。",
+    "summary": "去传送阵执事处登记入禁地的名额。",
     "objectives": [
       {
-        "type": "kill",
-        "target": "flood-serpent",
+        "type": "talk",
+        "target": "gate-steward",
         "count": 1
       }
     ],
     "rewards": {
-      "exp": 20200,
-      "gold": 800,
+      "exp": 3000,
+      "gold": 200,
+      "items": [
+        {
+          "item": "small-potion",
+          "count": 10
+        }
+      ],
+      "teleport": {
+        "map": "blood-forbidden",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch3-trial-offer",
+    "finish": "ch3-trial-finish",
+    "prev": "join-sect"
+  },
+  "ch3-spider": {
+    "id": "ch3-spider",
+    "name": "玉髓芝",
+    "giver": "forbidden-guard",
+    "level": 11,
+    "main": true,
+    "summary": "击败 6 只守着玉髓芝的血纹蛛。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "blood-spider",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 7000,
+      "gold": 300,
+      "items": []
+    },
+    "offer": "ch3-spider-offer",
+    "finish": "ch3-spider-finish",
+    "prev": "ch3-trial"
+  },
+  "ch3-snake": {
+    "id": "ch3-snake",
+    "name": "紫猴花",
+    "giver": "forbidden-guard",
+    "level": 11,
+    "main": true,
+    "summary": "击败 6 条盘在紫猴花旁的赤鳞蛇。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "red-snake",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 7000,
+      "gold": 300,
+      "items": [
+        {
+          "item": "small-mana",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "ch3-snake-offer",
+    "finish": "ch3-snake-finish",
+    "prev": "ch3-spider"
+  },
+  "ch3-rival": {
+    "id": "ch3-rival",
+    "name": "夺药之争",
+    "giver": "forbidden-guard",
+    "level": 11,
+    "main": true,
+    "summary": "击退 5 名抢夺灵药的他派弟子。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "rival-disciple",
+        "count": 5
+      }
+    ],
+    "rewards": {
+      "exp": 8000,
+      "gold": 400,
+      "items": []
+    },
+    "offer": "ch3-rival-offer",
+    "finish": "ch3-rival-finish",
+    "prev": "ch3-snake"
+  },
+  "ch3-fengyue": {
+    "id": "ch3-fengyue",
+    "name": "天阙堡封岳",
+    "giver": "forbidden-guard",
+    "level": 11,
+    "main": true,
+    "summary": "击败在禁地中截杀同道的封岳。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "feng-yue",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 9000,
+      "gold": 600,
       "items": [
         {
           "item": "refine-stone",
-          "count": 3
-        },
+          "count": 2
+        }
+      ]
+    },
+    "offer": "ch3-fengyue-offer",
+    "finish": "ch3-fengyue-finish",
+    "prev": "ch3-rival"
+  },
+  "ch3-serpent": {
+    "id": "ch3-serpent",
+    "name": "墨蛟",
+    "giver": "nangong-wan",
+    "level": 12,
+    "main": true,
+    "summary": "与南宫婉联手击败石殿前的墨蛟。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "mo-jiao",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 8000,
+      "gold": 800,
+      "items": [],
+      "teleport": {
+        "map": "huangfeng-valley",
+        "x": 20,
+        "y": 24
+      }
+    },
+    "offer": "ch3-serpent-offer",
+    "finish": "ch3-serpent-finish",
+    "prev": "ch3-fengyue"
+  },
+  "ch3-master": {
+    "id": "ch3-master",
+    "name": "拜入李门",
+    "giver": "li-huayuan",
+    "level": 12,
+    "main": true,
+    "summary": "把三味主药交给李化元：玉髓芝 3、紫猴花 3、天灵果 2。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "jade-marrow",
+        "count": 3
+      },
+      {
+        "type": "collect",
+        "target": "purple-monkey",
+        "count": 3
+      },
+      {
+        "type": "collect",
+        "target": "sky-fruit",
+        "count": 2
+      }
+    ],
+    "rewards": {
+      "exp": 5000,
+      "gold": 500,
+      "items": [
         {
-          "item": "steel-sword",
+          "item": "foundation-pill",
           "count": 1
         }
       ]
     },
-    "offer": "serpent-offer",
-    "finish": "serpent-finish"
+    "offer": "ch3-master-offer",
+    "finish": "ch3-master-finish",
+    "prev": "ch3-serpent"
   },
   "ape-fur": {
     "id": "ape-fur",

@@ -255,5 +255,205 @@
       "item": "jade-ring",
       "chance": 0.3
     }
+  ],
+  "blood-spider": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 8,
+      "max": 15
+    },
+    {
+      "item": "small-potion",
+      "chance": 0.2
+    },
+    {
+      "item": "small-mana",
+      "chance": 0.15
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.015
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.008
+    },
+    {
+      "item": "iron-helm",
+      "chance": 0.006
+    },
+    {
+      "item": "spirit-pendant",
+      "chance": 0.006
+    },
+    {
+      "item": "jade-ring",
+      "chance": 0.006
+    },
+    {
+      "item": "jade-marrow",
+      "chance": 0.4
+    }
+  ],
+  "red-snake": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 8,
+      "max": 15
+    },
+    {
+      "item": "small-potion",
+      "chance": 0.2
+    },
+    {
+      "item": "small-mana",
+      "chance": 0.15
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.015
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.008
+    },
+    {
+      "item": "iron-helm",
+      "chance": 0.006
+    },
+    {
+      "item": "spirit-pendant",
+      "chance": 0.006
+    },
+    {
+      "item": "jade-ring",
+      "chance": 0.006
+    },
+    {
+      "item": "purple-monkey",
+      "chance": 0.4
+    }
+  ],
+  "rival-disciple": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 8,
+      "max": 15
+    },
+    {
+      "item": "small-potion",
+      "chance": 0.2
+    },
+    {
+      "item": "small-mana",
+      "chance": 0.15
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.015
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.008
+    },
+    {
+      "item": "iron-helm",
+      "chance": 0.006
+    },
+    {
+      "item": "spirit-pendant",
+      "chance": 0.006
+    },
+    {
+      "item": "jade-ring",
+      "chance": 0.006
+    },
+    {
+      "item": "sky-fruit",
+      "chance": 0.35
+    },
+    {
+      "item": "steel-sword",
+      "chance": 0.01
+    }
+  ],
+  "feng-yue": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 400,
+      "max": 700
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 1,
+      "max": 2
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.6
+    },
+    {
+      "item": "sky-fruit",
+      "chance": 1,
+      "min": 1,
+      "max": 2
+    },
+    {
+      "item": "steel-sword",
+      "chance": 0.5
+    },
+    {
+      "item": "iron-helm",
+      "chance": 0.3
+    },
+    {
+      "item": "iron-bracelet",
+      "chance": 0.3
+    },
+    {
+      "item": "jade-ring",
+      "chance": 0.3
+    }
+  ],
+  "mo-jiao": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 500,
+      "max": 900
+    },
+    {
+      "item": "serpent-scale",
+      "chance": 1,
+      "min": 3,
+      "max": 4
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 2,
+      "max": 3
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.7
+    },
+    {
+      "item": "sword-14",
+      "chance": 0.3
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.1
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.1
+    }
   ]
 }

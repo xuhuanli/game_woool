@@ -71,5 +71,19 @@
       "color": "#ffc88a",
       "alpha": 0.06
     }
+  },
+  "blood-forbidden": {
+    "id": "blood-forbidden",
+    "name": "血色禁地",
+    "tiled": "blood-forbidden.tmj",
+    "respawn": {
+      "map": "huangfeng-valley",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#c84a3a",
+      "alpha": 0.14
+    }
   }
 }

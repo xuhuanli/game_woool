@@ -214,7 +214,7 @@ describe('任务', () => {
   it('对话任务：接取、拜见、回来交付、解锁下一个', () => {
     const world = town();
     expect(status(world, 'join-sect')).toBe('available');
-    expect(status(world, 'slay-serpent')).toBe('locked');
+    expect(status(world, 'ch3-trial')).toBe('locked');
 
     world.acceptQuest('join-sect');
     expect(status(world, 'join-sect')).toBe('active');
@@ -226,9 +226,9 @@ describe('任务', () => {
     expect(world.player.gold).toBe(100);
     expect(world.player.bag['small-potion']).toBe(5);
     expect(world.player.level).toBe(2);
-    expect(status(world, 'slay-serpent')).toBe('locked');
-    world.player.level = 6;
-    expect(status(world, 'slay-serpent')).toBe('available');
+    expect(status(world, 'ch3-trial')).toBe('locked');
+    world.player.level = 11;
+    expect(status(world, 'ch3-trial')).toBe('available');
   });
 
   it('未完成时不能交付，已完成的不能重复领奖', () => {
@@ -292,15 +292,17 @@ describe('任务', () => {
   });
 
   it('背包放不下法器奖励时不能交付', () => {
-    const world = town();
-    world.player.level = 6;
-    world.player.quests.completed.push('join-sect');
-    world.player.quests.active.push({ id: 'slay-serpent', counts: [1] });
+    const setup = structuredClone(config);
+    const quest = setup.quests['join-sect']!;
+    quest.rewards.items = [{ item: 'steel-sword', count: 1 }];
+    const world = passChapterOne(new World(setup, 'huangfeng-valley', 'body', 1));
+    world.player.quests.active.push({ id: 'join-sect', counts: [1] });
     for (let uid = 0; uid < config.affixes.bagCapacity; uid++) {
       world.player.equipBag.push({ uid: 1000 + uid, itemId: 'cloth-robe', grade: 'low', affixes: [], luck: 0 });
     }
-    world.turnInQuest('slay-serpent');
-    expect(status(world, 'slay-serpent')).toBe('ready');
+    world.turnInQuest('join-sect');
+    expect(world.player.quests.completed).not.toContain('join-sect');
+    expect(world.player.quests.active.map((active) => active.id)).toContain('join-sect');
   });
 
   it('任务进度写入存档', () => {
@@ -1348,6 +1350,40 @@ describe('章节主线', () => {
     expect(Math.hypot(judge.x - boss.x, judge.y - boss.y) - talkRange).toBeGreaterThan(
       config.monsters['qingwen-daoren']!.aggroRange,
     );
+  });
+
+  it('第 3 章：禁地取药、斩墨蛟、拜入李门，筑基材料齐全', () => {
+    const world = passChapterOne(new World(config, 'huangfeng-valley', 'body', 1));
+    while (world.player.level < 11) {
+      world.player.exp = world.expToNext!;
+      (world as unknown as { gainExp(amount: number): void }).gainExp(0);
+    }
+    world.player.bag['foundation-pill'] = 1;
+    finish(world, 'join-sect');
+    finish(world, 'ch3-trial');
+    expect(world.mapId).toBe('blood-forbidden');
+    for (const questId of ['ch3-spider', 'ch3-snake', 'ch3-rival', 'ch3-fengyue']) finish(world, questId);
+    expect(world.npcs.map((npc) => npc.id)).toContain('nangong-wan');
+    finish(world, 'ch3-serpent');
+    expect(world.mapId).toBe('huangfeng-valley');
+    Object.assign(world.player.bag, { 'jade-marrow': 3, 'purple-monkey': 3, 'sky-fruit': 2, 'serpent-scale': 3 });
+    finish(world, 'ch3-master');
+    expect(world.player.level).toBe(13);
+    expect(world.player.bag['foundation-pill']).toBe(2);
+    expect(world.player.bag['jade-marrow']).toBeUndefined();
+    const realm = config.realms[0]!.breakthrough!;
+    for (const { item, count } of realm.requires) {
+      expect(world.player.bag[item] ?? 0, item).toBeGreaterThanOrEqual(count);
+    }
+  });
+
+  it('禁地里的灵药有怪物会掉，南宫婉不会惊动墨蛟', () => {
+    for (const herb of ['jade-marrow', 'purple-monkey', 'sky-fruit']) {
+      expect(Object.values(config.drops).some((table) => table.some((entry) => entry.item === herb)), herb).toBe(true);
+    }
+    const nangong = config.npcs['nangong-wan']!;
+    const boss = config.maps['blood-forbidden']!.spawns.find((spawn) => spawn.monster === 'mo-jiao')!;
+    expect(Math.hypot(nangong.x - boss.x, nangong.y - boss.y) - 2).toBeGreaterThan(config.monsters['mo-jiao']!.aggroRange);
   });
 
   it('万小山带路后离开，太南谷的传送点要先过第二个任务', () => {
