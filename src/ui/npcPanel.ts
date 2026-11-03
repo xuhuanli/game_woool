@@ -3,6 +3,7 @@ import { equipmentColor, equipmentName, type Equipment } from '../game/equipment
 import { cellDistance } from '../game/grid';
 import { questsForNpc, questStatus } from '../game/quests';
 import type { World } from '../game/world';
+import { iconImage } from './icons';
 
 const CLOSE_DISTANCE = 6;
 
@@ -155,7 +156,9 @@ export class NpcPanel {
       // 功法书只卖本职业、还没学会的
       const skill = config.skills[item.skill ?? ''];
       if (skill && (skill.classId !== player.def.id || player.skills.includes(skill.id))) continue;
-      body.append(this.option(`${item.name}（${item.price} 灵石）`, () => world.buy(npc, itemId)));
+      const option = this.option(`${item.name}（${item.price} 灵石）`, () => world.buy(npc, itemId));
+      option.prepend(iconImage(itemId));
+      body.append(option);
     }
 
     body.append(el('p', 'npc-quest', '出售'));

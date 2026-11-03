@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { validateConfig, type GameConfig } from './config';
 import type { Equipment } from './equipment';
@@ -1025,6 +1026,14 @@ describe('40 级内容', () => {
     world.player.auto.recallBelow = 0;
     run(world, 120);
     expect(Object.keys(world.player.skillCooldowns)).toContain('spell-bixie');
+  });
+});
+
+describe('图标', () => {
+  it('每个功法和物品都生成了图标', () => {
+    const ids = [...Object.keys(config.skills), ...Object.keys(config.items)];
+    const missing = ids.filter((id) => !existsSync(`public/assets/icons/${id}.svg`));
+    expect(missing).toEqual([]);
   });
 });
 

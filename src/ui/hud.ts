@@ -5,6 +5,7 @@ import { questDestination } from '../game/navigation';
 import { objectiveCount, questStatus } from '../game/quests';
 import { pendingBreakthrough, realmName } from '../game/realm';
 import { HOTBAR_SIZE, type World } from '../game/world';
+import { iconUrl } from './icons';
 import { Minimap } from './minimap';
 
 const LOG_LINES = 7;
@@ -19,6 +20,7 @@ function byId(id: string): HTMLElement {
 
 interface SlotView {
   button: HTMLButtonElement;
+  icon: HTMLImageElement;
   label: HTMLElement;
   cooldown: HTMLElement;
 }
@@ -58,13 +60,17 @@ export class Hud {
     for (let slot = 0; slot < HOTBAR_SIZE; slot++) {
       const button = document.createElement('button');
       const key = document.createElement('kbd');
+      const icon = document.createElement('img');
       const label = document.createElement('span');
       const cooldown = document.createElement('i');
       key.textContent = `F${slot + 1}`;
-      button.append(key, label, cooldown);
+      icon.alt = '';
+      icon.draggable = false;
+      icon.hidden = true;
+      button.append(icon, key, label, cooldown);
       button.addEventListener('click', () => this.onSlot(slot));
       hotbar.append(button);
-      this.slots.push({ button, label, cooldown });
+      this.slots.push({ button, icon, label, cooldown });
     }
   }
 
@@ -172,19 +178,28 @@ export class Hud {
     this.slots.forEach((view, slot) => {
       const entry = player.hotbar[slot];
       let label = '';
+      let title = '';
       let usable = false;
       let cooldown = 0;
       if (entry?.kind === 'skill') {
         const skill = this.config.skills[entry.id];
-        label = skill?.name ?? '';
+        title = skill?.name ?? '';
         const left = player.skillCooldowns[entry.id] ?? 0;
         cooldown = skill ? left / skill.cooldown : 0;
         usable = !!skill && left <= 0 && player.mp >= skill.mpCost;
       } else if (entry?.kind === 'item') {
         const count = player.bag[entry.id] ?? 0;
-        label = `${this.config.items[entry.id]?.name ?? ''}×${count}`;
+        title = this.config.items[entry.id]?.name ?? '';
+        label = `×${count}`;
         usable = count > 0;
       }
+      const iconId = entry?.id ?? '';
+      if (view.icon.dataset.id !== iconId) {
+        view.icon.dataset.id = iconId;
+        view.icon.hidden = !iconId;
+        if (iconId) view.icon.src = iconUrl(iconId);
+      }
+      view.button.title = title;
       view.label.textContent = label;
       view.button.classList.toggle('unusable', !usable);
       view.cooldown.style.height = `${cooldown * 100}%`;

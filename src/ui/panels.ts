@@ -11,6 +11,7 @@ import {
 } from '../game/equipment';
 import { breakthroughChance, pendingBreakthrough, realmName } from '../game/realm';
 import type { World } from '../game/world';
+import { iconImage } from './icons';
 
 const STAT_NAMES: Record<Exclude<BonusStat, 'primary'>, string> = {
   maxHp: '生命',
@@ -173,7 +174,10 @@ export class Panels {
     const row = el('button', 'slot-row');
     row.append(el('span', 'slot-name', SLOT_NAMES[slot]));
     const name = el('span', '', equipment ? equipmentName(equipment, this.config) : '空');
-    if (equipment) name.style.color = equipmentColor(equipment, this.config);
+    if (equipment) {
+      name.prepend(iconImage(equipment.itemId));
+      name.style.color = equipmentColor(equipment, this.config);
+    }
     row.append(name);
     if (equipment) {
       row.classList.toggle('selected', this.isSelected(equipment));
@@ -192,6 +196,7 @@ export class Panels {
     const grid = el('div', 'bag-grid');
     for (const equipment of player.equipBag) {
       const cell = el('button', 'bag-cell', equipmentName(equipment, this.config));
+      cell.prepend(iconImage(equipment.itemId));
       cell.style.color = equipmentColor(equipment, this.config);
       cell.classList.toggle('selected', this.isSelected(equipment));
       cell.addEventListener('click', () => this.select({ kind: 'equipment', uid: equipment.uid }));
@@ -200,6 +205,7 @@ export class Panels {
     for (const [id, count] of Object.entries(player.bag)) {
       const label = `${this.config.items[id]?.name ?? id}×${count}`;
       const cell = el('button', 'bag-cell', label);
+      cell.prepend(iconImage(id));
       const selected = this.selection?.kind === 'stack' && this.selection.id === id;
       cell.classList.toggle('selected', selected);
       cell.addEventListener('click', () => this.select({ kind: 'stack', id }));

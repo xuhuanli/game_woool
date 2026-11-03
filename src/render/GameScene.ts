@@ -16,6 +16,7 @@ import {
 import type { AutoSaver } from '../save/autoSaver';
 import type { AutoPanel } from '../ui/autoPanel';
 import type { Hud } from '../ui/hud';
+import { iconUrl } from '../ui/icons';
 import type { NpcPanel } from '../ui/npcPanel';
 import type { Panels } from '../ui/panels';
 import { GameAudio } from './audio';
@@ -29,6 +30,8 @@ import {
 } from './placeholders';
 import { paintGround } from './groundPainter';
 
+/** 地上物品图标的边长 */
+const DROP_ICON_SIZE = 28;
 const FONT = '"PingFang SC", "Microsoft YaHei", sans-serif';
 const HOLD_REPATH_MS = 200;
 const MAX_FRAME_MS = 250;
@@ -112,6 +115,15 @@ export class GameScene extends Phaser.Scene {
     for (const key of Object.keys(this.props)) {
       this.load.image(`prop-${key}`, `${import.meta.env.BASE_URL}assets/props/${key}.png`);
     }
+    for (const id of Object.keys(this.world.config.items)) {
+      this.load.svg(`icon-${id}`, iconUrl(id), { width: DROP_ICON_SIZE, height: DROP_ICON_SIZE });
+    }
+  }
+
+  /** 地上物品用图标，没有图标时用占位图。 */
+  private dropTexture(item: GroundItem): string {
+    const icon = `icon-${item.def.id}`;
+    return this.textures.exists(icon) ? icon : `item-${item.def.kind}`;
   }
 
   create(): void {
@@ -794,7 +806,7 @@ export class GameScene extends Phaser.Scene {
   private showDrop(item: GroundItem, announce = true): void {
     const { x, y } = toScreen(item.cell);
     const sprite = this.add
-      .image(x, y - 26, `item-${item.def.kind}`)
+      .image(x, y - 26, this.dropTexture(item))
       .setOrigin(0.5, 0.75)
       .setDepth(y - 1);
     const label = this.add
@@ -864,7 +876,7 @@ export class GameScene extends Phaser.Scene {
 
   private flyToPlayer(item: GroundItem): void {
     const from = toScreen(item.cell);
-    const sprite = this.add.image(from.x, from.y, `item-${item.def.kind}`).setDepth(UI_DEPTH - 3);
+    const sprite = this.add.image(from.x, from.y, this.dropTexture(item)).setDepth(UI_DEPTH - 3);
     const target = this.unitViews.get(this.world.player)!.sprite;
     this.tweens.add({
       targets: sprite,

@@ -78,6 +78,8 @@ M3 的目标是 1～40 级可以从头玩到结局。先验证美术，再补内
 
 `assets-src/` 里的 Poly Haven 模型是 CC0 的岩石、植物和道具，适合渲染成场景素材，不含人物。game-icons 是 CC BY 3.0，公开发布时需要署名，可用于技能和物品图标。
 
+功法和物品图标由 `tools/make-icons.ts` 生成到 `public/assets/icons/`：每个功法和物品在脚本里配一个 game-icons 图形，功法按职业配底色，法器按境界配底色（灰、绿、蓝、紫），特殊戒指是金色，丹药按生命和灵力分红蓝，功法书用所授功法的图形加纸色底。快捷栏、背包、商店、功法面板、法器栏和地上掉落都用这套图标。新增物品或功法时要在脚本里补图形，测试会检查缺图。
+
 第 0 批走的是 3D 预渲染：`tools/bake/kaykit.ts` 载入 KayKit Adventurers 的法师模型（CC0），去掉帽子和法杖，按色块改贴图，再加发髻和剑，从 8 个方向渲染成精灵表，输出到 `public/assets/sprites/`。启动 `npx vite --config tools/bake/vite.config.ts` 后打开 http://localhost:5180 即可重新烘焙。
 
 模型要先下载到 `assets-src/models/kaykit/adventurers/`，来源是 `https://github.com/KayKit-Game-Assets/KayKit-Character-Pack-Adventures-1.0`。旧版代码拼模型的 `tools/bake/bake.ts` 和 `cultivator.ts` 已不再使用，旧精灵备份在 `docs/art/body-old.png`，新旧对比图是 `docs/art/body-compare.jpg`。

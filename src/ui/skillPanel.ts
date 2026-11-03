@@ -1,5 +1,6 @@
 import type { SkillDef, SkillEffect } from '../game/config';
 import type { World } from '../game/world';
+import { iconImage } from './icons';
 
 function describeEffect(effect: SkillEffect, range: number): string {
   const reach = range > 1 ? `，射程 ${range}` : '';
@@ -69,6 +70,7 @@ export class SkillPanel {
     row.className = learned ? 'skill-row' : 'skill-row locked';
     const name = document.createElement('b');
     name.textContent = skill.name;
+    name.prepend(iconImage(skill.id));
     const state = document.createElement('span');
     const level = this.world.player.skillLevels[skill.id] ?? 1;
     const power = Math.round((this.world.inventory.skillPower(skill.id) - 1) * 100);
