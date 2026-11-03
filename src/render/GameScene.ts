@@ -192,7 +192,7 @@ export class GameScene extends Phaser.Scene {
     for (const item of [...this.itemViews.keys()]) this.removeItemView(item);
 
     this.drawGround();
-    this.audio.playMusic(this.world.map.safe ? 'town' : 'field');
+    this.audio.playMusic(this.world.map.music ?? 'town');
     for (const portal of this.world.portals) this.addPortal(portal.x, portal.y, portal.name);
     for (const npc of this.world.npcs) this.addNpc(npc);
     for (const monster of this.world.monsters) {

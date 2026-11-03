@@ -41,7 +41,8 @@
     "tone": {
       "color": "#ff9a5a",
       "alpha": 0.1
-    }
+    },
+    "music": "caixia"
   },
   "taina-mountain": {
     "id": "taina-mountain",
@@ -55,7 +56,8 @@
     "tone": {
       "color": "#8fb4c8",
       "alpha": 0.07
-    }
+    },
+    "music": "taina"
   },
   "taina-valley": {
     "id": "taina-valley",
@@ -84,7 +86,8 @@
     "tone": {
       "color": "#c84a3a",
       "alpha": 0.14
-    }
+    },
+    "music": "forbidden"
   },
   "yanling-fort": {
     "id": "yanling-fort",
@@ -98,7 +101,8 @@
     "tone": {
       "color": "#9a7aa0",
       "alpha": 0.08
-    }
+    },
+    "music": "yanling"
   },
   "spirit-mine": {
     "id": "spirit-mine",
@@ -112,7 +116,8 @@
     "tone": {
       "color": "#6a7a9a",
       "alpha": 0.12
-    }
+    },
+    "music": "yanling"
   },
   "jingu-plain": {
     "id": "jingu-plain",
@@ -126,7 +131,8 @@
     "tone": {
       "color": "#c8a06a",
       "alpha": 0.08
-    }
+    },
+    "music": "yanling"
   },
   "tianxing-city": {
     "id": "tianxing-city",
@@ -155,7 +161,8 @@
     "tone": {
       "color": "#5a9ac8",
       "alpha": 0.08
-    }
+    },
+    "music": "sea"
   },
   "xutian-mist": {
     "id": "xutian-mist",
@@ -169,7 +176,8 @@
     "tone": {
       "color": "#6a7a8a",
       "alpha": 0.16
-    }
+    },
+    "music": "xutian"
   },
   "xutian-hall": {
     "id": "xutian-hall",
@@ -183,7 +191,8 @@
     "tone": {
       "color": "#7a9ab4",
       "alpha": 0.12
-    }
+    },
+    "music": "xutian"
   },
   "xutian-core": {
     "id": "xutian-core",
@@ -197,6 +206,7 @@
     "tone": {
       "color": "#8a3a5a",
       "alpha": 0.14
-    }
+    },
+    "music": "xutian"
   }
 }

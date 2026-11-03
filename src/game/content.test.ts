@@ -1028,6 +1028,16 @@ describe('40 级内容', () => {
   });
 });
 
+describe('背景音乐', () => {
+  it('每张野外地图都配了本章的音乐，主城用默认音乐', () => {
+    for (const map of Object.values(config.maps)) {
+      if (map.safe) expect(map.music, map.id).toBeUndefined();
+      else expect(map.music, map.id).toBeTruthy();
+    }
+    expect(config.maps['xutian-hall']!.music).toBe(config.maps['xutian-mist']!.music);
+  });
+});
+
 describe('功法书', () => {
   it('升级不再自动领悟，研读本职业的功法书才学会，书用掉', () => {
     const world = new World(config, 'huangfeng-valley', 'spell', 1);

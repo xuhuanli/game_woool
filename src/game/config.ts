@@ -264,6 +264,8 @@ export interface MapDef {
   decor?: DecorDef[];
   /** 画面色调和浓度 */
   tone?: { color: string; alpha: number };
+  /** 背景音乐，缺省时主城用 town */
+  music?: string;
   width: number;
   height: number;
   playerStart: Cell;
