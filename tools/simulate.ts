@@ -7,11 +7,15 @@ import { pendingBreakthrough } from '../src/game/realm';
 import { loadConfigFromDisk } from '../src/game/testConfig';
 import { TICK_SECONDS, World } from '../src/game/world';
 
-const MAX_HOURS = 24;
-const TARGET_LEVEL = 26;
+const MAX_HOURS = 40;
+const TARGET_LEVEL = 34;
 const SEEDS = [1, 2, 3];
 /** 按等级选挂机地图，和各章节的等级段一致 */
 const FIELDS: [number, string][] = [
+  [33, 'xutian-core'],
+  [31, 'xutian-hall'],
+  [29, 'xutian-mist'],
+  [27, 'outer-sea'],
   [22, 'jingu-plain'],
   [18, 'spirit-mine'],
   [14, 'yanling-fort'],
@@ -20,8 +24,8 @@ const FIELDS: [number, string][] = [
   [1, 'starter-field'],
 ];
 const POTIONS_PER_TRIP = 10;
-/** 14 级起改买养元丹，回春丹到燕翎堡就不够用了。 */
-const potionFor = (level: number) => (level >= 14 ? 'mid-potion' : 'small-potion');
+/** 14 级起改买养元丹，27 级起改买大还丹，低一档的丹药到下一章就不够用了。 */
+const potionFor = (level: number) => (level >= 27 ? 'big-potion' : level >= 14 ? 'mid-potion' : 'small-potion');
 
 const config = await loadConfigFromDisk();
 
@@ -48,9 +52,17 @@ function primaryBonus(world: World, itemId: string): number {
   return world.config.items[itemId]?.bonus?.primary ?? 0;
 }
 
-/** 回城补给：买药，把背包里更好的武器换上。 */
+/** 回城补给：买够等级的功法书，买药，把背包里更好的武器换上。 */
 function resupply(world: World): void {
   const { player, inventory } = world;
+  for (const item of Object.values(config.items)) {
+    const skill = config.skills[item.skill ?? ''];
+    if (item.kind !== 'book' || !skill || skill.classId !== player.def.id || skill.level > player.level) continue;
+    if (player.skills.includes(skill.id) || player.gold < (item.price ?? 0)) continue;
+    player.gold -= item.price ?? 0;
+    inventory.addToBag(item.id, 1);
+    inventory.useItem(item.id);
+  }
   const potionId = potionFor(player.level);
   const price = config.items[potionId]?.price ?? 0;
   while ((player.bag[potionId] ?? 0) < POTIONS_PER_TRIP && player.gold >= price) {
@@ -151,8 +163,8 @@ const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0)
 const round = (value: number) => Math.round(value).toLocaleString('en-US');
 
 console.log(`模拟：挂机到 ${TARGET_LEVEL} 级，最多 ${MAX_HOURS} 小时，每职业 ${SEEDS.length} 个种子。\n`);
-console.log('| 职业 | 到 5 级 | 到 10 级 | 到 13 级 | 到 18 级 | 到 22 级 | 到 26 级 | 死亡 | 回城 | 法器 | 经验/时 | 灵石/时 |');
-console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+console.log('| 职业 | 到 10 级 | 到 13 级 | 到 18 级 | 到 22 级 | 到 26 级 | 到 30 级 | 到 34 级 | 死亡 | 回城 | 法器 | 经验/时 | 灵石/时 |');
+console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
 const rows: Result[][] = [];
 for (const classId of Object.keys(config.classes)) {
   const runs = SEEDS.map((seed) => simulate(classId, seed));
@@ -162,7 +174,7 @@ for (const classId of Object.keys(config.classes)) {
     return times.length === runs.length ? `${(mean(times) / 3600).toFixed(1)} 时` : '未到';
   };
   console.log(
-    `| ${config.classes[classId]!.name} | ${at(5)} | ${at(10)} | ${at(13)} | ${at(18)} | ${at(22)} | ${at(26)} | ` +
+    `| ${config.classes[classId]!.name} | ${at(10)} | ${at(13)} | ${at(18)} | ${at(22)} | ${at(26)} | ${at(30)} | ${at(34)} | ` +
       `${round(mean(runs.map((run) => run.deaths)))} | ${round(mean(runs.map((run) => run.recalls)))} | ` +
       `${round(mean(runs.map((run) => run.equipment)))} | ${round(mean(runs.map((run) => run.expPerHour)))} | ` +
       `${round(mean(runs.map((run) => run.goldPerHour)))} |`,

@@ -58,7 +58,9 @@ export type SkillEffect =
   | { type: 'shield'; reduction: number; duration: number }
   | { type: 'defense'; amount: number; duration: number }
   | { type: 'empower'; multiplier: number; duration: number }
-  | { type: 'summon'; monster: string; hpPerLevel: number; duration: number };
+  | { type: 'summon'; monster: string; hpPerLevel: number; duration: number }
+  /** 在目标处留下一片地面，持续时间内每隔 interval 秒伤害范围内的怪 */
+  | { type: 'field'; stat: DamageStat; multiplier: number; size: number; duration: number; interval: number };
 
 export interface SkillDef {
   id: string;
@@ -157,7 +159,9 @@ export type SpecialDef =
 export interface ItemDef {
   id: string;
   name: string;
-  kind: 'gold' | 'potion' | 'material' | 'equip' | 'scroll';
+  kind: 'gold' | 'potion' | 'material' | 'equip' | 'scroll' | 'book';
+  /** 功法书学会的功法 */
+  skill?: string;
   scroll?: 'recall' | 'random';
   special?: SpecialDef;
   heal?: number;
@@ -353,8 +357,8 @@ export interface GameConfig {
   dialogues: Record<string, string[]>;
 }
 
-/** 快捷栏 8 格，后两格固定放丹药 */
-export const SKILL_SLOTS = 6;
+/** 快捷栏 9 格，后两格固定放丹药 */
+export const SKILL_SLOTS = 7;
 
 export const CONFIG_FILES = [
   'game',
@@ -436,6 +440,11 @@ export function validateConfig(config: GameConfig): string[] {
   }
   for (const item of Object.values(config.items)) {
     if (item.kind === 'equip' && !item.slot) errors.push(`法器 ${item.id} 缺少栏位`);
+    if (item.kind === 'book' && !config.skills[item.skill ?? '']) errors.push(`功法书 ${item.id} 的功法不存在`);
+  }
+  for (const skill of Object.values(config.skills)) {
+    const hasBook = Object.values(config.items).some((item) => item.kind === 'book' && item.skill === skill.id);
+    if (skill.level > 1 && !hasBook) errors.push(`功法 ${skill.id} 没有功法书`);
   }
   for (const classDef of Object.values(config.classes)) {
     const count = Object.values(config.skills).filter((skill) => skill.classId === classDef.id).length;

@@ -27,6 +27,18 @@ export interface StatusEffect {
   source: Unit;
 }
 
+/** 持续伤害的地面，比如火墙、毒瘴。 */
+export interface Field {
+  id: number;
+  skill: SkillDef;
+  caster: Unit;
+  cells: Cell[];
+  left: number;
+  nextTick: number;
+  /** 每跳伤害倍率，已经算上功法修炼 */
+  multiplier: number;
+}
+
 interface PendingAction {
   target: Unit | null;
   skill: SkillDef | null;

@@ -20,6 +20,16 @@ const passChapterOne = (world: World) => {
 };
 const town = () => passChapterOne(new World(config, 'huangfeng-valley', 'body', 1));
 
+/** 研读本职业当前等级能学的全部功法书。 */
+function readBooks(world: World): void {
+  for (const item of Object.values(config.items)) {
+    const skill = config.skills[item.skill ?? ''];
+    if (item.kind !== 'book' || skill?.classId !== world.player.def.id || skill.level > world.player.level) continue;
+    world.player.bag[item.id] = 1;
+    world.inventory.useItem(item.id);
+  }
+}
+
 function run(world: World, seconds: number, until?: () => boolean): void {
   for (let elapsed = 0; elapsed < seconds; elapsed += TICK_SECONDS) {
     world.tick();
@@ -947,6 +957,7 @@ describe('40 级内容', () => {
     while (player.level < level) {
       (world as unknown as { gainExp(amount: number): void }).gainExp(world.expToNext!);
     }
+    readBooks(world);
   };
 
   it('三职业到 40 级技能都能放进快捷栏，丹药格不被占用', () => {
@@ -1014,6 +1025,72 @@ describe('40 级内容', () => {
     world.player.auto.recallBelow = 0;
     run(world, 120);
     expect(Object.keys(world.player.skillCooldowns)).toContain('spell-bixie');
+  });
+});
+
+describe('功法书', () => {
+  it('升级不再自动领悟，研读本职业的功法书才学会，书用掉', () => {
+    const world = new World(config, 'huangfeng-valley', 'spell', 1);
+    const { player } = world;
+    expect(player.skills).toEqual(['spell-fire']);
+    player.bag['book-spell-thunder'] = 1;
+    world.inventory.useItem('book-spell-thunder');
+    expect(player.skills).not.toContain('spell-thunder');
+    while (player.level < 3) (world as unknown as { gainExp(amount: number): void }).gainExp(world.expToNext!);
+    expect(player.skills).not.toContain('spell-thunder');
+    world.inventory.useItem('book-spell-thunder');
+    expect(player.skills).toContain('spell-thunder');
+    expect(player.hotbar).toContainEqual({ kind: 'skill', id: 'spell-thunder' });
+    expect(player.bag['book-spell-thunder'] ?? 0).toBe(0);
+    player.bag['book-body-pierce'] = 1;
+    world.inventory.useItem('book-body-pierce');
+    expect(player.skills).not.toContain('body-pierce');
+    expect(player.bag['book-body-pierce']).toBe(1);
+  });
+
+  it('每门功法都能在商店买到书，低级书在前期主城就有', () => {
+    const sold = new Map<string, string[]>();
+    for (const npc of Object.values(config.npcs)) {
+      for (const itemId of npc.shop ?? []) sold.set(itemId, [...(sold.get(itemId) ?? []), npc.map]);
+    }
+    for (const item of Object.values(config.items).filter((candidate) => candidate.kind === 'book')) {
+      expect(sold.get(item.id), item.id).toBeDefined();
+      if (config.skills[item.skill!]!.level <= 8) expect(sold.get(item.id), item.id).toContain('qixuan-gate');
+    }
+  });
+});
+
+describe('地面持续功法', () => {
+  it('火墙留在目标脚下，按间隔多次伤害站在上面的怪，到时消失', () => {
+    const world = new World(config, 'taina-mountain', 'spell', 1);
+    world.player.skills.push('spell-firewall');
+    world.player.mp = world.player.stats.maxMp;
+    const ape = world.monsters.find((monster) => monster.def.id === 'mountain-ape')!;
+    world.player.cell = { x: ape.cell.x - 3, y: ape.cell.y };
+    world.player.pos = { ...world.player.cell };
+    ape.stats = { ...ape.stats, maxHp: 100000 };
+    ape.hp = 100000;
+    ape.moveSpeed = 0;
+    world.castSkill('spell-firewall', ape);
+    run(world, 1);
+    expect(world.fields).toHaveLength(1);
+    const hits = () => world.drainEvents().filter((event) => event.type === 'damage' && event.unit === ape).length;
+    world.player.order = null;
+    world.player.auto.enabled = false;
+    hits();
+    const fieldHits: number[] = [];
+    for (let second = 0; second < 7; second++) {
+      run(world, 1);
+      fieldHits.push(hits());
+    }
+    expect(fieldHits.filter((count) => count > 0).length).toBeGreaterThanOrEqual(3);
+    expect(world.fields).toHaveLength(0);
+  });
+
+  it('法修和御灵修士 20 级各有一门地面功法，快捷栏放得下', () => {
+    const fields = Object.values(config.skills).filter((skill) => skill.effect.type === 'field');
+    expect(fields.map((skill) => skill.classId).sort()).toEqual(['spell', 'spirit']);
+    for (const skill of fields) expect(skill.level).toBe(20);
   });
 });
 
@@ -1432,7 +1509,7 @@ describe('章节主线', () => {
       ['ch4-toads'],
       ['ch4-night'],
       ['ch4-commander'],
-      ['ch4-abandon'],
+      ['ch4-abandon', 'tianxing-city'],
     ];
     for (const [questId, mapId] of steps) {
       reach(config.quests[questId]!.level);
@@ -1441,7 +1518,70 @@ describe('章节主线', () => {
       if (mapId) expect(world.mapId, questId).toBe(mapId);
     }
     expect(world.player.bag['great-transfer-token']).toBe(1);
-    expect(world.npcs.map((npc) => npc.id)).toContain('li-huayuan-front');
+    expect(world.npcs.map((npc) => npc.id)).toContain('star-steward');
+  });
+
+  it('第 5 章：外星海猎妖，随乌丑进虚天殿，夺得虚天鼎后拿到定灵丹', () => {
+    const world = new World(config, 'tianxing-city', 'body', 1);
+    world.player.quests.completed.push('ch4-abandon');
+    world.player.realmPassed.push('qi', 'foundation');
+    const reach = (level: number) => {
+      while (world.player.level < level) {
+        world.player.exp = world.expToNext!;
+        (world as unknown as { gainExp(amount: number): void }).gainExp(0);
+      }
+    };
+    const portal = (name: string) => world.portals.find((candidate) => candidate.name === name)!;
+    expect(portal('外星海').requires).toBe('ch5-arrive');
+    expect(portal('虚天殿').requires).toBe('ch5-map');
+    const steps: [string, string?][] = [
+      ['ch5-arrive'],
+      ['ch5-squid'],
+      ['ch5-fish'],
+      ['ch5-ray'],
+      ['ch5-seaking'],
+      ['ch5-map', 'xutian-mist'],
+      ['ch5-mist'],
+      ['ch5-skull'],
+      ['ch5-meet'],
+      ['ch5-puppets'],
+      ['ch5-seekers'],
+      ['ch5-jiyin'],
+      ['ch5-demons'],
+      ['ch5-shadows'],
+      ['ch5-cauldron', 'tianxing-city'],
+      ['ch5-return'],
+    ];
+    for (const [questId, mapId] of steps) {
+      reach(config.quests[questId]!.level);
+      if (questId === 'ch5-cauldron') world.player.bag['xutian-cauldron'] = 1;
+      finish(world, questId);
+      if (mapId) expect(world.mapId, questId).toBe(mapId);
+      if (questId === 'ch5-arrive') expect(world.player.bag['core-pill']).toBe(1);
+    }
+    expect(world.player.bag['xutian-cauldron']).toBe(1);
+    expect(world.player.bag['nascent-pill']).toBe(1);
+  });
+
+  it('虚天殿三层按任务解锁，第 5 章经验约四成来自任务，Boss 离 NPC 足够远', () => {
+    expect(config.maps['xutian-mist']!.portals!.find((portal) => portal.toMap === 'xutian-hall')!.requires).toBe('ch5-skull');
+    expect(config.maps['xutian-hall']!.portals!.find((portal) => portal.toMap === 'xutian-core')!.requires).toBe('ch5-jiyin');
+    const levels = config.levels.expToNext.slice(25, 33).reduce((sum, exp) => sum + exp, 0);
+    const quests = Object.values(config.quests)
+      .filter((quest) => quest.id.startsWith('ch5'))
+      .reduce((sum, quest) => sum + quest.rewards.exp, 0);
+    expect(quests / levels).toBeGreaterThan(0.3);
+    expect(quests / levels).toBeLessThan(0.5);
+    for (const [mapId, bossId] of [
+      ['outer-sea', 'sea-king'],
+      ['xutian-hall', 'jiyin'],
+      ['xutian-core', 'xuangu'],
+    ] as const) {
+      const boss = config.maps[mapId]!.spawns.find((spawn) => spawn.monster === bossId)!;
+      for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === mapId)) {
+        expect(Math.hypot(npc.x - boss.x, npc.y - boss.y) - 2, npc.id).toBeGreaterThan(config.monsters[bossId]!.aggroRange);
+      }
+    }
   });
 
   it('第 4 章的经验大约四成来自任务，Boss 都离 NPC 足够远', () => {

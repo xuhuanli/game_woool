@@ -74,6 +74,7 @@ interface ItemView {
 export class GameScene extends Phaser.Scene {
   private readonly unitViews = new Map<Unit, UnitView>();
   private readonly itemViews = new Map<GroundItem, ItemView>();
+  private readonly fieldViews = new Map<number, Phaser.GameObjects.Graphics>();
   private npcViews: NpcView[] = [];
   private mapObjects: { destroy(): void }[] = [];
   private accumulator = 0;
@@ -130,7 +131,7 @@ export class GameScene extends Phaser.Scene {
     this.input.on('pointerup', () => (this.holding = false));
 
     const keyboard = this.input.keyboard!;
-    const digits = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT'];
+    const digits = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'];
     digits.forEach((digit, slot) => {
       keyboard.addCapture(`F${slot + 1}`);
       keyboard.on(`keydown-F${slot + 1}`, () => this.useSlot(slot));
@@ -167,6 +168,7 @@ export class GameScene extends Phaser.Scene {
 
     const alpha = this.accumulator / stepMs;
     for (const view of this.unitViews.values()) this.syncUnit(view, alpha);
+    this.syncFields();
 
     this.updatePointer(delta);
     this.fadeDecorAroundPlayer(delta);
@@ -190,6 +192,7 @@ export class GameScene extends Phaser.Scene {
     for (const item of [...this.itemViews.keys()]) this.removeItemView(item);
 
     this.drawGround();
+    this.audio.playMusic(this.world.map.safe ? 'town' : 'field');
     for (const portal of this.world.portals) this.addPortal(portal.x, portal.y, portal.name);
     for (const npc of this.world.npcs) this.addNpc(npc);
     for (const monster of this.world.monsters) {
@@ -559,7 +562,7 @@ export class GameScene extends Phaser.Scene {
         this.showSkill(event.unit, event.skill, event.cells);
         break;
       case 'skillLearned':
-        this.hud.log(`领悟功法：${event.skill.name}`, 'gain');
+        this.hud.log(`学会功法：${event.skill.name}`, 'gain');
         break;
       case 'summoned':
         this.addUnitView(event.unit, event.unit.def.id);
@@ -727,6 +730,30 @@ export class GameScene extends Phaser.Scene {
       duration: unit.windupLeft * 1000,
       onComplete: () => orb.destroy(),
     });
+  }
+
+  /** 火墙、毒瘴等地面：放下时画出，持续期间闪动，结束时淡出。 */
+  private syncFields(): void {
+    const live = new Set(this.world.fields.map((field) => field.id));
+    for (const [id, view] of this.fieldViews) {
+      if (live.has(id)) continue;
+      this.fieldViews.delete(id);
+      this.tweens.add({ targets: view, alpha: 0, duration: 300, onComplete: () => view.destroy() });
+    }
+    const pulse = 0.35 + Math.sin(this.time.now / 160) * 0.1;
+    for (const field of this.world.fields) {
+      let view = this.fieldViews.get(field.id);
+      if (!view) {
+        const tint = Phaser.Display.Color.HexStringToColor(field.skill.color).color;
+        view = this.add.graphics().setDepth(2);
+        for (const cell of field.cells) {
+          const { x, y } = toScreen(cell);
+          view.fillStyle(tint, 1).fillPoints(diamond(x, y), true);
+        }
+        this.fieldViews.set(field.id, view);
+      }
+      view.setAlpha(pulse);
+    }
   }
 
   private showSkill(unit: Unit, skill: SkillDef, cells: Cell[]): void {

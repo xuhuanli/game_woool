@@ -241,8 +241,15 @@ export class Panels {
       if (item.mana) box.append(el('div', '', `回复 ${item.mana} 点灵力`));
       if (item.kind === 'material') box.append(el('div', '', '用于祭炼武器'));
       if (item.scroll) box.append(el('div', '', item.scroll === 'recall' ? '回到主城' : '在当前地图随机传送'));
+      const skill = this.config.skills[item.skill ?? ''];
+      if (item.kind === 'book' && skill) {
+        const owner = this.config.classes[skill.classId]?.name ?? '';
+        box.append(el('div', '', `${owner}功法，${skill.level} 级可研读`));
+      }
       if (item.kind === 'potion' || item.kind === 'scroll') {
         box.append(this.action('使用', () => this.world.inventory.useItem(selection.id)));
+      } else if (item.kind === 'book') {
+        box.append(this.action('研读', () => this.world.inventory.useItem(selection.id)));
       }
       return box;
     }

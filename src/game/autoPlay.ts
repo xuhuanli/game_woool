@@ -109,6 +109,11 @@ export class AutoPlay {
         return distance <= (effect.shape === 'around' ? (effect.size ?? 1) : skill.range);
       case 'dot':
         return !target.effects.some((active) => active.kind === 'dot' && active.source === player);
+      case 'field':
+        return (
+          distance <= skill.range &&
+          !this.world.fields.some((field) => field.caster === player && field.cells.some((cell) => sameCell(cell, target.cell)))
+        );
       case 'heal':
         return health < HEAL_SKILL_BELOW;
       case 'shield':

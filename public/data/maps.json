@@ -127,5 +127,76 @@
       "color": "#c8a06a",
       "alpha": 0.08
     }
+  },
+  "tianxing-city": {
+    "id": "tianxing-city",
+    "name": "天星城",
+    "safe": true,
+    "tiled": "tianxing-city.tmj",
+    "respawn": {
+      "map": "tianxing-city",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#8ab4ff",
+      "alpha": 0.06
+    }
+  },
+  "outer-sea": {
+    "id": "outer-sea",
+    "name": "外星海",
+    "tiled": "outer-sea.tmj",
+    "respawn": {
+      "map": "tianxing-city",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#5a9ac8",
+      "alpha": 0.08
+    }
+  },
+  "xutian-mist": {
+    "id": "xutian-mist",
+    "name": "虚天殿·鬼雾",
+    "tiled": "xutian-mist.tmj",
+    "respawn": {
+      "map": "tianxing-city",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#6a7a8a",
+      "alpha": 0.16
+    }
+  },
+  "xutian-hall": {
+    "id": "xutian-hall",
+    "name": "虚天殿·冰火道",
+    "tiled": "xutian-hall.tmj",
+    "respawn": {
+      "map": "tianxing-city",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#7a9ab4",
+      "alpha": 0.12
+    }
+  },
+  "xutian-core": {
+    "id": "xutian-core",
+    "name": "虚天殿·鼎殿",
+    "tiled": "xutian-core.tmj",
+    "respawn": {
+      "map": "tianxing-city",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#8a3a5a",
+      "alpha": 0.14
+    }
   }
 }

@@ -27,6 +27,8 @@ function describeEffect(effect: SkillEffect, range: number): string {
       return `伤害 +${Math.round(effect.multiplier * 100)}%，持续 ${effect.duration} 秒`;
     case 'summon':
       return `召唤协助作战，持续 ${effect.duration} 秒`;
+    case 'field':
+      return `目标周围 ${effect.size} 格留下地面，每 ${effect.interval} 秒 ${Math.round(effect.multiplier * 100)}%，持续 ${effect.duration} 秒${reach}`;
   }
 }
 
@@ -71,7 +73,7 @@ export class SkillPanel {
     const level = this.world.player.skillLevels[skill.id] ?? 1;
     const power = Math.round((this.world.inventory.skillPower(skill.id) - 1) * 100);
     const bonus = power > 0 ? `，威力 +${power}%` : '';
-    state.textContent = learned ? `${level} 层 · 灵力 ${skill.mpCost}${bonus}` : `${skill.level} 级领悟`;
+    state.textContent = learned ? `${level} 层 · 灵力 ${skill.mpCost}${bonus}` : `${skill.level} 级可研读《${skill.name}》`;
     const detail = document.createElement('small');
     detail.textContent = `${describeEffect(skill.effect, skill.range)}，冷却 ${skill.cooldown} 秒`;
     row.append(name, state, detail);

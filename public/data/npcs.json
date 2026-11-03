@@ -33,7 +33,15 @@
       "recall-scroll",
       "random-scroll",
       "rusty-sword",
-      "cloth-robe"
+      "cloth-robe",
+      "book-spell-thunder",
+      "book-spirit-heal",
+      "book-body-pierce",
+      "book-spirit-ward",
+      "book-spell-shield",
+      "book-spirit-summon",
+      "book-body-whirl",
+      "book-spell-gale"
     ]
   },
   "guide-senior": {
@@ -62,7 +70,21 @@
       "recall-scroll",
       "random-scroll",
       "rusty-sword",
-      "cloth-robe"
+      "cloth-robe",
+      "book-spell-thunder",
+      "book-spirit-heal",
+      "book-body-pierce",
+      "book-spirit-ward",
+      "book-spell-shield",
+      "book-spirit-summon",
+      "book-body-whirl",
+      "book-spell-gale",
+      "book-body-mingwang",
+      "book-spell-qingyuan",
+      "book-spirit-puppet",
+      "book-spell-firewall",
+      "book-spirit-miasma",
+      "book-body-vajra"
     ]
   },
   "vault-keeper": {
@@ -171,7 +193,15 @@
       "refine-stone",
       "recall-scroll",
       "random-scroll",
-      "steel-sword"
+      "steel-sword",
+      "book-spell-thunder",
+      "book-spirit-heal",
+      "book-body-pierce",
+      "book-spirit-ward",
+      "book-spell-shield",
+      "book-spirit-summon",
+      "book-body-whirl",
+      "book-spell-gale"
     ]
   },
   "sect-judge": {
@@ -265,5 +295,130 @@
     "y": 15,
     "color": "#3f4a6a",
     "greeting": "li-front-greeting"
+  },
+  "star-steward": {
+    "id": "star-steward",
+    "name": "星宫执事",
+    "map": "tianxing-city",
+    "x": 20,
+    "y": 16,
+    "color": "#8ab4ff",
+    "greeting": "star-greeting"
+  },
+  "star-merchant": {
+    "id": "star-merchant",
+    "name": "天星城坊主",
+    "map": "tianxing-city",
+    "x": 27,
+    "y": 20,
+    "color": "#c9a24a",
+    "greeting": "star-merchant-greeting",
+    "storage": true,
+    "shop": [
+      "mid-potion",
+      "mid-mana",
+      "big-potion",
+      "big-mana",
+      "refine-stone",
+      "recall-scroll",
+      "random-scroll",
+      "book-spell-firewall",
+      "book-spirit-miasma",
+      "book-body-vajra",
+      "book-spell-bixie",
+      "book-spirit-corrosion",
+      "book-body-brahma"
+    ]
+  },
+  "star-gate": {
+    "id": "star-gate",
+    "name": "传送阵执事",
+    "map": "tianxing-city",
+    "x": 13,
+    "y": 20,
+    "color": "#9fd0ff",
+    "greeting": "star-gate-greeting",
+    "travel": [
+      {
+        "name": "外星海",
+        "map": "outer-sea",
+        "x": 12,
+        "y": 12,
+        "cost": 300,
+        "requires": "ch5-arrive"
+      },
+      {
+        "name": "虚天殿",
+        "map": "xutian-mist",
+        "x": 12,
+        "y": 12,
+        "cost": 500,
+        "requires": "ch5-map"
+      },
+      {
+        "name": "冰火道",
+        "map": "xutian-hall",
+        "x": 12,
+        "y": 12,
+        "cost": 600,
+        "requires": "ch5-skull"
+      },
+      {
+        "name": "鼎殿",
+        "map": "xutian-core",
+        "x": 12,
+        "y": 12,
+        "cost": 700,
+        "requires": "ch5-jiyin"
+      }
+    ]
+  },
+  "wu-chou": {
+    "id": "wu-chou",
+    "name": "乌丑",
+    "map": "tianxing-city",
+    "x": 24,
+    "y": 26,
+    "color": "#4a3a2a",
+    "greeting": "wuchou-greeting",
+    "requires": "ch5-seaking",
+    "hiddenAfter": "ch5-map"
+  },
+  "sea-hunter": {
+    "id": "sea-hunter",
+    "name": "猎妖队首领",
+    "map": "outer-sea",
+    "x": 15,
+    "y": 12,
+    "color": "#5a9ac8",
+    "greeting": "hunter-greeting"
+  },
+  "wu-chou-mist": {
+    "id": "wu-chou-mist",
+    "name": "乌丑",
+    "map": "xutian-mist",
+    "x": 15,
+    "y": 12,
+    "color": "#4a3a2a",
+    "greeting": "wuchou-mist-greeting"
+  },
+  "xuangu-hall": {
+    "id": "xuangu-hall",
+    "name": "玄骨上人",
+    "map": "xutian-hall",
+    "x": 15,
+    "y": 12,
+    "color": "#d8d0c0",
+    "greeting": "xuangu-greeting"
+  },
+  "xuangu-core": {
+    "id": "xuangu-core",
+    "name": "玄骨上人",
+    "map": "xutian-core",
+    "x": 15,
+    "y": 12,
+    "color": "#d8d0c0",
+    "greeting": "xuangu-core-greeting",
+    "hiddenAfter": "ch5-cauldron"
   }
 }

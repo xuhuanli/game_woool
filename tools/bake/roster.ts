@@ -4,6 +4,7 @@ const ADVENTURERS = '/kaykit/adventurers/addons/kaykit_character_pack_adventures
 const SKELETONS = '/kaykit/skeletons/addons/kaykit_character_pack_skeletons';
 const ENEMIES = '/quaternius/easy-enemies/Easy Animated Enemy Pack - Jan 2019/FBX';
 const MONSTERS = '/quaternius/monsters/FBX';
+const ULTIMATE = '/quaternius/ultimate-monsters';
 
 export interface ClipSpec {
   name: string;
@@ -69,6 +70,18 @@ const beastClips = (idle: string, walk: string): ClipSpec[] => [
   clip('attack', '_Attack', 5, 14, false),
 ];
 
+/** Ultimate Monsters 的大体型（Big）和飞行（Flying）两类骨骼的动作名不同 */
+const bigClips = (attack = 'Punch'): ClipSpec[] => [
+  clip('idle', '|Idle', 3, 5),
+  clip('walk', '|Walk', 6, 12),
+  clip('attack', `|${attack}`, 5, 14, false),
+];
+const flyingClips = (attack = 'Punch'): ClipSpec[] => [
+  clip('idle', '|Flying_Idle', 3, 5),
+  clip('walk', '|Fast_Flying', 6, 12),
+  clip('attack', `|${attack}`, 5, 14, false),
+];
+
 const MAGE_HIDDEN = ['Spellbook', 'Spellbook_open', '1H_Wand', 'Mage_Hat'];
 
 /** 法师长袍的色块：长袍、披风、腰带、靴子、袖口 */
@@ -96,20 +109,14 @@ const npc = (key: string, main: string, cape: string): Entry => ({
   recolor: robe(main, cape),
 });
 
-/** 山魈用蛮族模型，皮肤全部换成毛色。 */
-const ape = (key: string, fur: string, attack: string): Entry => ({
+/** 山魈用 Ultimate Monsters 的猴形妖兽，毛色和脸色按种类改。 */
+const ape = (key: string, fur: string, face: string, attack: string): Entry => ({
   key,
-  model: `${ADVENTURERS}/Characters/gltf/Barbarian.glb`,
+  model: `${ULTIMATE}/Big/Monkroose.glb`,
   frame: 128,
-  clips: humanoidEnemyClips(attack),
+  clips: bigClips(attack),
   size: 1.6,
-  humanoid: true,
-  hide: ['Barbarian_Hat', 'Barbarian_Round_Shield', '1H_Axe', '1H_Axe_Offhand', '2H_Axe', 'Mug'],
-  recolor: [
-    { col: 0, row: 0, color: fur },
-    { col: 0, row: 1, span: 2, color: '#6e2a24' },
-    { col: 2, row: 2, color: '#6e2a24' },
-  ],
+  materials: { Monkroose_Main: fur, Monkroose_Ears: '#2a1a12', Monkroose_Secondary: face },
 });
 
 export const ROSTER: Entry[] = [
@@ -174,6 +181,14 @@ export const ROSTER: Entry[] = [
   npc('front-commander', '#c8a24a', '#7a2a22'),
   npc('dong-xuaner-fort', '#f0b8c8', '#c86a8a'),
   npc('li-huayuan-front', '#3f4a6a', '#a8342a'),
+  npc('star-steward', '#8ab4ff', '#2a3a6a'),
+  npc('star-merchant', '#c9a24a', '#5a3f2a'),
+  npc('star-gate', '#9fd0ff', '#3f6fb5'),
+  npc('sea-hunter', '#5a9ac8', '#2a4a5a'),
+  npc('wu-chou', '#4a3a2a', '#1a1a1a'),
+  npc('wu-chou-mist', '#4a3a2a', '#1a1a1a'),
+  npc('xuangu-hall', '#d8d0c0', '#5a4a6a'),
+  npc('xuangu-core', '#d8d0c0', '#5a4a6a'),
 
   {
     key: 'ash-rat',
@@ -378,8 +393,8 @@ export const ROSTER: Entry[] = [
     size: 1.5,
     materials: { Main: '#2f8f8a', Belly: '#d9c98a', Wings: '#1f5f5f', Claws: '#e6dfc8' },
   },
-  ape('mountain-ape', '#4a3626', 'Unarmed_Melee_Attack_Punch_A'),
-  ape('ape-shaman', '#3f2d4a', 'Spellcast_Shoot'),
+  ape('mountain-ape', '#5a4030', '#b8402e', 'Punch'),
+  ape('ape-shaman', '#3f2d4a', '#3a6ab8', 'Weapon'),
   {
     key: 'iron-puppet',
     model: `${ADVENTURERS}/Characters/gltf/Knight.glb`,
@@ -423,5 +438,109 @@ export const ROSTER: Entry[] = [
     humanoid: true,
     hide: ['Spellbook', 'Spellbook_open', '1H_Wand'],
     recolor: robe('#e0b63c', '#8a5a1a', '#fff0b0', '#fff0b0'),
+  },
+  {
+    key: 'sea-squid',
+    model: `${ULTIMATE}/Flying/Squidle.glb`,
+    frame: 128,
+    clips: flyingClips(),
+    size: 2,
+    materials: { Squidle_Main: '#3a1a3a', Squidle_Secondary: '#1a3a5a' },
+  },
+  {
+    key: 'fish-demon',
+    model: `${ULTIMATE}/Big/Fish.glb`,
+    frame: 128,
+    clips: bigClips(),
+    size: 1.7,
+  },
+  {
+    key: 'flying-ray',
+    model: `${ULTIMATE}/Flying/Glub.glb`,
+    frame: 128,
+    clips: flyingClips('Headbutt'),
+    size: 1.9,
+    materials: { Glub_Main: '#1a2a4a', Wings: '#4a6a9a' },
+  },
+  {
+    key: 'sea-king',
+    model: `${ULTIMATE}/Flying/Glub_Evolved.glb`,
+    frame: 192,
+    clips: flyingClips('Headbutt'),
+    size: 2.9,
+    materials: { Glub_Main: '#2a5a8a', Wings: '#d9a441' },
+  },
+  {
+    key: 'mist-ghost',
+    model: `${ULTIMATE}/Flying/Ghost.glb`,
+    frame: 128,
+    clips: flyingClips(),
+    size: 1.4,
+    materials: { Ghost_Main: '#5a6a7a' },
+  },
+  {
+    key: 'skull-ghost',
+    model: `${ULTIMATE}/Flying/Ghost_Skull.glb`,
+    frame: 128,
+    clips: flyingClips(),
+    size: 1.5,
+  },
+  {
+    key: 'palace-puppet',
+    model: `${ULTIMATE}/Flying/Goleling_Evolved.glb`,
+    frame: 128,
+    clips: flyingClips(),
+    size: 2.2,
+    materials: { Goleling_Main: '#6a6a70', Goleling_Secondary: '#3a3a40' },
+  },
+  {
+    key: 'treasure-seeker',
+    model: `${ADVENTURERS}/Characters/gltf/Rogue_Hooded.glb`,
+    frame: 128,
+    clips: humanoidEnemyClips('Spellcast_Shoot'),
+    size: 1.7,
+    humanoid: true,
+    hide: ['Knife_Offhand', '1H_Crossbow', '2H_Crossbow', 'Knife', 'Throwable'],
+    recolor: [
+      { col: 0, row: 1, span: 2, color: '#2a3a5a' },
+      { col: 1, row: 2, color: '#c8a06a' },
+    ],
+  },
+  {
+    key: 'jiyin',
+    model: `${ADVENTURERS}/Characters/gltf/Mage.glb`,
+    frame: 192,
+    clips: humanoidEnemyClips('Spellcast_Shoot'),
+    size: 2,
+    humanoid: true,
+    headScale: 0.84,
+    topknot: true,
+    hide: MAGE_HIDDEN,
+    recolor: robe('#1a2a24', '#3a6a5a', '#8ab4a0', '#6a8a7a'),
+  },
+  {
+    key: 'heavenly-demon',
+    model: `${ULTIMATE}/Big/Demon.glb`,
+    frame: 128,
+    clips: bigClips('Weapon'),
+    size: 1.8,
+  },
+  {
+    key: 'shadow-demon',
+    model: `${ULTIMATE}/Flying/Demon.glb`,
+    frame: 128,
+    clips: flyingClips(),
+    size: 1.5,
+    materials: { Demon_Main: '#2a0a2a' },
+  },
+  {
+    key: 'xuangu',
+    model: `${SKELETONS}/Characters/gltf/Skeleton_Mage.glb`,
+    frame: 192,
+    clips: humanoidEnemyClips('Spellcast_Shoot'),
+    size: 2.1,
+    humanoid: true,
+    topknot: true,
+    hide: ['Skeleton_Mage_Hat'],
   },
 ];

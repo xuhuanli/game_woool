@@ -152,6 +152,9 @@ export class NpcPanel {
     for (const itemId of npc.shop ?? []) {
       const item = config.items[itemId];
       if (!item) continue;
+      // 功法书只卖本职业、还没学会的
+      const skill = config.skills[item.skill ?? ''];
+      if (skill && (skill.classId !== player.def.id || player.skills.includes(skill.id))) continue;
       body.append(this.option(`${item.name}（${item.price} 灵石）`, () => world.buy(npc, itemId)));
     }
 

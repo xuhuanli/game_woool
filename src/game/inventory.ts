@@ -71,6 +71,10 @@ export class Inventory {
       this.useScroll(item);
       return;
     }
+    if (item.kind === 'book') {
+      this.readBook(item);
+      return;
+    }
     const healed = Math.min(item.heal ?? 0, player.stats.maxHp - player.hp);
     const refilled = Math.min(item.mana ?? 0, player.stats.maxMp - player.mp);
     if (healed <= 0 && refilled <= 0) return;
@@ -79,6 +83,34 @@ export class Inventory {
     this.removeFromBag(itemId);
     if (healed > 0) this.emit({ type: 'heal', amount: healed });
     if (refilled > 0) this.emit({ type: 'mana', amount: refilled });
+  }
+
+  /** 研读功法书：本职业、等级够、还没学会才能用，学会后书就没了。 */
+  private readBook(item: ItemDef): void {
+    const player = this.player;
+    const skill = this.config.skills[item.skill ?? ''];
+    if (!skill) return;
+    let refusal = '';
+    if (skill.classId !== player.def.id) refusal = `${item.name}不是本职业的功法`;
+    else if (player.skills.includes(skill.id)) refusal = `已经学会${skill.name}`;
+    else if (skill.level > player.level) refusal = `${skill.level} 级才能研读${item.name}`;
+    if (refusal) {
+      this.emit({ type: 'message', text: refusal });
+      return;
+    }
+    this.removeFromBag(item.id);
+    this.learnSkill(skill.id);
+  }
+
+  /** 学会功法，放进快捷栏第一个空格。 */
+  learnSkill(skillId: string): void {
+    const player = this.player;
+    const skill = this.config.skills[skillId];
+    if (!skill || player.skills.includes(skillId)) return;
+    player.skills.push(skillId);
+    const slot = player.hotbar.indexOf(null);
+    if (slot >= 0) player.hotbar[slot] = { kind: 'skill', id: skillId };
+    this.emit({ type: 'skillLearned', skill });
   }
 
   /** 把背包里的法器穿上，同栏位优先用空位，否则替换第一个。 */

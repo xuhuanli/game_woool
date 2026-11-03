@@ -1045,7 +1045,12 @@
     "rewards": {
       "exp": 18000,
       "gold": 2000,
-      "items": []
+      "items": [],
+      "teleport": {
+        "map": "tianxing-city",
+        "x": 20,
+        "y": 24
+      }
     },
     "offer": "ch4-abandon-offer",
     "finish": "ch4-abandon-finish",
@@ -1072,5 +1077,457 @@
     "offer": "ape-fur-offer",
     "finish": "ape-fur-finish",
     "prev": "join-sect"
+  },
+  "ch5-arrive": {
+    "id": "ch5-arrive",
+    "name": "初到天星城",
+    "giver": "star-steward",
+    "level": 26,
+    "main": true,
+    "summary": "去天星城坊主那里落脚，打听结丹的门路。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "star-merchant",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 14000,
+      "gold": 1000,
+      "items": [
+        {
+          "item": "core-pill",
+          "count": 1
+        },
+        {
+          "item": "big-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch5-arrive-offer",
+    "finish": "ch5-arrive-finish",
+    "prev": "ch4-abandon"
+  },
+  "ch5-squid": {
+    "id": "ch5-squid",
+    "name": "外海猎妖",
+    "giver": "star-steward",
+    "level": 27,
+    "main": true,
+    "summary": "去外星海找猎妖队，击败 12 只墨鱿妖。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "sea-squid",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 31500,
+      "gold": 2000,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch5-squid-offer",
+    "finish": "ch5-squid-finish",
+    "prev": "ch5-arrive"
+  },
+  "ch5-fish": {
+    "id": "ch5-fish",
+    "name": "礁上鱼妖",
+    "giver": "sea-hunter",
+    "level": 27,
+    "main": true,
+    "summary": "击败礁石上的 12 只鱼妖。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "fish-demon",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 33500,
+      "gold": 2200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "ch5-fish-offer",
+    "finish": "ch5-fish-finish",
+    "prev": "ch5-squid"
+  },
+  "ch5-ray": {
+    "id": "ch5-ray",
+    "name": "飞鳐成群",
+    "giver": "sea-hunter",
+    "level": 28,
+    "main": true,
+    "summary": "击败海面上的 12 只飞鳐妖。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "flying-ray",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 36500,
+      "gold": 2400,
+      "items": [
+        {
+          "item": "big-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch5-ray-offer",
+    "finish": "ch5-ray-finish",
+    "prev": "ch5-fish"
+  },
+  "ch5-seaking": {
+    "id": "ch5-seaking",
+    "name": "海妖王",
+    "giver": "sea-hunter",
+    "level": 29,
+    "main": true,
+    "summary": "击败盘踞外海深处的海妖王。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "sea-king",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 42000,
+      "gold": 4000,
+      "items": []
+    },
+    "offer": "ch5-seaking-offer",
+    "finish": "ch5-seaking-finish",
+    "prev": "ch5-ray"
+  },
+  "ch5-map": {
+    "id": "ch5-map",
+    "name": "虚天残图",
+    "giver": "star-steward",
+    "level": 29,
+    "main": true,
+    "summary": "有人在城里打听你，去见见那个叫乌丑的人。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "wu-chou",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 14000,
+      "gold": 1000,
+      "items": [
+        {
+          "item": "xutian-map",
+          "count": 1
+        }
+      ],
+      "teleport": {
+        "map": "xutian-mist",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch5-map-offer",
+    "finish": "ch5-map-finish",
+    "prev": "ch5-seaking"
+  },
+  "ch5-mist": {
+    "id": "ch5-mist",
+    "name": "鬼雾",
+    "giver": "wu-chou-mist",
+    "level": 30,
+    "main": true,
+    "summary": "击败鬼雾中的 12 只鬼雾阴魂。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "mist-ghost",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 38500,
+      "gold": 2600,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch5-mist-offer",
+    "finish": "ch5-mist-finish",
+    "prev": "ch5-map"
+  },
+  "ch5-skull": {
+    "id": "ch5-skull",
+    "name": "骷髅鬼",
+    "giver": "wu-chou-mist",
+    "level": 30,
+    "main": true,
+    "summary": "击败守在殿门前的 12 只骷髅鬼，打开冰火道。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "skull-ghost",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 40500,
+      "gold": 2800,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "ch5-skull-offer",
+    "finish": "ch5-skull-finish",
+    "prev": "ch5-mist"
+  },
+  "ch5-meet": {
+    "id": "ch5-meet",
+    "name": "殿中元神",
+    "giver": "wu-chou-mist",
+    "level": 31,
+    "main": true,
+    "summary": "穿过殿门进入冰火道，见那位传音给你的前辈。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "xuangu-hall",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 15500,
+      "gold": 1200,
+      "items": []
+    },
+    "offer": "ch5-meet-offer",
+    "finish": "ch5-meet-finish",
+    "prev": "ch5-skull"
+  },
+  "ch5-puppets": {
+    "id": "ch5-puppets",
+    "name": "守殿傀儡",
+    "giver": "xuangu-hall",
+    "level": 31,
+    "main": true,
+    "summary": "击败冰火道上的 12 具守殿傀儡。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "palace-puppet",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 42000,
+      "gold": 3000,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch5-puppets-offer",
+    "finish": "ch5-puppets-finish",
+    "prev": "ch5-meet"
+  },
+  "ch5-seekers": {
+    "id": "ch5-seekers",
+    "name": "夺宝之争",
+    "giver": "xuangu-hall",
+    "level": 32,
+    "main": true,
+    "summary": "击败 12 名争抢补天丹的夺宝修士。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "treasure-seeker",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 45000,
+      "gold": 3200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch5-seekers-offer",
+    "finish": "ch5-seekers-finish",
+    "prev": "ch5-puppets"
+  },
+  "ch5-jiyin": {
+    "id": "ch5-jiyin",
+    "name": "极阴祖师",
+    "giver": "xuangu-hall",
+    "level": 32,
+    "main": true,
+    "summary": "击败极阴祖师，解开他种在你身上的禁制。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "jiyin",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 52500,
+      "gold": 5000,
+      "items": []
+    },
+    "offer": "ch5-jiyin-offer",
+    "finish": "ch5-jiyin-finish",
+    "prev": "ch5-seekers"
+  },
+  "ch5-demons": {
+    "id": "ch5-demons",
+    "name": "鼎殿天魔",
+    "giver": "xuangu-core",
+    "level": 33,
+    "main": true,
+    "summary": "击败鼎殿里的 12 只天魔。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "heavenly-demon",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 46000,
+      "gold": 3400,
+      "items": [
+        {
+          "item": "big-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch5-demons-offer",
+    "finish": "ch5-demons-finish",
+    "prev": "ch5-jiyin"
+  },
+  "ch5-shadows": {
+    "id": "ch5-shadows",
+    "name": "魔影",
+    "giver": "xuangu-core",
+    "level": 33,
+    "main": true,
+    "summary": "击败缠在虚天鼎周围的 12 道魔影。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "shadow-demon",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 42000,
+      "gold": 3400,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch5-shadows-offer",
+    "finish": "ch5-shadows-finish",
+    "prev": "ch5-demons"
+  },
+  "ch5-cauldron": {
+    "id": "ch5-cauldron",
+    "name": "虚天鼎",
+    "giver": "xuangu-core",
+    "level": 34,
+    "main": true,
+    "summary": "击败玄骨上人，带着虚天鼎逃出虚天殿。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "xuangu",
+        "count": 1
+      },
+      {
+        "type": "collect",
+        "target": "xutian-cauldron",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 56000,
+      "gold": 6000,
+      "items": [
+        {
+          "item": "xutian-cauldron",
+          "count": 1
+        }
+      ],
+      "teleport": {
+        "map": "tianxing-city",
+        "x": 20,
+        "y": 24
+      }
+    },
+    "offer": "ch5-cauldron-offer",
+    "finish": "ch5-cauldron-finish",
+    "prev": "ch5-shadows"
+  },
+  "ch5-return": {
+    "id": "ch5-return",
+    "name": "重返天南",
+    "giver": "star-steward",
+    "level": 34,
+    "main": true,
+    "summary": "虚天殿一战已经传开，去坊主那里辞行，准备返回天南。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "star-merchant",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 17500,
+      "gold": 2000,
+      "items": [
+        {
+          "item": "nascent-pill",
+          "count": 1
+        }
+      ]
+    },
+    "offer": "ch5-return-offer",
+    "finish": "ch5-return-finish",
+    "prev": "ch5-cauldron"
   }
 }

@@ -1,0 +1,19 @@
+{
+  "frameW": 128,
+  "frameH": 128,
+  "originY": 0.8,
+  "columns": 4,
+  "displayScale": 0.75,
+  "clips": {
+    "idle": {
+      "frames": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "rate": 4,
+      "loop": true
+    }
+  }
+}

@@ -1798,5 +1798,823 @@
         "message": "魔道统领杀红了眼"
       }
     ]
+  },
+  "sea-squid": {
+    "id": "sea-squid",
+    "name": "墨鱿妖",
+    "stats": {
+      "maxHp": 340,
+      "maxMp": 0,
+      "attack": {
+        "min": 22,
+        "max": 29
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 11,
+        "max": 13
+      },
+      "magicDefense": {
+        "min": 11,
+        "max": 13
+      },
+      "accuracy": 38,
+      "evasion": 10,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 560,
+    "respawnSeconds": 20,
+    "dropTable": "sea-band",
+    "look": {
+      "fur": "#5a2a4a",
+      "head": "#2a4a6a",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "ink-spray",
+        "name": "喷墨",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#3a2a5a",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.2,
+        "poison": {
+          "damage": 8,
+          "duration": 5
+        }
+      }
+    ]
+  },
+  "fish-demon": {
+    "id": "fish-demon",
+    "name": "鱼妖",
+    "stats": {
+      "maxHp": 390,
+      "maxMp": 0,
+      "attack": {
+        "min": 24,
+        "max": 31
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 13,
+        "max": 15
+      },
+      "magicDefense": {
+        "min": 10,
+        "max": 12
+      },
+      "accuracy": 39,
+      "evasion": 9,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 620,
+    "respawnSeconds": 20,
+    "dropTable": "sea-band",
+    "look": {
+      "fur": "#1a4a5a",
+      "head": "#2a7a8a",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "tide-charge",
+        "name": "破浪",
+        "cooldown": 9,
+        "windup": 0.7,
+        "color": "#5ab4ff",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.2,
+        "charge": true
+      }
+    ]
+  },
+  "flying-ray": {
+    "id": "flying-ray",
+    "name": "飞鳐妖",
+    "stats": {
+      "maxHp": 360,
+      "maxMp": 0,
+      "attack": {
+        "min": 24,
+        "max": 32
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 10,
+        "max": 12
+      },
+      "magicDefense": {
+        "min": 13,
+        "max": 15
+      },
+      "accuracy": 40,
+      "evasion": 11,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 660,
+    "respawnSeconds": 20,
+    "dropTable": "sea-band",
+    "look": {
+      "fur": "#1a1a2a",
+      "head": "#4a4a6a",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "water-bolt",
+        "name": "水箭",
+        "cooldown": 7,
+        "windup": 0.8,
+        "color": "#5ab4ff",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.2
+      }
+    ]
+  },
+  "sea-king": {
+    "id": "sea-king",
+    "name": "海妖王",
+    "stats": {
+      "maxHp": 4200,
+      "maxMp": 0,
+      "attack": {
+        "min": 26,
+        "max": 34
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 13,
+        "max": 16
+      },
+      "magicDefense": {
+        "min": 13,
+        "max": 16
+      },
+      "accuracy": 40,
+      "evasion": 10,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 30000,
+    "respawnSeconds": 300,
+    "dropTable": "sea-king",
+    "look": {
+      "fur": "#2a3a5a",
+      "head": "#d9a441",
+      "scale": 1.3
+    },
+    "abilities": [
+      {
+        "id": "tidal-wave",
+        "name": "覆海",
+        "cooldown": 10,
+        "windup": 1.1,
+        "color": "#5ab4ff",
+        "range": 2,
+        "shape": "around",
+        "size": 3,
+        "multiplier": 1.4
+      },
+      {
+        "id": "sea-bolt",
+        "name": "水龙",
+        "cooldown": 7,
+        "windup": 0.8,
+        "color": "#3a8aff",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.3
+      },
+      {
+        "id": "call-school",
+        "name": "唤妖",
+        "cooldown": 20,
+        "windup": 0.8,
+        "color": "#b48cff",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "flying-ray",
+          "count": 1
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.3,
+        "attackMultiplier": 1.3,
+        "message": "海妖王掀起巨浪"
+      }
+    ]
+  },
+  "mist-ghost": {
+    "id": "mist-ghost",
+    "name": "鬼雾阴魂",
+    "stats": {
+      "maxHp": 410,
+      "maxMp": 0,
+      "attack": {
+        "min": 27,
+        "max": 35
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 11,
+        "max": 13
+      },
+      "magicDefense": {
+        "min": 16,
+        "max": 19
+      },
+      "accuracy": 41,
+      "evasion": 12,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 720,
+    "respawnSeconds": 20,
+    "dropTable": "xutian-band",
+    "look": {
+      "fur": "#3a4a5a",
+      "head": "#8a9ab0",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "yin-mist",
+        "name": "阴雾",
+        "cooldown": 9,
+        "windup": 0.9,
+        "color": "#6a7a9a",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.1,
+        "poison": {
+          "damage": 10,
+          "duration": 5
+        }
+      }
+    ]
+  },
+  "skull-ghost": {
+    "id": "skull-ghost",
+    "name": "骷髅鬼",
+    "stats": {
+      "maxHp": 470,
+      "maxMp": 0,
+      "attack": {
+        "min": 28,
+        "max": 36
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 13,
+        "max": 15
+      },
+      "magicDefense": {
+        "min": 15,
+        "max": 17
+      },
+      "accuracy": 42,
+      "evasion": 11,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 790,
+    "respawnSeconds": 20,
+    "dropTable": "xutian-band",
+    "look": {
+      "fur": "#1a1a24",
+      "head": "#d8c8a0",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "ghost-fire",
+        "name": "鬼火",
+        "cooldown": 7,
+        "windup": 0.8,
+        "color": "#7affb4",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.2
+      }
+    ]
+  },
+  "palace-puppet": {
+    "id": "palace-puppet",
+    "name": "守殿傀儡",
+    "stats": {
+      "maxHp": 580,
+      "maxMp": 0,
+      "attack": {
+        "min": 30,
+        "max": 37
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 18,
+        "max": 21
+      },
+      "magicDefense": {
+        "min": 14,
+        "max": 16
+      },
+      "accuracy": 42,
+      "evasion": 8,
+      "luck": 0
+    },
+    "moveSpeed": 2.2,
+    "attackInterval": 1.3,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 860,
+    "respawnSeconds": 20,
+    "dropTable": "xutian-band",
+    "look": {
+      "fur": "#6a6a70",
+      "head": "#d9a441",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "stone-slam",
+        "name": "震地",
+        "cooldown": 9,
+        "windup": 1.0,
+        "color": "#c8a06a",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.4
+      }
+    ]
+  },
+  "treasure-seeker": {
+    "id": "treasure-seeker",
+    "name": "夺宝修士",
+    "stats": {
+      "maxHp": 470,
+      "maxMp": 0,
+      "attack": {
+        "min": 31,
+        "max": 40
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 13,
+        "max": 15
+      },
+      "magicDefense": {
+        "min": 15,
+        "max": 18
+      },
+      "accuracy": 44,
+      "evasion": 12,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 880,
+    "respawnSeconds": 20,
+    "dropTable": "xutian-band",
+    "look": {
+      "fur": "#2a3a5a",
+      "head": "#c8a06a",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "flying-sword",
+        "name": "飞剑",
+        "cooldown": 7,
+        "windup": 0.7,
+        "color": "#9fd0ff",
+        "range": 6,
+        "shape": "line",
+        "size": 5,
+        "multiplier": 1.2
+      }
+    ]
+  },
+  "jiyin": {
+    "id": "jiyin",
+    "name": "极阴祖师",
+    "stats": {
+      "maxHp": 5000,
+      "maxMp": 0,
+      "attack": {
+        "min": 28,
+        "max": 36
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 14,
+        "max": 17
+      },
+      "magicDefense": {
+        "min": 15,
+        "max": 18
+      },
+      "accuracy": 43,
+      "evasion": 11,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 40000,
+    "respawnSeconds": 300,
+    "dropTable": "jiyin",
+    "look": {
+      "fur": "#1a2a24",
+      "head": "#6a8a7a",
+      "scale": 1.3
+    },
+    "attackRange": 4,
+    "abilities": [
+      {
+        "id": "xuanyin",
+        "name": "玄阴魔气",
+        "cooldown": 11,
+        "windup": 1.1,
+        "color": "#3a7a6a",
+        "range": 2,
+        "shape": "around",
+        "size": 3,
+        "multiplier": 1.3,
+        "poison": {
+          "damage": 12,
+          "duration": 6
+        }
+      },
+      {
+        "id": "ice-soul",
+        "name": "冰魄神光",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#9fe0ff",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.3
+      },
+      {
+        "id": "yinluo",
+        "name": "阴罗幡",
+        "cooldown": 18,
+        "windup": 0.8,
+        "color": "#b48cff",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "mist-ghost",
+          "count": 1
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.3,
+        "attackMultiplier": 1.3,
+        "message": "极阴祖师祭出本命元婴，阴气暴涨"
+      }
+    ]
+  },
+  "heavenly-demon": {
+    "id": "heavenly-demon",
+    "name": "天魔",
+    "stats": {
+      "maxHp": 630,
+      "maxMp": 0,
+      "attack": {
+        "min": 32,
+        "max": 41
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 17,
+        "max": 20
+      },
+      "magicDefense": {
+        "min": 15,
+        "max": 18
+      },
+      "accuracy": 45,
+      "evasion": 10,
+      "luck": 0
+    },
+    "moveSpeed": 2.5,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 950,
+    "respawnSeconds": 20,
+    "dropTable": "cauldron-band",
+    "look": {
+      "fur": "#4a0a0a",
+      "head": "#1a1a1a",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "trident",
+        "name": "魔叉",
+        "cooldown": 8,
+        "windup": 0.7,
+        "color": "#ff6a4a",
+        "range": 5,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.3,
+        "charge": true
+      }
+    ]
+  },
+  "shadow-demon": {
+    "id": "shadow-demon",
+    "name": "魔影",
+    "stats": {
+      "maxHp": 500,
+      "maxMp": 0,
+      "attack": {
+        "min": 33,
+        "max": 42
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 13,
+        "max": 16
+      },
+      "magicDefense": {
+        "min": 17,
+        "max": 20
+      },
+      "accuracy": 46,
+      "evasion": 13,
+      "luck": 0
+    },
+    "moveSpeed": 2.9,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 960,
+    "respawnSeconds": 20,
+    "dropTable": "cauldron-band",
+    "look": {
+      "fur": "#1a0a1a",
+      "head": "#6a1a2a",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "shadow-bolt",
+        "name": "魔焰",
+        "cooldown": 7,
+        "windup": 0.8,
+        "color": "#a05aff",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.25
+      }
+    ]
+  },
+  "xuangu": {
+    "id": "xuangu",
+    "name": "玄骨上人",
+    "stats": {
+      "maxHp": 6000,
+      "maxMp": 0,
+      "attack": {
+        "min": 30,
+        "max": 38
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 16,
+        "max": 19
+      },
+      "magicDefense": {
+        "min": 16,
+        "max": 19
+      },
+      "accuracy": 45,
+      "evasion": 12,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 52000,
+    "respawnSeconds": 300,
+    "dropTable": "xuangu",
+    "look": {
+      "fur": "#d8d0c0",
+      "head": "#3a2a4a",
+      "scale": 1.3
+    },
+    "attackRange": 4,
+    "abilities": [
+      {
+        "id": "bone-curse",
+        "name": "玄骨咒",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#c8b8ff",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.3
+      },
+      {
+        "id": "dark-tide",
+        "name": "天魔潮",
+        "cooldown": 12,
+        "windup": 1.1,
+        "color": "#7a2a5a",
+        "range": 2,
+        "shape": "around",
+        "size": 3,
+        "multiplier": 1.35
+      },
+      {
+        "id": "call-demon",
+        "name": "召魔",
+        "cooldown": 20,
+        "windup": 0.8,
+        "color": "#b48cff",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "shadow-demon",
+          "count": 1
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.3,
+        "attackMultiplier": 1.3,
+        "message": "玄骨上人催动虚天鼎残力，魔气冲天"
+      }
+    ]
   }
 }

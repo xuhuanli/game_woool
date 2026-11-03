@@ -1,57 +1,37 @@
 const MUTE_KEY = 'xiuxian-muted';
 const MASTER_VOLUME = 0.5;
-const MUSIC_VOLUME = 0.1;
-/** 五声音阶，听起来有古风 */
-const PENTATONIC = [220, 247, 277.2, 329.6, 370, 440, 493.9, 554.4];
-const MUSIC_STEP_SECONDS = 1.1;
+const MUSIC_VOLUME = 0.35;
+const MUSIC_FADE_SECONDS = 1.5;
 
-type Wave = OscillatorType;
-
-interface Note {
-  frequency: number;
-  to?: number;
-  seconds: number;
-  wave: Wave;
-  volume: number;
-  delay?: number;
-}
-
-const SOUNDS: Record<string, Note[]> = {
-  hit: [{ frequency: 170, to: 70, seconds: 0.09, wave: 'square', volume: 0.25 }],
-  crit: [
-    { frequency: 240, to: 60, seconds: 0.14, wave: 'sawtooth', volume: 0.35 },
-    { frequency: 880, to: 440, seconds: 0.1, wave: 'triangle', volume: 0.2 },
-  ],
-  hurt: [{ frequency: 130, to: 60, seconds: 0.14, wave: 'sawtooth', volume: 0.22 }],
-  cast: [{ frequency: 330, to: 880, seconds: 0.2, wave: 'triangle', volume: 0.2 }],
-  gold: [
-    { frequency: 1320, seconds: 0.05, wave: 'triangle', volume: 0.12 },
-    { frequency: 1760, seconds: 0.07, wave: 'triangle', volume: 0.12, delay: 0.05 },
-  ],
-  pickup: [{ frequency: 660, to: 990, seconds: 0.1, wave: 'triangle', volume: 0.18 }],
-  rare: [
-    { frequency: 523, seconds: 0.16, wave: 'triangle', volume: 0.3 },
-    { frequency: 659, seconds: 0.16, wave: 'triangle', volume: 0.3, delay: 0.12 },
-    { frequency: 880, seconds: 0.3, wave: 'triangle', volume: 0.32, delay: 0.24 },
-  ],
-  levelUp: [
-    { frequency: 392, seconds: 0.14, wave: 'triangle', volume: 0.28 },
-    { frequency: 523, seconds: 0.14, wave: 'triangle', volume: 0.28, delay: 0.12 },
-    { frequency: 784, seconds: 0.32, wave: 'triangle', volume: 0.3, delay: 0.24 },
-  ],
-  warning: [{ frequency: 440, to: 330, seconds: 0.22, wave: 'square', volume: 0.14 }],
-  death: [{ frequency: 300, to: 50, seconds: 0.6, wave: 'sawtooth', volume: 0.28 }],
-  portal: [{ frequency: 220, to: 880, seconds: 0.35, wave: 'sine', volume: 0.25 }],
-};
+/**
+ * 音效来自 Kenney 的 RPG Sounds 和 Interface Sounds，音乐来自 OpenGameArt，都是 CC0。
+ * 原始素材和授权文件在 assets-src/audio/。
+ */
+const SOUNDS = {
+  hit: { file: 'hit', volume: 0.5 },
+  crit: { file: 'crit', volume: 0.7 },
+  hurt: { file: 'hurt', volume: 0.6 },
+  cast: { file: 'cast', volume: 0.4 },
+  gold: { file: 'gold', volume: 0.35 },
+  pickup: { file: 'pickup', volume: 0.5 },
+  rare: { file: 'rare', volume: 0.7 },
+  levelUp: { file: 'level-up', volume: 0.7 },
+  warning: { file: 'warning', volume: 0.6 },
+  death: { file: 'death', volume: 0.6 },
+  portal: { file: 'portal', volume: 0.5 },
+} as const;
 
 export type SoundName = keyof typeof SOUNDS;
+export type MusicName = 'town' | 'field';
 
-/** 用 Web Audio 实时合成音效和背景音乐，不需要音频文件，正式素材可以后续替换。 */
+/** 播放音效和背景音乐，主城和野外各一首，切图时淡入淡出。 */
 export class GameAudio {
   private context: AudioContext | null = null;
   private master: GainNode | null = null;
   private muted = readMuted();
-  private musicIndex = 0;
+  private readonly buffers = new Map<string, AudioBuffer>();
+  private music: { name: MusicName; source: AudioBufferSourceNode; gain: GainNode } | null = null;
+  private wantedMusic: MusicName = 'town';
 
   /** 浏览器要求用户操作后才能发声，在第一次按键或点击时调用。 */
   unlock(): void {
@@ -60,7 +40,8 @@ export class GameAudio {
     this.master = this.context.createGain();
     this.master.gain.value = this.muted ? 0 : MASTER_VOLUME;
     this.master.connect(this.context.destination);
-    window.setInterval(() => this.playMusicNote(), MUSIC_STEP_SECONDS * 1000);
+    for (const { file } of Object.values(SOUNDS)) void this.load(file);
+    void this.load(`music-${this.wantedMusic}`).then(() => this.playMusic(this.wantedMusic));
   }
 
   toggleMute(): boolean {
@@ -75,34 +56,54 @@ export class GameAudio {
   }
 
   play(name: SoundName): void {
-    for (const note of SOUNDS[name] ?? []) this.playNote(note);
-  }
-
-  private playNote({ frequency, to, seconds, wave, volume, delay = 0 }: Note): void {
     const { context, master } = this;
-    if (!context || !master) return;
-    const start = context.currentTime + delay;
-    const oscillator = context.createOscillator();
+    const sound = SOUNDS[name];
+    const buffer = this.buffers.get(sound.file);
+    if (!context || !master || !buffer) return;
+    const source = context.createBufferSource();
     const gain = context.createGain();
-    oscillator.type = wave;
-    oscillator.frequency.setValueAtTime(frequency, start);
-    if (to) oscillator.frequency.exponentialRampToValueAtTime(to, start + seconds);
-    gain.gain.setValueAtTime(volume, start);
-    gain.gain.exponentialRampToValueAtTime(0.0001, start + seconds);
-    oscillator.connect(gain).connect(master);
-    oscillator.start(start);
-    oscillator.stop(start + seconds);
+    source.buffer = buffer;
+    gain.gain.value = sound.volume;
+    source.connect(gain).connect(master);
+    source.start();
   }
 
-  /** 背景音乐：按五声音阶慢慢拨弦，用固定走向避免随机感。 */
-  private playMusicNote(): void {
-    const steps = [0, 2, 3, 5, 3, 2, 4, 3, 1, 2, 0, -1];
-    const step = steps[this.musicIndex % steps.length] ?? 0;
-    this.musicIndex += 1;
-    if (step < 0) return;
-    const frequency = PENTATONIC[step] ?? 220;
-    this.playNote({ frequency, seconds: 1.4, wave: 'sine', volume: MUSIC_VOLUME });
-    this.playNote({ frequency: frequency * 2, seconds: 0.5, wave: 'triangle', volume: MUSIC_VOLUME / 3 });
+  /** 换背景音乐，同一首不重新开始。 */
+  playMusic(name: MusicName): void {
+    this.wantedMusic = name;
+    const { context, master } = this;
+    if (!context || !master || this.music?.name === name) return;
+    const buffer = this.buffers.get(`music-${name}`);
+    if (!buffer) {
+      void this.load(`music-${name}`).then(() => this.wantedMusic === name && this.playMusic(name));
+      return;
+    }
+    const now = context.currentTime;
+    if (this.music) {
+      const old = this.music;
+      old.gain.gain.setValueAtTime(old.gain.gain.value, now);
+      old.gain.gain.linearRampToValueAtTime(0, now + MUSIC_FADE_SECONDS);
+      old.source.stop(now + MUSIC_FADE_SECONDS);
+    }
+    const source = context.createBufferSource();
+    const gain = context.createGain();
+    source.buffer = buffer;
+    source.loop = true;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(MUSIC_VOLUME, now + MUSIC_FADE_SECONDS);
+    source.connect(gain).connect(master);
+    source.start();
+    this.music = { name, source, gain };
+  }
+
+  private async load(file: string): Promise<void> {
+    if (!this.context || this.buffers.has(file)) return;
+    try {
+      const response = await fetch(`${import.meta.env.BASE_URL}assets/audio/${file}.ogg`);
+      this.buffers.set(file, await this.context.decodeAudioData(await response.arrayBuffer()));
+    } catch (error) {
+      console.warn(`音频 ${file} 加载失败`, error);
+    }
   }
 }
 

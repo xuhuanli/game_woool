@@ -34,6 +34,7 @@ import { needsTarget, skillArea } from './skills';
 import { refreshStats } from './stats';
 import type {
   DeathDrop,
+  Field,
   GameEvent,
   GroundItem,
   HotbarEntry,
@@ -49,7 +50,7 @@ import type {
 export * from './types';
 
 export const TICK_SECONDS = 0.05;
-export const HOTBAR_SIZE = 8;
+export const HOTBAR_SIZE = 9;
 
 const REPATH_SECONDS = 0.3;
 const RESPAWN_SECONDS = 3;
@@ -73,6 +74,8 @@ export class World {
   readonly autoPlay: AutoPlay;
   readonly monsters: Monster[] = [];
   readonly summons: Summon[] = [];
+  /** 当前地图上的火墙、毒瘴等持续地面 */
+  fields: Field[] = [];
   readonly items: GroundItem[] = [];
   /** Boss 下次刷新的游戏内时间，切图后继续计时 */
   bossReadyAt: Record<string, number> = {};
@@ -216,6 +219,7 @@ export class World {
     const player = this.player;
     player.order = null;
     player.path = [];
+    this.fields = [];
     this.loadMap(mapId);
     const arrival = this.grid.nearest(cell, (c) => this.isFree(c, player)) ?? cell;
     player.cell = { ...arrival };
@@ -326,10 +330,13 @@ export class World {
     player.auto = { ...data.auto, enabled: false };
     player.lastFieldMap = data.lastFieldMap ?? player.lastFieldMap;
     player.skills = data.skills.filter((id) => skills[id]);
-    player.hotbar = data.hotbar.map((entry) => {
+    const hotbar = data.hotbar.map((entry) => {
       const exists = entry?.kind === 'skill' ? skills[entry.id] : entry && items[entry.id];
       return exists ? entry : null;
     });
+    // 快捷栏变长时在丹药格前面补空格，丹药仍在最后两格
+    const missing = Math.max(0, HOTBAR_SIZE - hotbar.length);
+    player.hotbar = [...hotbar.slice(0, -2), ...Array<null>(missing).fill(null), ...hotbar.slice(-2)];
     refreshStats(this.player, this.config, this.time);
     this.learnSkills();
     this.drainEvents();
@@ -781,6 +788,7 @@ export class World {
     this.tickPlayer(dt);
     for (const monster of this.monsters) this.tickMonster(monster, dt);
     for (const summon of [...this.summons]) this.tickSummon(summon, dt);
+    this.tickFields(dt);
     this.expireItems();
   }
 
@@ -1199,7 +1207,38 @@ export class World {
       case 'summon':
         this.summon(effect.monster, effect.hpPerLevel, effect.duration);
         break;
+      case 'field':
+        if (cells.length === 0) break;
+        this.fields.push({
+          id: this.nextId++,
+          skill,
+          caster,
+          cells,
+          left: effect.duration,
+          nextTick: 0,
+          multiplier: effect.multiplier * this.inventory.skillPower(skill.id),
+        });
+        break;
     }
+  }
+
+  /** 地面每跳伤害站在上面的怪，第一跳在放下时立即生效。 */
+  private tickFields(dt: number): void {
+    if (this.fields.length === 0) return;
+    for (const field of this.fields) {
+      const { effect } = field.skill;
+      if (effect.type !== 'field') continue;
+      field.left -= dt;
+      field.nextTick -= dt;
+      if (field.nextTick > 0) continue;
+      field.nextTick += effect.interval;
+      for (const monster of this.monsters) {
+        if (monster.hp > 0 && field.cells.some((cell) => sameCell(cell, monster.cell))) {
+          this.resolveHit(field.caster, monster, { stat: effect.stat, multiplier: field.multiplier });
+        }
+      }
+    }
+    this.fields = this.fields.filter((field) => field.left > 0);
   }
 
   private addEffect(unit: Unit, kind: 'shield' | 'defense' | 'empower', amount: number, duration: number): void {
@@ -1487,17 +1526,11 @@ export class World {
     }
   }
 
+  /** 只有 1 级的起手功法自动领悟，其余要靠功法书。 */
   private learnSkills(): void {
     const player = this.player;
-    const available = Object.values(this.config.skills)
-      .filter((skill) => skill.classId === player.def.id && skill.level <= player.level)
-      .filter((skill) => !player.skills.includes(skill.id))
-      .sort((a, b) => a.level - b.level);
-    for (const skill of available) {
-      player.skills.push(skill.id);
-      const slot = player.hotbar.indexOf(null);
-      if (slot >= 0) player.hotbar[slot] = { kind: 'skill', id: skill.id };
-      this.emit({ type: 'skillLearned', skill });
+    for (const skill of Object.values(this.config.skills)) {
+      if (skill.classId === player.def.id && skill.level <= 1) this.inventory.learnSkill(skill.id);
     }
   }
 

@@ -310,5 +310,43 @@
       "duration": 10,
       "interval": 1
     }
+  },
+  "spell-firewall": {
+    "id": "spell-firewall",
+    "name": "火墙术",
+    "classId": "spell",
+    "level": 20,
+    "mpCost": 30,
+    "cooldown": 10,
+    "windup": 0.5,
+    "range": 6,
+    "color": "#ff7a3a",
+    "effect": {
+      "type": "field",
+      "stat": "magic",
+      "multiplier": 0.5,
+      "size": 1,
+      "duration": 6,
+      "interval": 1
+    }
+  },
+  "spirit-miasma": {
+    "id": "spirit-miasma",
+    "name": "瘴毒术",
+    "classId": "spirit",
+    "level": 20,
+    "mpCost": 28,
+    "cooldown": 12,
+    "windup": 0.5,
+    "range": 6,
+    "color": "#7ad04a",
+    "effect": {
+      "type": "field",
+      "stat": "dao",
+      "multiplier": 0.3,
+      "size": 1,
+      "duration": 8,
+      "interval": 1
+    }
   }
 }

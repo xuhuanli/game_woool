@@ -59,11 +59,11 @@ describe('存档恢复', () => {
     expect(player.hotbar[0]).toEqual(world.player.hotbar[0]);
   });
 
-  it('读档时补上当前等级该会的新技能', () => {
+  it('读档时补上起手功法，其余功法要靠功法书', () => {
     const save = equippedWorld().toSave(1000);
-    save.player.skills = ['spirit-poison'];
+    save.player.skills = [];
     const { player } = World.fromSave(config, save, 2);
-    expect(player.skills).toContain('spirit-ward');
+    expect(player.skills).toEqual(['spirit-poison']);
   });
 
   it('存档能经过 JSON 导出再导入', () => {

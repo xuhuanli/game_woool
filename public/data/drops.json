@@ -777,5 +777,347 @@
       "item": "stun-ring",
       "chance": 0.1
     }
+  ],
+  "sea-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 40,
+      "max": 60
+    },
+    {
+      "item": "big-potion",
+      "chance": 0.12
+    },
+    {
+      "item": "big-mana",
+      "chance": 0.1
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.02
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.012
+    },
+    {
+      "item": "sword-27",
+      "chance": 0.00536
+    },
+    {
+      "item": "robe-27",
+      "chance": 0.008
+    },
+    {
+      "item": "crown-27",
+      "chance": 0.008
+    },
+    {
+      "item": "pendant-27",
+      "chance": 0.008
+    },
+    {
+      "item": "bracelet-27",
+      "chance": 0.008
+    },
+    {
+      "item": "ring-27",
+      "chance": 0.008
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    }
+  ],
+  "xutian-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 48,
+      "max": 70
+    },
+    {
+      "item": "big-potion",
+      "chance": 0.12
+    },
+    {
+      "item": "big-mana",
+      "chance": 0.1
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.02
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.012
+    },
+    {
+      "item": "sword-27",
+      "chance": 0.00603
+    },
+    {
+      "item": "robe-27",
+      "chance": 0.009
+    },
+    {
+      "item": "crown-27",
+      "chance": 0.009
+    },
+    {
+      "item": "pendant-27",
+      "chance": 0.009
+    },
+    {
+      "item": "bracelet-27",
+      "chance": 0.009
+    },
+    {
+      "item": "ring-27",
+      "chance": 0.009
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    }
+  ],
+  "cauldron-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 55,
+      "max": 80
+    },
+    {
+      "item": "big-potion",
+      "chance": 0.12
+    },
+    {
+      "item": "big-mana",
+      "chance": 0.1
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.02
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.012
+    },
+    {
+      "item": "sword-27",
+      "chance": 0.00603
+    },
+    {
+      "item": "robe-27",
+      "chance": 0.009
+    },
+    {
+      "item": "crown-27",
+      "chance": 0.009
+    },
+    {
+      "item": "pendant-27",
+      "chance": 0.009
+    },
+    {
+      "item": "bracelet-27",
+      "chance": 0.009
+    },
+    {
+      "item": "ring-27",
+      "chance": 0.009
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "sword-35",
+      "chance": 0.0015
+    },
+    {
+      "item": "robe-35",
+      "chance": 0.0015
+    },
+    {
+      "item": "crown-35",
+      "chance": 0.0015
+    },
+    {
+      "item": "pendant-35",
+      "chance": 0.0015
+    },
+    {
+      "item": "bracelet-35",
+      "chance": 0.0015
+    },
+    {
+      "item": "ring-35",
+      "chance": 0.0015
+    }
+  ],
+  "sea-king": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 2400,
+      "max": 3600
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 2,
+      "max": 3
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.8
+    },
+    {
+      "item": "sword-27",
+      "chance": 0.2
+    },
+    {
+      "item": "robe-27",
+      "chance": 0.2
+    },
+    {
+      "item": "crown-27",
+      "chance": 0.2
+    },
+    {
+      "item": "pendant-27",
+      "chance": 0.2
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.1
+    }
+  ],
+  "jiyin": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 3000,
+      "max": 4400
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 2,
+      "max": 3
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.8
+    },
+    {
+      "item": "crown-27",
+      "chance": 0.25
+    },
+    {
+      "item": "pendant-27",
+      "chance": 0.25
+    },
+    {
+      "item": "bracelet-27",
+      "chance": 0.25
+    },
+    {
+      "item": "ring-27",
+      "chance": 0.25
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.12
+    }
+  ],
+  "xuangu": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 3600,
+      "max": 5200
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 2,
+      "max": 3
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.8
+    },
+    {
+      "item": "sword-35",
+      "chance": 0.1
+    },
+    {
+      "item": "robe-35",
+      "chance": 0.1
+    },
+    {
+      "item": "crown-35",
+      "chance": 0.1
+    },
+    {
+      "item": "pendant-35",
+      "chance": 0.1
+    },
+    {
+      "item": "bracelet-35",
+      "chance": 0.1
+    },
+    {
+      "item": "ring-35",
+      "chance": 0.1
+    },
+    {
+      "item": "xutian-cauldron",
+      "chance": 1
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.12
+    }
   ]
 }

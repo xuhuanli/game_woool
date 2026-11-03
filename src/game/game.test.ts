@@ -280,7 +280,7 @@ describe('技能', () => {
     }
   });
 
-  it('升级后学会新技能', () => {
+  it('升级后不会自动学会新技能', () => {
     const world = new World(fixture({ x: 3, y: 2 }, [], 0), 'test', 'spirit', 1);
     const monster = world.monsters[0]!;
     world.player.exp = (110 + 70 + 40) * 15;
@@ -288,8 +288,8 @@ describe('技能', () => {
     monster.hp = 1;
     world.attack(monster);
     run(world, 10, () => monster.hp === 0);
-    expect(world.player.skills).toContain('spirit-heal');
-    expect(world.player.hotbar).toContainEqual({ kind: 'skill', id: 'spirit-heal' });
+    expect(world.player.level).toBeGreaterThanOrEqual(3);
+    expect(world.player.skills).not.toContain('spirit-heal');
   });
 
   it('远程技能走进射程后释放，消耗灵力并进入冷却', () => {

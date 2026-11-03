@@ -470,5 +470,148 @@
     "id": "great-transfer-token",
     "name": "大挪移令",
     "kind": "material"
+  },
+  "big-potion": {
+    "id": "big-potion",
+    "name": "大还丹",
+    "kind": "potion",
+    "heal": 260,
+    "price": 150
+  },
+  "big-mana": {
+    "id": "big-mana",
+    "name": "凝神丹",
+    "kind": "potion",
+    "mana": 200,
+    "price": 150
+  },
+  "xutian-map": {
+    "id": "xutian-map",
+    "name": "虚天残图",
+    "kind": "material"
+  },
+  "xutian-cauldron": {
+    "id": "xutian-cauldron",
+    "name": "虚天鼎",
+    "kind": "material"
+  },
+  "book-body-pierce": {
+    "id": "book-body-pierce",
+    "name": "《穿云刺》",
+    "kind": "book",
+    "skill": "body-pierce",
+    "price": 150
+  },
+  "book-body-whirl": {
+    "id": "book-body-whirl",
+    "name": "《旋风斩》",
+    "kind": "book",
+    "skill": "body-whirl",
+    "price": 400
+  },
+  "book-spell-thunder": {
+    "id": "book-spell-thunder",
+    "name": "《天雷术》",
+    "kind": "book",
+    "skill": "spell-thunder",
+    "price": 100
+  },
+  "book-spell-shield": {
+    "id": "book-spell-shield",
+    "name": "《金光罩》",
+    "kind": "book",
+    "skill": "spell-shield",
+    "price": 250
+  },
+  "book-spell-gale": {
+    "id": "book-spell-gale",
+    "name": "《罡风术》",
+    "kind": "book",
+    "skill": "spell-gale",
+    "price": 400
+  },
+  "book-spirit-heal": {
+    "id": "book-spirit-heal",
+    "name": "《回春术》",
+    "kind": "book",
+    "skill": "spirit-heal",
+    "price": 100
+  },
+  "book-spirit-ward": {
+    "id": "book-spirit-ward",
+    "name": "《固元诀》",
+    "kind": "book",
+    "skill": "spirit-ward",
+    "price": 200
+  },
+  "book-spirit-summon": {
+    "id": "book-spirit-summon",
+    "name": "《唤噬金虫》",
+    "kind": "book",
+    "skill": "spirit-summon",
+    "price": 350
+  },
+  "book-body-mingwang": {
+    "id": "book-body-mingwang",
+    "name": "《明王诀》",
+    "kind": "book",
+    "skill": "body-mingwang",
+    "price": 1000
+  },
+  "book-body-vajra": {
+    "id": "book-body-vajra",
+    "name": "《金刚诀》",
+    "kind": "book",
+    "skill": "body-vajra",
+    "price": 2400
+  },
+  "book-body-brahma": {
+    "id": "book-body-brahma",
+    "name": "《梵圣真魔功》",
+    "kind": "book",
+    "skill": "body-brahma",
+    "price": 4250
+  },
+  "book-spell-qingyuan": {
+    "id": "book-spell-qingyuan",
+    "name": "《青元剑诀》",
+    "kind": "book",
+    "skill": "spell-qingyuan",
+    "price": 1000
+  },
+  "book-spell-bixie": {
+    "id": "book-spell-bixie",
+    "name": "《辟邪神雷》",
+    "kind": "book",
+    "skill": "spell-bixie",
+    "price": 3450
+  },
+  "book-spirit-puppet": {
+    "id": "book-spirit-puppet",
+    "name": "《傀儡术》",
+    "kind": "book",
+    "skill": "spirit-puppet",
+    "price": 1250
+  },
+  "book-spirit-corrosion": {
+    "id": "book-spirit-corrosion",
+    "name": "《腐骨毒》",
+    "kind": "book",
+    "skill": "spirit-corrosion",
+    "price": 3450
+  },
+  "book-spell-firewall": {
+    "id": "book-spell-firewall",
+    "name": "《火墙术》",
+    "kind": "book",
+    "skill": "spell-firewall",
+    "price": 1800
+  },
+  "book-spirit-miasma": {
+    "id": "book-spirit-miasma",
+    "name": "《瘴毒术》",
+    "kind": "book",
+    "skill": "spirit-miasma",
+    "price": 1800
   }
 }
