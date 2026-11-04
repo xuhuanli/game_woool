@@ -105,6 +105,8 @@ export class AutoPlay {
     const distance = cellDistance(player.cell, target.cell);
     const { effect } = skill;
     switch (effect.type) {
+      case 'charge':
+        return distance <= skill.range;
       case 'damage':
         return distance <= (effect.shape === 'around' ? (effect.size ?? 1) : skill.range);
       case 'dot':

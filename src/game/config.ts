@@ -59,6 +59,8 @@ export type SkillEffect =
   | { type: 'defense'; amount: number; duration: number }
   | { type: 'empower'; multiplier: number; duration: number }
   | { type: 'summon'; monster: string; hpPerLevel: number; duration: number }
+  /** 冲到射程内的目标身前打一击，并把它定身 stun 秒 */
+  | { type: 'charge'; stat: DamageStat; multiplier: number; stun: number }
   /** 在目标处留下一片地面，持续时间内每隔 interval 秒伤害范围内的怪 */
   | { type: 'field'; stat: DamageStat; multiplier: number; size: number; duration: number; interval: number };
 

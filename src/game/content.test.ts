@@ -1111,6 +1111,32 @@ describe('地面持续功法', () => {
     expect(fields.map((skill) => skill.classId).sort()).toEqual(['spell', 'spirit']);
     for (const skill of fields) expect(skill.level).toBe(20);
   });
+
+  it('撼山冲闪到目标身边打一击并定身', () => {
+    const world = new World(config, 'taina-mountain', 'body', 1);
+    world.player.skills.push('body-charge');
+    world.player.mp = world.player.stats.maxMp;
+    world.player.auto.enabled = false;
+    const ape = world.monsters.find((monster) => monster.def.id === 'mountain-ape')!;
+    world.player.cell = { x: ape.cell.x - 3, y: ape.cell.y };
+    world.player.pos = { ...world.player.cell };
+    ape.stats = { ...ape.stats, maxHp: 100000 };
+    ape.hp = 100000;
+    world.drainEvents();
+    world.castSkill('body-charge', ape);
+    run(world, 0.3);
+    expect(cellDistance(world.player.cell, ape.cell)).toBe(1);
+    const events = world.drainEvents();
+    expect(events.some((event) => event.type === 'stunned' && event.unit === ape)).toBe(true);
+    expect(ape.stunLeft).toBeGreaterThan(1);
+  });
+
+  it('体修 20 级有招牌功法撼山冲', () => {
+    const charge = config.skills['body-charge']!;
+    expect(charge.classId).toBe('body');
+    expect(charge.level).toBe(20);
+    expect(config.items['book-body-charge']?.skill).toBe('body-charge');
+  });
 });
 
 describe('Boss 仇恨', () => {

@@ -3,15 +3,17 @@ import type { Cell, SkillDef } from './config';
 /** 需要先选中敌人才能释放的技能。 */
 export function needsTarget(skill: SkillDef): boolean {
   const { effect } = skill;
-  if (effect.type === 'dot' || effect.type === 'field') return true;
+  if (effect.type === 'dot' || effect.type === 'field' || effect.type === 'charge') return true;
   return effect.type === 'damage' && effect.shape !== 'around';
 }
 
 /** 计算伤害技能覆盖的格子。 */
 export function skillArea(skill: SkillDef, origin: Cell, target: Cell | null): Cell[] {
   const { effect } = skill;
-  if (effect.type !== 'damage' && effect.type !== 'dot' && effect.type !== 'field') return [];
-  if (effect.type === 'dot' || (effect.type === 'damage' && effect.shape === 'single')) return target ? [target] : [];
+  if (effect.type !== 'damage' && effect.type !== 'dot' && effect.type !== 'field' && effect.type !== 'charge') return [];
+  if (effect.type === 'dot' || effect.type === 'charge' || (effect.type === 'damage' && effect.shape === 'single')) {
+    return target ? [target] : [];
+  }
 
   const size = effect.size ?? 1;
   if (effect.type === 'damage' && effect.shape === 'line') {

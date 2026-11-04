@@ -1207,6 +1207,23 @@ export class World {
       case 'summon':
         this.summon(effect.monster, effect.hpPerLevel, effect.duration);
         break;
+      case 'charge': {
+        if (!target?.hp) break;
+        this.dashTo(caster, target);
+        // 落地震开身边一圈，目标和贴身的怪都挨一击并定身
+        const hit = this.monsters.filter(
+          (monster) => monster.hp > 0 && (monster === target || cellDistance(monster.cell, caster.cell) <= 1),
+        );
+        const power = effect.multiplier * this.inventory.skillPower(skill.id);
+        for (const monster of hit) {
+          this.resolveHit(caster, monster, { stat: effect.stat, multiplier: power });
+          if (monster.hp > 0) {
+            monster.stunLeft = Math.max(monster.stunLeft, effect.stun);
+            this.emit({ type: 'stunned', unit: monster });
+          }
+        }
+        break;
+      }
       case 'field':
         if (cells.length === 0) break;
         this.fields.push({
@@ -1267,6 +1284,25 @@ export class World {
     };
     this.summons.push(unit);
     this.emit({ type: 'summoned', unit });
+  }
+
+  /** 闪到目标身边离自己最近的空格，已经贴身就不动。 */
+  private dashTo(unit: Unit, target: Unit): void {
+    if (cellDistance(unit.cell, target.cell) <= 1) return;
+    let best: Cell | null = null;
+    for (let y = target.cell.y - 1; y <= target.cell.y + 1; y++) {
+      for (let x = target.cell.x - 1; x <= target.cell.x + 1; x++) {
+        const cell = { x, y };
+        if (!this.isFree(cell, unit)) continue;
+        if (!best || cellDistance(unit.cell, cell) < cellDistance(unit.cell, best)) best = cell;
+      }
+    }
+    if (!best) return;
+    unit.cell = best;
+    unit.pos = { ...best };
+    unit.path = [];
+    unit.repathLeft = 0;
+    unit.facing = direction(unit.cell, target.cell);
   }
 
   private knockBack(unit: Unit, from: Cell, distance: number): void {

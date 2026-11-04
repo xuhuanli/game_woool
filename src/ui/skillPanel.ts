@@ -28,6 +28,8 @@ function describeEffect(effect: SkillEffect, range: number): string {
       return `伤害 +${Math.round(effect.multiplier * 100)}%，持续 ${effect.duration} 秒`;
     case 'summon':
       return `召唤协助作战，持续 ${effect.duration} 秒`;
+    case 'charge':
+      return `冲到 ${range} 格内的敌人身前，震击目标和身边一圈，${Math.round(effect.multiplier * 100)}%，定身 ${effect.stun} 秒`;
     case 'field':
       return `目标周围 ${effect.size} 格留下地面，每 ${effect.interval} 秒 ${Math.round(effect.multiplier * 100)}%，持续 ${effect.duration} 秒${reach}`;
   }

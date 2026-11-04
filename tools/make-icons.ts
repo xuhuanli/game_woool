@@ -51,6 +51,7 @@ const GLYPHS: Record<string, string> = {
   'body-mingwang': 'spiked-halo',
   'body-vajra': 'bell-shield',
   'body-brahma': 'muscle-up',
+  'body-charge': 'boulder-dash',
   'spell-fire': 'fireball',
   'spell-thunder': 'lightning-storm',
   'spell-shield': 'magic-shield',

@@ -613,5 +613,12 @@
     "kind": "book",
     "skill": "spirit-miasma",
     "price": 1800
+  },
+  "book-body-charge": {
+    "id": "book-body-charge",
+    "name": "《撼山冲》",
+    "kind": "book",
+    "skill": "body-charge",
+    "price": 1800
   }
 }

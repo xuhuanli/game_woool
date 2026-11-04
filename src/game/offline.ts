@@ -53,7 +53,7 @@ function damagePerSecond(config: GameConfig, fighter: Fighter, monster: MonsterD
   let poison: (typeof casts)[number] | null = null;
   for (const { skill, power } of fighter.skills) {
     const { effect } = skill;
-    if (effect.type === 'damage') {
+    if (effect.type === 'damage' || effect.type === 'charge') {
       const damage = Math.max(1, average(stats[effect.stat]) * effect.multiplier * power - defenseOf(effect.stat)) * hit;
       casts.push({ damage, rate: 1 / Math.max(skill.cooldown, attackInterval), mana: skill.mpCost });
     } else if (effect.type === 'dot') {

@@ -348,5 +348,22 @@
       "duration": 8,
       "interval": 1
     }
+  },
+  "body-charge": {
+    "id": "body-charge",
+    "name": "撼山冲",
+    "classId": "body",
+    "level": 20,
+    "mpCost": 8,
+    "cooldown": 8,
+    "windup": 0.15,
+    "range": 5,
+    "color": "#ff9f43",
+    "effect": {
+      "type": "charge",
+      "stat": "attack",
+      "multiplier": 2.0,
+      "stun": 1.5
+    }
   }
 }
