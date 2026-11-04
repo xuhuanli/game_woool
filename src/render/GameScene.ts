@@ -615,7 +615,7 @@ export class GameScene extends Phaser.Scene {
       case 'achievement':
         this.hud.log(`达成成就：${event.achievement.name}`, 'gain');
         this.floatText(this.world.player, event.achievement.name, '#ffd84a', 20);
-        this.audio.play('levelUp');
+        this.audio.play('achievement');
         break;
       case 'skillLearned':
         this.hud.log(`学会功法：${event.skill.name}`, 'gain');
@@ -701,6 +701,7 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'questCompleted':
         this.hud.log(`完成任务：${event.name}`, 'gain');
+        this.audio.play('questDone');
         break;
       case 'goldChanged':
         this.hud.log(`灵石 ${event.amount > 0 ? '+' : ''}${event.amount}`);

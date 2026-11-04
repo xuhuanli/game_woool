@@ -16,6 +16,8 @@ const SOUNDS = {
   warning: { file: 'warning.ogg', volume: 0.6 },
   death: { file: 'death.ogg', volume: 0.6 },
   portal: { file: 'portal.ogg', volume: 0.5 },
+  questDone: { file: 'jingle-quest.ogg', volume: 0.5 },
+  achievement: { file: 'jingle-achievement.ogg', volume: 0.5 },
 } as const;
 
 /** 背景音乐文件，键名就是地图配置里的 music */
@@ -27,9 +29,9 @@ const MUSIC: Record<string, string> = {
   yanling: 'music-yanling.ogg',
   sea: 'music-sea.ogg',
   xutian: 'music-xutian.ogg',
-  zhuomo: 'music-zhuomo.mp3',
+  zhuomo: 'music-zhuomo.ogg',
   /** Boss 盯上玩家时播放，不属于任何地图 */
-  boss: 'music-boss.mp3',
+  boss: 'music-boss.ogg',
 };
 
 export type SoundName = keyof typeof SOUNDS;
