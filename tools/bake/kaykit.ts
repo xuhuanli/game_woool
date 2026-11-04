@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { addStudioLighting } from './lighting';
 import { ROSTER, type ClipSpec, type Entry, type Recolor } from './roster';
 
 const WORLD_HEIGHT = 3;
@@ -171,13 +172,7 @@ async function bake(entry: Entry): Promise<void> {
 
   const scene = new THREE.Scene();
   scene.add(root);
-  scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x6a5a44, 2.2));
-  const sun = new THREE.DirectionalLight(0xfff2dc, 3.2);
-  sun.position.set(-3, 5, 4);
-  scene.add(sun);
-  const rim = new THREE.DirectionalLight(0x9fc4ff, 0.8);
-  rim.position.set(3, 2, -4);
-  scene.add(rim);
+  addStudioLighting(scene);
 
   const columns = entry.clips.reduce((sum, clip) => sum + clip.frames, 0);
   sheet.width = frame * columns;

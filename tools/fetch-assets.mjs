@@ -101,10 +101,12 @@ const POLYHAVEN_PICKS = [
  */
 // 注意：`assets-src/audio/kenney/` 下已有手工下载的 interface/ 与 rpg/ 两包，
 // 这里不再重复拉取，避免同一套音效在仓库里存两份。
+// `sci-fi-sounds` 暂不自动拉取：该包 5.9 MB，Kenney 的 /download/ 端点不支持
+// Range 断点续传且限速约 25 KB/s，单次下载常在 2~3 MB 处超时。
+// 需要时去 https://kenney.nl/assets/sci-fi-sounds 手动下载 zip，放进 `_incoming/` 解包。
 const KENNEY_PACKS = [
   { slug: 'music-jingles', note: '85 个短 jingle：升级、过关、开箱' },
   { slug: 'impact-sounds', note: '打击、撞击、破碎音效' },
-  { slug: 'sci-fi-sounds', note: '法术、传送、能量类音效' },
 ];
 
 /**
@@ -139,12 +141,12 @@ async function exists(p) {
   }
 }
 
-async function download(url, dest) {
+async function download(url, dest, timeoutMs = 60_000) {
   await mkdir(path.dirname(dest), { recursive: true });
   const res = await fetch(url, {
     headers: { 'user-agent': 'game-woool-asset-fetcher/1.0' },
-    // 单个请求卡死不该拖垮整批抓取
-    signal: AbortSignal.timeout(60_000),
+    // 单个请求卡死不该拖垮整批抓取；OGA 源站较慢，可单独放宽
+    signal: AbortSignal.timeout(timeoutMs),
   });
   if (!res.ok) throw new Error(`${res.status} ${res.statusText} <- ${url}`);
   const tmp = `${dest}.part`;
@@ -431,7 +433,8 @@ async function fetchOgaMusic(checkOnly = false) {
           continue;
         }
         const name = decodeURIComponent(path.basename(new URL(url).pathname));
-        await download(url, path.join(dir, name));
+        // OpenGameArt 常年限速（实测约 30 KB/s），音频附件给足时间
+        await download(url, path.join(dir, name), 150_000);
         saved.push({ name, url, bytes: (await stat(path.join(dir, name))).size });
       }
 

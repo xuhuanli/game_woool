@@ -16,6 +16,7 @@ import {
   wall,
   weaponRack,
 } from './buildings';
+import { addStudioLighting } from './lighting';
 
 /** 景观物件：把 KayKit Forest 的模型和代码建模的建筑烘成单张精灵，脚底是原点，输出到 public/assets/props。 */
 
@@ -186,10 +187,7 @@ async function bake(entry: Prop): Promise<Placement> {
 
   const scene = new THREE.Scene();
   scene.add(model);
-  scene.add(new THREE.HemisphereLight(0xe6ecff, 0x6a5a44, 2));
-  const sun = new THREE.DirectionalLight(0xfff0d8, 3);
-  sun.position.set(-3, 6, 4);
-  scene.add(sun);
+  addStudioLighting(scene);
   renderer.render(scene, camera);
 
   const frame = document.createElement('canvas');

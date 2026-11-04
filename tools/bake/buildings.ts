@@ -84,7 +84,32 @@ function column(
   parent.add(mesh);
 }
 
-/** 四面坡屋顶，檐口内凹，四角起翘，瓦垄用深浅两色表现。 */
+/**
+ * 四面坡屋顶：四个坡面各自成面，瓦垄沿坡向等距排布。
+ *
+ * 旧版是在一张网格上按 i/j 奇偶上色，方向判断写错了，四个坡出来是斜向同心条纹。
+ * 现在每个坡面单独生成，u 沿檐线、v 沿坡长，瓦垄就是 u 方向的等宽条带，
+ * 中间起脊、两侧落沟，檐口收平并加一圈瓦当，屋顶才有厚度。
+ */
+
+/** 瓦垄间距（世界单位）。一格约 0.9 米，瓦垄压到 0.3 单位一根。 */
+const TILE_PITCH = 0.3;
+/** 瓦垄凸起高度 */
+const TILE_HEIGHT = 0.05;
+/** 坡面沿坡长的分段数 */
+const ROOF_ROWS = 6;
+/** 檐口瓦当的厚度 */
+const EAVE_LIP = 0.09;
+
+interface RoofFace {
+  /** 正脊两端；左右坡是三角形时两点重合 */
+  topA: THREE.Vector3;
+  topB: THREE.Vector3;
+  /** 檐口两端 */
+  eaveA: THREE.Vector3;
+  eaveB: THREE.Vector3;
+}
+
 function roof(
   parent: THREE.Object3D,
   width: number,
@@ -94,62 +119,194 @@ function roof(
   style: Style,
   lift = height * 0.28,
 ): void {
+  // 所有调用点都是宽大于深；万一反了，转 90 度走同一套逻辑
+  if (depth > width) {
+    const holder = new THREE.Group();
+    holder.rotation.y = Math.PI / 2;
+    parent.add(holder);
+    roof(holder, depth, width, height, y, style, lift);
+    return;
+  }
+
+  const group = new THREE.Group();
+  group.position.y = y;
+  parent.add(group);
+
   const halfW = width / 2;
   const halfD = depth / 2;
-  const slope = Math.min(halfW, halfD);
-  const steps = 40;
+  /** 正脊半长，等于四坡的举折线水平投影 */
+  const ridge = Math.max(0, halfW - halfD);
+  const at = (x: number, yy: number, z: number) => new THREE.Vector3(x, yy, z);
+
+  const faces: RoofFace[] = [
+    // 前坡（朝 +z）
+    { topA: at(-ridge, height, 0), topB: at(ridge, height, 0), eaveA: at(-halfW, 0, halfD), eaveB: at(halfW, 0, halfD) },
+    // 后坡（朝 -z）
+    { topA: at(ridge, height, 0), topB: at(-ridge, height, 0), eaveA: at(halfW, 0, -halfD), eaveB: at(-halfW, 0, -halfD) },
+    // 左坡（朝 -x）
+    { topA: at(-ridge, height, 0), topB: at(-ridge, height, 0), eaveA: at(-halfW, 0, -halfD), eaveB: at(-halfW, 0, halfD) },
+    // 右坡（朝 +x）
+    { topA: at(ridge, height, 0), topB: at(ridge, height, 0), eaveA: at(halfW, 0, halfD), eaveB: at(halfW, 0, -halfD) },
+  ];
+
+  /** u 沿檐线 0→1，v 从正脊 0→檐口 1。crest 是瓦垄的起脊量（0 在沟里，1 在垄顶）。 */
+  const sample = (face: RoofFace, u: number, v: number, crest: number): THREE.Vector3 => {
+    const x = THREE.MathUtils.lerp(
+      THREE.MathUtils.lerp(face.topA.x, face.topB.x, u),
+      THREE.MathUtils.lerp(face.eaveA.x, face.eaveB.x, u),
+      v,
+    );
+    const z = THREE.MathUtils.lerp(
+      THREE.MathUtils.lerp(face.topA.z, face.topB.z, u),
+      THREE.MathUtils.lerp(face.eaveA.z, face.eaveB.z, u),
+      v,
+    );
+    // 坡面凹下去（举折），檐角翘起来（起翘）
+    const sag = height * Math.pow(1 - v, 1.25);
+    const corner = Math.pow(Math.abs(u * 2 - 1), 6) * Math.pow(v, 3) * lift;
+    // 瓦垄在檐口收平，免得边缘炸毛
+    const relief = TILE_HEIGHT * crest * Math.pow(Math.sin(Math.PI * Math.min(1, v)), 0.4);
+    return new THREE.Vector3(x, sag + corner + relief, z);
+  };
+
   const positions: number[] = [];
   const colors: number[] = [];
   const light = new THREE.Color(style.roof);
   const dark = new THREE.Color(style.roofDark);
+  /** 正脊附近瓦垄挤在一起，用中间色过渡，免得糊成一片 */
+  const mid = light.clone().lerp(dark, 0.5);
 
-  const point = (i: number, j: number): [number, number, number] => {
-    const x = (i / steps) * 2 - 1;
-    const z = (j / steps) * 2 - 1;
-    const px = x * halfW;
-    const pz = z * halfD;
-    const t = Math.min(1, Math.max((Math.abs(px) - (halfW - slope)) / slope, (Math.abs(pz) - (halfD - slope)) / slope));
-    const corner = Math.pow(Math.abs(x), 6) * Math.pow(Math.abs(z), 6);
-    return [px, height * Math.pow(1 - t, 1.6) + lift * corner + lift * 0.18 * Math.pow(t, 8), pz];
+  /** 压一个四边形，顺便把法线摆正朝上 */
+  const quad = (
+    p0: THREE.Vector3,
+    p1: THREE.Vector3,
+    p2: THREE.Vector3,
+    p3: THREE.Vector3,
+    color: THREE.Color,
+  ): void => {
+    const normal = new THREE.Vector3().subVectors(p1, p0).cross(new THREE.Vector3().subVectors(p2, p0));
+    const order = normal.y >= 0 ? [p0, p1, p2, p0, p2, p3] : [p0, p3, p2, p0, p2, p1];
+    for (const point of order) {
+      positions.push(point.x, point.y, point.z);
+      colors.push(color.r, color.g, color.b);
+    }
   };
 
-  for (let i = 0; i < steps; i++) {
-    for (let j = 0; j < steps; j++) {
-      const a = point(i, j);
-      const b = point(i + 1, j);
-      const c = point(i + 1, j + 1);
-      const d = point(i, j + 1);
-      positions.push(...a, ...d, ...b, ...b, ...d, ...c);
-      const onFront = Math.abs((i + 0.5) / steps - 0.5) * halfW * 2 - (halfW - slope) / 1 < Math.abs((j + 0.5) / steps - 0.5) * halfD * 2 - (halfD - slope);
-      const band = onFront ? i : j;
+  for (const face of faces) {
+    const eaveLength = face.eaveA.distanceTo(face.eaveB);
+    if (eaveLength < 0.05) continue;
+    const bands = Math.max(2, Math.round(eaveLength / TILE_PITCH));
+    for (let band = 0; band < bands; band++) {
+      const u0 = band / bands;
+      const u1 = (band + 1) / bands;
+      const um = (u0 + u1) / 2;
       const tone = band % 2 === 0 ? light : dark;
-      for (let v = 0; v < 6; v++) colors.push(tone.r, tone.g, tone.b);
+      for (let row = 0; row < ROOF_ROWS; row++) {
+        const v0 = row / ROOF_ROWS;
+        const v1 = (row + 1) / ROOF_ROWS;
+        // 一根瓦垄拆成左右两半，中间起脊
+        const shade = mid.clone().lerp(tone, Math.min(1, v0 * 2.4));
+        quad(sample(face, u0, v0, 0), sample(face, um, v0, 1), sample(face, um, v1, 1), sample(face, u0, v1, 0), shade);
+        quad(sample(face, um, v0, 1), sample(face, u1, v0, 0), sample(face, u1, v1, 0), sample(face, um, v1, 1), shade);
+      }
     }
   }
 
-  const geometry = new THREE.BufferGeometry();
-  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
-  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-  geometry.computeVertexNormals();
-  const mesh = new THREE.Mesh(
-    geometry,
-    new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, flatShading: true, side: THREE.DoubleSide }),
+  // 檐口：沿檐线挂一圈瓦当，屋顶不再是纸片
+  const lipColor = dark.clone().multiplyScalar(0.72);
+  const segments = 24;
+  for (const face of faces) {
+    if (face.eaveA.distanceTo(face.eaveB) < 0.05) continue;
+    for (let i = 0; i < segments; i++) {
+      const a = sample(face, i / segments, 1, 0);
+      const b = sample(face, (i + 1) / segments, 1, 0);
+      const outward = (point: THREE.Vector3) => {
+        const length = Math.hypot(point.x, point.z) || 1;
+        return new THREE.Vector3((point.x / length) * 0.03, 0, (point.z / length) * 0.03);
+      };
+      const aDown = a.clone().add(outward(a));
+      const bDown = b.clone().add(outward(b));
+      aDown.y = a.y - EAVE_LIP;
+      bDown.y = b.y - EAVE_LIP;
+      quad(a, b, bDown, aDown, lipColor);
+    }
+  }
+
+  const slopes = new THREE.BufferGeometry();
+  slopes.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  slopes.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  slopes.computeVertexNormals();
+  group.add(
+    new THREE.Mesh(
+      slopes,
+      new THREE.MeshStandardMaterial({
+        vertexColors: true,
+        roughness: 0.62,
+        flatShading: true,
+        side: THREE.DoubleSide,
+      }),
+    ),
   );
-  mesh.position.y = y;
-  parent.add(mesh);
 
   // 正脊和两端的鸱吻
   const ridgeLength = Math.max(0, width - depth) + 0.3;
   if (ridgeLength > 0.35) {
-    box(parent, [ridgeLength, 0.16, 0.16], [0, y + height + 0.05, 0], style.ridge);
+    box(group, [ridgeLength, 0.16, 0.16], [0, height + 0.05, 0], style.ridge);
     for (const side of [-1, 1]) {
-      const end = box(parent, [0.16, 0.34, 0.16], [(side * ridgeLength) / 2, y + height + 0.2, 0], style.ridge);
+      const end = box(group, [0.16, 0.34, 0.16], [(side * ridgeLength) / 2, height + 0.2, 0], style.ridge);
       end.rotation.z = -side * 0.35;
     }
   } else {
     const tip = new THREE.Mesh(new THREE.ConeGeometry(0.14, 0.45, 8), material(style.ridge));
-    tip.position.set(0, y + height + 0.2, 0);
-    parent.add(tip);
+    tip.position.set(0, height + 0.2, 0);
+    group.add(tip);
+  }
+}
+
+/** 檐下阴影的渐变贴图，全局共用一张 */
+let shadeTexture: THREE.Texture | null = null;
+
+function shadeGradient(): THREE.Texture {
+  if (shadeTexture) return shadeTexture;
+  const canvas = document.createElement('canvas');
+  canvas.width = 4;
+  canvas.height = 64;
+  const context = canvas.getContext('2d')!;
+  const gradient = context.createLinearGradient(0, 0, 0, 64);
+  gradient.addColorStop(0, 'rgba(14, 11, 8, 0.5)');
+  gradient.addColorStop(0.4, 'rgba(14, 11, 8, 0.24)');
+  gradient.addColorStop(1, 'rgba(14, 11, 8, 0)');
+  context.fillStyle = gradient;
+  context.fillRect(0, 0, 4, 64);
+  shadeTexture = new THREE.CanvasTexture(canvas);
+  shadeTexture.colorSpace = THREE.SRGBColorSpace;
+  return shadeTexture;
+}
+
+/**
+ * 檐下阴影：贴着墙顶压一层自上而下淡出的暗色。
+ * 出檐没有投影，建筑就会像纸板立在地面上，这层比多加几何体更划算。
+ */
+function eaveShade(parent: THREE.Object3D, width: number, depth: number, topY: number): void {
+  const height = Math.min(0.85, topY * 0.55);
+  const shade = new THREE.MeshBasicMaterial({
+    map: shadeGradient(),
+    transparent: true,
+    depthWrite: false,
+    side: THREE.DoubleSide,
+  });
+  const sides: [number, number, number, number][] = [
+    // [宽, x, z, 绕 y 的旋转]。墙上的窗棂探出到 +0.05，这里再往前让一点
+    [width, 0, depth / 2 + 0.07, 0],
+    [width, 0, -depth / 2 - 0.07, Math.PI],
+    [depth, width / 2 + 0.07, 0, Math.PI / 2],
+    [depth, -width / 2 - 0.07, 0, -Math.PI / 2],
+  ];
+  for (const [sideWidth, x, z, rotation] of sides) {
+    const plane = new THREE.Mesh(new THREE.PlaneGeometry(sideWidth, height), shade);
+    plane.position.set(x, topY - height / 2 + 0.02, z);
+    plane.rotation.y = rotation;
+    parent.add(plane);
   }
 }
 
@@ -236,10 +393,11 @@ export function hall(style: Style, name: string, cellsW = 9, cellsD = 6): THREE.
   colonnade(group, coreW, coreD, 1.7, 0.56, style);
   box(group, [coreW - 0.4, 1.6, coreD - 0.4], [0, 1.36, 0], style.beam);
   lattice(group, coreW - 0.4, 1.6, 0.56, (coreD - 0.4) / 2 + 0.03, style);
+  eaveShade(group, coreW - 0.4, coreD - 0.4, 2.16);
   roof(group, coreW + 1.6, coreD + 1.6, 0.8, 2.3, style, 0.34);
   box(group, [coreW * 0.72, 0.7, coreD * 0.62], [0, 3.15, 0], style.beam);
   roof(group, coreW * 0.72 + 1.1, coreD * 0.62 + 1.1, 1.3, 3.5, style, 0.36);
-  if (name) plaque(group, name, 2.4, 3.12, (coreD * 0.62) / 2 + 0.03, style);
+  if (name) plaque(group, name, 1.9, 3.14, (coreD * 0.62) / 2 + 0.09, style);
   return group;
 }
 
@@ -265,6 +423,7 @@ export function house(style: Style, cellsW = 6, cellsD = 4): THREE.Group {
     box(group, [0.6, 0.03, 0.07], [x, 1.05, depth / 2 + 0.05], style.beam);
   }
   roof(group, width + 1.1, depth + 1.1, 1.25, 1.72, style, 0.3);
+  eaveShade(group, width, depth, 1.72);
   return group;
 }
 
@@ -280,6 +439,7 @@ export function tower(style: Style, name: string, cells = 5): THREE.Group {
     box(group, [size, height, size], [0, y + height / 2, 0], style.beam);
     lattice(group, size, height, y, size / 2 + 0.03, style);
     colonnade(group, size + 0.1, size + 0.1, height, y, style);
+    eaveShade(group, size, size, y + height);
     const top = y + height;
     if (floor === 2) {
       roof(group, size + 1.3, size + 1.3, 1.4, top, style, 0.34);
