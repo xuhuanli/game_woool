@@ -3239,5 +3239,825 @@
         "message": "古魔燃烧精血，作困兽之斗"
       }
     ]
+  },
+  "mulan-rider": {
+    "id": "mulan-rider",
+    "name": "慕兰骑兵",
+    "stats": {
+      "maxHp": 600,
+      "maxMp": 0,
+      "attack": {
+        "min": 29,
+        "max": 37
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 18,
+        "max": 21
+      },
+      "magicDefense": {
+        "min": 15,
+        "max": 18
+      },
+      "accuracy": 47,
+      "evasion": 10,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 1000,
+    "respawnSeconds": 20,
+    "dropTable": "zhuomo-band",
+    "look": {
+      "fur": "#5a4a2a",
+      "head": "#c8a06a",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "mulan-charge",
+        "name": "冲阵",
+        "cooldown": 9,
+        "windup": 0.7,
+        "color": "#c8a06a",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.2,
+        "charge": true
+      }
+    ]
+  },
+  "mulan-mage": {
+    "id": "mulan-mage",
+    "name": "慕兰法士",
+    "stats": {
+      "maxHp": 520,
+      "maxMp": 0,
+      "attack": {
+        "min": 30,
+        "max": 38
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 14,
+        "max": 16
+      },
+      "magicDefense": {
+        "min": 19,
+        "max": 22
+      },
+      "accuracy": 47,
+      "evasion": 13,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 1040,
+    "respawnSeconds": 20,
+    "dropTable": "zhuomo-band",
+    "look": {
+      "fur": "#3a5a4a",
+      "head": "#d8c08a",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "mulan-hex",
+        "name": "神咒",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#8ad86a",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.1,
+        "poison": {
+          "damage": 10,
+          "duration": 5
+        }
+      }
+    ]
+  },
+  "sacred-bird": {
+    "id": "sacred-bird",
+    "name": "慕兰圣禽",
+    "stats": {
+      "maxHp": 420,
+      "maxMp": 0,
+      "attack": {
+        "min": 28,
+        "max": 35
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 14,
+        "max": 16
+      },
+      "magicDefense": {
+        "min": 16,
+        "max": 18
+      },
+      "accuracy": 46,
+      "evasion": 14,
+      "luck": 0
+    },
+    "moveSpeed": 3.0,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 300,
+    "respawnSeconds": 20,
+    "dropTable": "none",
+    "look": {
+      "fur": "#e6b84a",
+      "head": "#ffffff",
+      "scale": 1
+    }
+  },
+  "le-shangshi": {
+    "id": "le-shangshi",
+    "name": "乐上师",
+    "stats": {
+      "maxHp": 6400,
+      "maxMp": 0,
+      "attack": {
+        "min": 31,
+        "max": 40
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 17,
+        "max": 20
+      },
+      "magicDefense": {
+        "min": 18,
+        "max": 21
+      },
+      "accuracy": 46,
+      "evasion": 11,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 50000,
+    "respawnSeconds": 300,
+    "dropTable": "le-shangshi",
+    "look": {
+      "fur": "#3a5a4a",
+      "head": "#e6b84a",
+      "scale": 1.3
+    },
+    "attackRange": 4,
+    "abilities": [
+      {
+        "id": "lamp-flame",
+        "name": "神灯烈焰",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#ffd84a",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.3
+      },
+      {
+        "id": "lamp-ward",
+        "name": "灯火燎原",
+        "cooldown": 11,
+        "windup": 1.1,
+        "color": "#ff9a4a",
+        "range": 6,
+        "shape": "circle",
+        "size": 2,
+        "multiplier": 1.3
+      },
+      {
+        "id": "call-bird",
+        "name": "召唤圣禽",
+        "cooldown": 18,
+        "windup": 0.8,
+        "color": "#e6b84a",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "sacred-bird",
+          "count": 1
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.3,
+        "attackMultiplier": 1.25,
+        "message": "乐上师催动元明灯，圣禽长鸣"
+      }
+    ]
+  },
+  "grass-beast": {
+    "id": "grass-beast",
+    "name": "草原妖兽",
+    "stats": {
+      "maxHp": 760,
+      "maxMp": 0,
+      "attack": {
+        "min": 38,
+        "max": 48
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 21,
+        "max": 24
+      },
+      "magicDefense": {
+        "min": 17,
+        "max": 20
+      },
+      "accuracy": 52,
+      "evasion": 11,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 2200,
+    "respawnSeconds": 20,
+    "dropTable": "tianlan-band",
+    "look": {
+      "fur": "#c8b08a",
+      "head": "#8a6a4a",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "grass-charge",
+        "name": "顶撞",
+        "cooldown": 9,
+        "windup": 0.7,
+        "color": "#c8a06a",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.2,
+        "charge": true
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "grass-hide",
+        "chance": 0.3
+      }
+    ]
+  },
+  "tuwu-rider": {
+    "id": "tuwu-rider",
+    "name": "突兀骑兵",
+    "stats": {
+      "maxHp": 820,
+      "maxMp": 0,
+      "attack": {
+        "min": 40,
+        "max": 50
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 23,
+        "max": 26
+      },
+      "magicDefense": {
+        "min": 18,
+        "max": 21
+      },
+      "accuracy": 53,
+      "evasion": 11,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 2300,
+    "respawnSeconds": 20,
+    "dropTable": "tianlan-band",
+    "look": {
+      "fur": "#6a4a2a",
+      "head": "#c83a3a",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "tuwu-charge",
+        "name": "骑兵冲锋",
+        "cooldown": 9,
+        "windup": 0.7,
+        "color": "#ff6a4a",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.25,
+        "charge": true
+      }
+    ]
+  },
+  "tuwu-archer": {
+    "id": "tuwu-archer",
+    "name": "突兀射手",
+    "stats": {
+      "maxHp": 640,
+      "maxMp": 0,
+      "attack": {
+        "min": 42,
+        "max": 53
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 18,
+        "max": 20
+      },
+      "magicDefense": {
+        "min": 20,
+        "max": 23
+      },
+      "accuracy": 55,
+      "evasion": 14,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 2350,
+    "respawnSeconds": 20,
+    "dropTable": "tianlan-band",
+    "look": {
+      "fur": "#5a4a3a",
+      "head": "#c8a06a",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "volley",
+        "name": "连珠箭",
+        "cooldown": 8,
+        "windup": 0.8,
+        "color": "#d8c08a",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.2
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "tuwu-arrow",
+        "chance": 0.3
+      }
+    ]
+  },
+  "tuwu-shaman": {
+    "id": "tuwu-shaman",
+    "name": "突兀巫师",
+    "stats": {
+      "maxHp": 680,
+      "maxMp": 0,
+      "attack": {
+        "min": 43,
+        "max": 54
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 18,
+        "max": 21
+      },
+      "magicDefense": {
+        "min": 23,
+        "max": 26
+      },
+      "accuracy": 55,
+      "evasion": 13,
+      "luck": 0
+    },
+    "moveSpeed": 2.7,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 2450,
+    "respawnSeconds": 20,
+    "dropTable": "tianlan-band",
+    "look": {
+      "fur": "#3a2a4a",
+      "head": "#8ad86a",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "shaman-curse",
+        "name": "巫蛊",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#6ad84a",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.1,
+        "poison": {
+          "damage": 16,
+          "duration": 5
+        }
+      }
+    ]
+  },
+  "totem-golem": {
+    "id": "totem-golem",
+    "name": "图腾傀儡",
+    "stats": {
+      "maxHp": 1050,
+      "maxMp": 0,
+      "attack": {
+        "min": 41,
+        "max": 51
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 27,
+        "max": 30
+      },
+      "magicDefense": {
+        "min": 24,
+        "max": 27
+      },
+      "accuracy": 52,
+      "evasion": 8,
+      "luck": 0
+    },
+    "moveSpeed": 2.2,
+    "attackInterval": 1.3,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 2550,
+    "respawnSeconds": 20,
+    "dropTable": "tianlan-band",
+    "look": {
+      "fur": "#8a6a4a",
+      "head": "#c83a3a",
+      "scale": 1.1
+    },
+    "abilities": [
+      {
+        "id": "totem-slam",
+        "name": "图腾震地",
+        "cooldown": 10,
+        "windup": 1.0,
+        "color": "#c8a06a",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.3
+      }
+    ]
+  },
+  "tuwu-acolyte": {
+    "id": "tuwu-acolyte",
+    "name": "仙师弟子",
+    "stats": {
+      "maxHp": 720,
+      "maxMp": 0,
+      "attack": {
+        "min": 45,
+        "max": 56
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 20,
+        "max": 23
+      },
+      "magicDefense": {
+        "min": 24,
+        "max": 27
+      },
+      "accuracy": 57,
+      "evasion": 14,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 2600,
+    "respawnSeconds": 20,
+    "dropTable": "tianlan-band",
+    "look": {
+      "fur": "#2a3a5a",
+      "head": "#e6b84a",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "acolyte-bolt",
+        "name": "仙师秘术",
+        "cooldown": 7,
+        "windup": 0.8,
+        "color": "#7ab4ff",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.25
+      }
+    ]
+  },
+  "hu-xianshi": {
+    "id": "hu-xianshi",
+    "name": "呼大仙师",
+    "stats": {
+      "maxHp": 11000,
+      "maxMp": 0,
+      "attack": {
+        "min": 41,
+        "max": 52
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 22,
+        "max": 25
+      },
+      "magicDefense": {
+        "min": 24,
+        "max": 27
+      },
+      "accuracy": 56,
+      "evasion": 13,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 150000,
+    "respawnSeconds": 300,
+    "dropTable": "hu-xianshi",
+    "look": {
+      "fur": "#2a3a5a",
+      "head": "#e6b84a",
+      "scale": 1.35
+    },
+    "attackRange": 4,
+    "abilities": [
+      {
+        "id": "hu-lightning",
+        "name": "天雷符",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#7ab4ff",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.35
+      },
+      {
+        "id": "hu-plague",
+        "name": "万蛊噬身",
+        "cooldown": 11,
+        "windup": 1.1,
+        "color": "#6ad84a",
+        "range": 2,
+        "shape": "around",
+        "size": 3,
+        "multiplier": 1.35,
+        "poison": {
+          "damage": 18,
+          "duration": 6
+        }
+      },
+      {
+        "id": "hu-call",
+        "name": "唤弟子",
+        "cooldown": 18,
+        "windup": 0.8,
+        "color": "#b48cff",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "tuwu-acolyte",
+          "count": 1
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.3,
+        "attackMultiplier": 1.3,
+        "message": "呼大仙师咬破舌尖，秘术更急"
+      }
+    ]
+  },
+  "tianlan-beast": {
+    "id": "tianlan-beast",
+    "name": "天澜圣兽分身",
+    "stats": {
+      "maxHp": 14000,
+      "maxMp": 0,
+      "attack": {
+        "min": 42,
+        "max": 54
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 24,
+        "max": 27
+      },
+      "magicDefense": {
+        "min": 24,
+        "max": 27
+      },
+      "accuracy": 57,
+      "evasion": 12,
+      "luck": 0
+    },
+    "moveSpeed": 2.5,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 200000,
+    "respawnSeconds": 300,
+    "dropTable": "tianlan-beast",
+    "look": {
+      "fur": "#f0e8d4",
+      "head": "#e6b84a",
+      "scale": 1.5
+    },
+    "abilities": [
+      {
+        "id": "beast-roar",
+        "name": "圣兽长啸",
+        "cooldown": 10,
+        "windup": 1.1,
+        "color": "#ffd84a",
+        "range": 2,
+        "shape": "around",
+        "size": 3,
+        "multiplier": 1.4
+      },
+      {
+        "id": "beast-pounce",
+        "name": "扑击",
+        "cooldown": 9,
+        "windup": 0.7,
+        "color": "#ff9a4a",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.3,
+        "charge": true
+      },
+      {
+        "id": "beast-light",
+        "name": "圣光",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#fff0b0",
+        "range": 6,
+        "shape": "circle",
+        "size": 2,
+        "multiplier": 1.3
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.5,
+        "attackMultiplier": 1.15,
+        "message": "圣兽分身引动天澜圣女的法力"
+      },
+      {
+        "hpBelow": 0.2,
+        "attackMultiplier": 1.15,
+        "message": "圣兽分身灵光黯淡，困兽犹斗"
+      }
+    ]
   }
 }

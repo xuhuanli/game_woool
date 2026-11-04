@@ -1024,8 +1024,8 @@ describe('40 级内容', () => {
         .filter((item) => item.slot === slot && !item.boss)
         .sort((a, b) => (a.level ?? 1) - (b.level ?? 1));
       const highest = tiers.at(-1)!;
-      expect(highest.level, slot).toBe(35);
-      for (const level of [14, 27, 35]) {
+      expect(highest.level, slot).toBe(44);
+      for (const level of [14, 27, 35, 44]) {
         expect(tiers.some((item) => item.level === level), `${slot} ${level}`).toBe(true);
       }
       const power = (item: (typeof tiers)[number]) =>
@@ -1899,6 +1899,45 @@ describe('物品来源', () => {
       if (item.kind !== 'equip' && !collected.includes(item.id)) continue;
       if (story.has(item.id)) continue;
       expect(itemSources(config, world.player, item.id).length, item.id).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('第 7 章 天澜草原', () => {
+  it('主线接在第 6 章后面，地图按任务开放，任务经验约占 40～45 级的四成', () => {
+    const chain = Object.values(config.quests).filter((quest) => quest.id.startsWith('ch7-'));
+    expect(chain[0]!.prev).toBe('ch6-ending');
+    for (const quest of chain) expect(quest.main, quest.id).toBe(true);
+    expect(config.maps['tianlan-grass']!.portals!.find((portal) => portal.toMap === 'tuwu-camp')!.requires).toBe('ch7-fengyue');
+    expect(config.maps['tuwu-camp']!.portals!.find((portal) => portal.toMap === 'beast-altar')!.requires).toBe('ch7-hu');
+    const levels = config.levels.expToNext.slice(39, 44).reduce((sum, exp) => sum + exp, 0);
+    const quests = chain.reduce((sum, quest) => sum + quest.rewards.exp, 0);
+    expect(quests / levels).toBeGreaterThan(0.3);
+    expect(quests / levels).toBeLessThan(0.5);
+    for (const [mapId, bossId] of [
+      ['tuwu-camp', 'hu-xianshi'],
+      ['beast-altar', 'tianlan-beast'],
+      ['mulan-border', 'le-shangshi'],
+    ] as const) {
+      const boss = config.maps[mapId]!.spawns.find((spawn) => spawn.monster === bossId)!;
+      for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === mapId)) {
+        expect(Math.hypot(npc.x - boss.x, npc.y - boss.y) - 2, npc.id).toBeGreaterThan(config.monsters[bossId]!.aggroRange);
+      }
+    }
+  });
+
+  it('慕兰之战支线从落云宗开始，打赢乐上师结束', () => {
+    const chain = ['side-mulan-call', 'side-mulan-riders', 'side-mulan-mages', 'side-mulan-lamp'];
+    expect(config.quests[chain[0]!]!.prev).toBe('ch6-arrive');
+    for (let i = 1; i < chain.length; i++) expect(config.quests[chain[i]!]!.prev).toBe(chain[i - 1]);
+    expect(config.quests['side-mulan-lamp']!.objectives[0]).toEqual({ type: 'kill', target: 'le-shangshi', count: 1 });
+    expect(config.npcs['luoyun-gate']!.travel!.some((option) => option.map === 'mulan-border')).toBe(true);
+  });
+
+  it('44 级天澜套能从第 7 章的怪和 Boss 身上掉', () => {
+    const world = new World(config, 'tianlan-grass', 'body', 1);
+    for (const piece of config.sets['tianlan']!.pieces) {
+      expect(itemSources(config, world.player, piece).length, piece).toBeGreaterThan(0);
     }
   });
 });

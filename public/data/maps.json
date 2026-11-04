@@ -268,5 +268,80 @@
       "alpha": 0.2
     },
     "music": "zhuomo"
+  },
+  "cangl-tribe": {
+    "id": "cangl-tribe",
+    "name": "苍鹭部",
+    "safe": true,
+    "tiled": "cangl-tribe.tmj",
+    "respawn": {
+      "map": "cangl-tribe",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#f0d8a0",
+      "alpha": 0.05
+    }
+  },
+  "tianlan-grass": {
+    "id": "tianlan-grass",
+    "name": "天澜草原",
+    "tiled": "tianlan-grass.tmj",
+    "respawn": {
+      "map": "cangl-tribe",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#d8c88a",
+      "alpha": 0.06
+    },
+    "music": "tianlan"
+  },
+  "tuwu-camp": {
+    "id": "tuwu-camp",
+    "name": "突兀营地",
+    "tiled": "tuwu-camp.tmj",
+    "respawn": {
+      "map": "cangl-tribe",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#c8a06a",
+      "alpha": 0.1
+    },
+    "music": "tianlan"
+  },
+  "beast-altar": {
+    "id": "beast-altar",
+    "name": "圣兽降临之地",
+    "tiled": "beast-altar.tmj",
+    "respawn": {
+      "map": "cangl-tribe",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#fff0c8",
+      "alpha": 0.12
+    },
+    "music": "tianlan"
+  },
+  "mulan-border": {
+    "id": "mulan-border",
+    "name": "慕兰边境",
+    "tiled": "mulan-border.tmj",
+    "respawn": {
+      "map": "luoyun-sect",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#d8c88a",
+      "alpha": 0.08
+    },
+    "music": "tianlan"
   }
 }

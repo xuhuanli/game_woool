@@ -1376,5 +1376,254 @@
       "chance": 0.08,
       "firstKill": true
     }
+  ],
+  "tianlan-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 110,
+      "max": 160
+    },
+    {
+      "item": "huge-potion",
+      "chance": 0.12
+    },
+    {
+      "item": "huge-mana",
+      "chance": 0.1
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.025
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.015
+    },
+    {
+      "item": "sword-35",
+      "chance": 0.00201
+    },
+    {
+      "item": "robe-35",
+      "chance": 0.003
+    },
+    {
+      "item": "crown-35",
+      "chance": 0.003
+    },
+    {
+      "item": "pendant-35",
+      "chance": 0.003
+    },
+    {
+      "item": "bracelet-35",
+      "chance": 0.003
+    },
+    {
+      "item": "ring-35",
+      "chance": 0.003
+    },
+    {
+      "item": "sword-44",
+      "chance": 0.001675
+    },
+    {
+      "item": "robe-44",
+      "chance": 0.0025
+    },
+    {
+      "item": "crown-44",
+      "chance": 0.0025
+    },
+    {
+      "item": "pendant-44",
+      "chance": 0.0025
+    },
+    {
+      "item": "bracelet-44",
+      "chance": 0.0025
+    },
+    {
+      "item": "ring-44",
+      "chance": 0.0025
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    }
+  ],
+  "le-shangshi": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 4000,
+      "max": 6000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 4
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-35",
+      "chance": 0.15
+    },
+    {
+      "item": "robe-35",
+      "chance": 0.15
+    },
+    {
+      "item": "crown-35",
+      "chance": 0.15
+    },
+    {
+      "item": "pendant-35",
+      "chance": 0.15
+    },
+    {
+      "item": "bracelet-35",
+      "chance": 0.15
+    },
+    {
+      "item": "ring-35",
+      "chance": 0.15
+    },
+    {
+      "item": "boss-mulan-lamp",
+      "chance": 0.08,
+      "firstKill": true
+    }
+  ],
+  "hu-xianshi": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 7000,
+      "max": 10000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 4
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-44",
+      "chance": 0.15
+    },
+    {
+      "item": "robe-44",
+      "chance": 0.15
+    },
+    {
+      "item": "crown-44",
+      "chance": 0.15
+    },
+    {
+      "item": "pendant-44",
+      "chance": 0.15
+    },
+    {
+      "item": "bracelet-44",
+      "chance": 0.15
+    },
+    {
+      "item": "ring-44",
+      "chance": 0.15
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.12
+    },
+    {
+      "item": "boss-hu-staff",
+      "chance": 0.08,
+      "firstKill": true
+    }
+  ],
+  "tianlan-beast": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 9000,
+      "max": 13000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 4
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-44",
+      "chance": 0.3
+    },
+    {
+      "item": "robe-44",
+      "chance": 0.3
+    },
+    {
+      "item": "crown-44",
+      "chance": 0.3
+    },
+    {
+      "item": "pendant-44",
+      "chance": 0.3
+    },
+    {
+      "item": "bracelet-44",
+      "chance": 0.3
+    },
+    {
+      "item": "ring-44",
+      "chance": 0.3
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "boss-tianlan-cauldron",
+      "chance": 0.08,
+      "firstKill": true
+    }
   ]
 }

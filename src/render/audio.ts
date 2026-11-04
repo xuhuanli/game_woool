@@ -30,6 +30,7 @@ const MUSIC: Record<string, string> = {
   sea: 'music-sea.ogg',
   xutian: 'music-xutian.ogg',
   zhuomo: 'music-zhuomo.ogg',
+  tianlan: 'music-tianlan.ogg',
   /** Boss 盯上玩家时播放，不属于任何地图 */
   boss: 'music-boss.ogg',
 };

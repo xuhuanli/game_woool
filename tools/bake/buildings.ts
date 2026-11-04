@@ -55,6 +55,18 @@ export const SECT: Style = {
   gold: 0xe6b84a,
 };
 
+/** 草原部落：白毡红饰，木架 */
+export const GRASS: Style = {
+  roof: 0xe8e0cc,
+  roofDark: 0xcfc6b0,
+  ridge: 0xa8342a,
+  column: 0x7a4a2c,
+  wall: 0xf0e8d4,
+  beam: 0x8a5a34,
+  stone: 0x9a8a6a,
+  gold: 0xc9a24a,
+};
+
 const material = (color: number, roughness = 0.75) =>
   new THREE.MeshStandardMaterial({ color, roughness, flatShading: true });
 
@@ -507,6 +519,27 @@ export function wall(style: Style, cells = 2): THREE.Group {
   roof(cap, length + 0.12, 0.9, 0.26, 0, style, 0);
   cap.position.y = 1.42;
   group.add(cap);
+  return group;
+}
+
+/** 毡帐：圆形毡墙加尖顶，门朝 +z，顶上一圈红饰带。 */
+export function tent(style: Style, cells = 4): THREE.Group {
+  const group = new THREE.Group();
+  const radius = (cells * CELL) / 2 - 0.25;
+  const wall = new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, 1.3, 16), material(style.wall, 0.95));
+  wall.position.y = 0.65;
+  group.add(wall);
+  const band = new THREE.Mesh(new THREE.CylinderGeometry(radius + 0.02, radius + 0.02, 0.16, 16), material(style.ridge));
+  band.position.y = 1.15;
+  group.add(band);
+  const top = new THREE.Mesh(new THREE.ConeGeometry(radius + 0.18, 1.3, 16), material(style.roof, 0.95));
+  top.position.y = 1.95;
+  group.add(top);
+  const crown = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.3, 0.2, 10), material(style.beam));
+  crown.position.y = 2.65;
+  group.add(crown);
+  box(group, [0.7, 0.95, 0.08], [0, 0.48, radius], style.ridge);
+  box(group, [0.86, 0.08, 0.1], [0, 1.0, radius + 0.02], style.gold);
   return group;
 }
 

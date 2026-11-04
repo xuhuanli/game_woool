@@ -25,5 +25,14 @@
       { "count": 4, "bonus": { "primary": 10 } },
       { "count": 6, "bonus": { "primary": 15, "luck": 2 } }
     ]
+  },
+  "tianlan": {
+    "id": "tianlan", "name": "天澜套",
+    "pieces": ["sword-44", "robe-44", "crown-44", "pendant-44", "bracelet-44", "ring-44"],
+    "bonuses": [
+      { "count": 2, "bonus": { "maxHp": 260 } },
+      { "count": 4, "bonus": { "primary": 14 } },
+      { "count": 6, "bonus": { "primary": 20, "luck": 2 } }
+    ]
   }
 }

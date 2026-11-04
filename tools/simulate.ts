@@ -13,6 +13,8 @@ const MAX_HOURS = TARGET_LEVEL > 40 ? 100 : 60;
 const SEEDS = [1, 2, 3];
 /** 按等级选挂机地图，和各章节的等级段一致 */
 const FIELDS: [number, string][] = [
+  [43, 'tuwu-camp'],
+  [40, 'tianlan-grass'],
   [39, 'blood-gate'],
   [37, 'zhuomo-inner'],
   [35, 'zhuomo-outer'],

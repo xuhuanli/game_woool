@@ -1027,5 +1027,133 @@
     "kind": "potion",
     "mana": 340,
     "price": 300
+  },
+  "sword-44": {
+    "id": "sword-44",
+    "name": "天澜骨刃",
+    "kind": "equip",
+    "slot": "weapon",
+    "level": 44,
+    "bonus": {
+      "primary": 50
+    },
+    "price": 45000
+  },
+  "robe-44": {
+    "id": "robe-44",
+    "name": "狼裘法袍",
+    "kind": "equip",
+    "slot": "armor",
+    "level": 44,
+    "bonus": {
+      "defense": 23,
+      "maxHp": 400
+    },
+    "price": 22000
+  },
+  "crown-44": {
+    "id": "crown-44",
+    "name": "苍鹭羽冠",
+    "kind": "equip",
+    "slot": "helmet",
+    "level": 44,
+    "bonus": {
+      "defense": 12,
+      "magicDefense": 12
+    },
+    "price": 22000
+  },
+  "pendant-44": {
+    "id": "pendant-44",
+    "name": "兽牙佩",
+    "kind": "equip",
+    "slot": "necklace",
+    "level": 44,
+    "bonus": {
+      "maxMp": 280,
+      "magicDefense": 10
+    },
+    "price": 22000
+  },
+  "bracelet-44": {
+    "id": "bracelet-44",
+    "name": "金阳镯",
+    "kind": "equip",
+    "slot": "bracelet",
+    "level": 44,
+    "bonus": {
+      "defense": 11,
+      "evasion": 6
+    },
+    "price": 22000
+  },
+  "ring-44": {
+    "id": "ring-44",
+    "name": "图腾戒",
+    "kind": "equip",
+    "slot": "ring",
+    "level": 44,
+    "bonus": {
+      "primary": 14
+    },
+    "price": 22000
+  },
+  "boss-mulan-lamp": {
+    "id": "boss-mulan-lamp",
+    "name": "元明灯",
+    "kind": "equip",
+    "slot": "necklace",
+    "level": 36,
+    "bonus": {
+      "maxMp": 200,
+      "magicDefense": 8,
+      "primary": 3
+    },
+    "price": 12000,
+    "boss": "le-shangshi"
+  },
+  "boss-hu-staff": {
+    "id": "boss-hu-staff",
+    "name": "仙师骨杖",
+    "kind": "equip",
+    "slot": "weapon",
+    "level": 42,
+    "bonus": {
+      "primary": 52,
+      "accuracy": 3
+    },
+    "price": 40000,
+    "boss": "hu-xianshi"
+  },
+  "boss-tianlan-cauldron": {
+    "id": "boss-tianlan-cauldron",
+    "name": "天澜圣鼎",
+    "kind": "equip",
+    "slot": "necklace",
+    "level": 44,
+    "bonus": {
+      "maxMp": 300,
+      "magicDefense": 12,
+      "primary": 4
+    },
+    "price": 30000,
+    "boss": "tianlan-beast"
+  },
+  "grass-hide": {
+    "id": "grass-hide",
+    "name": "草原兽皮",
+    "kind": "material",
+    "price": 180
+  },
+  "tuwu-arrow": {
+    "id": "tuwu-arrow",
+    "name": "突兀箭羽",
+    "kind": "material",
+    "price": 190
+  },
+  "fengjia-key": {
+    "id": "fengjia-key",
+    "name": "冯家密窟钥匙",
+    "kind": "material"
   }
 }

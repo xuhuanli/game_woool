@@ -82,6 +82,13 @@ const flyingClips = (attack = 'Punch'): ClipSpec[] => [
   clip('attack', `|${attack}`, 5, 14, false),
 ];
 
+/** Ultimate Monsters 的圆团体型（Blob）用咬作攻击 */
+const blobClips = (): ClipSpec[] => [
+  clip('idle', '|Idle', 3, 5),
+  clip('walk', '|Walk', 6, 12),
+  clip('attack', '|Bite_Front', 5, 14, false),
+];
+
 const MAGE_HIDDEN = ['Spellbook', 'Spellbook_open', '1H_Wand', 'Mage_Hat'];
 
 /** 法师长袍的色块：长袍、披风、腰带、靴子、袖口 */
@@ -627,4 +634,125 @@ export const ROSTER: Entry[] = [
       { col: 0, row: 0, color: '#6a5a7a' },
     ],
   },
+  // ---- 第 6 章支线：慕兰之战 ----
+  {
+    key: 'mulan-rider',
+    model: `${ADVENTURERS}/Characters/gltf/Knight.glb`,
+    frame: 128,
+    clips: humanoidEnemyClips('2H_Melee_Attack_Stab'),
+    size: 1.8,
+    humanoid: true,
+    hide: ['1H_Sword_Offhand', 'Badge_Shield', 'Rectangle_Shield', 'Round_Shield', 'Spike_Shield', '1H_Sword', 'Knight_Helmet'],
+    recolor: [
+      { col: 0, row: 1, span: 2, color: '#5a4a2a' },
+      { col: 1, row: 2, color: '#c8a06a' },
+    ],
+  },
+  {
+    key: 'mulan-mage',
+    model: `${ADVENTURERS}/Characters/gltf/Mage.glb`,
+    frame: 128,
+    clips: humanoidEnemyClips('Spellcast_Shoot'),
+    size: 1.8,
+    humanoid: true,
+    headScale: 0.84,
+    hide: ['Spellbook', 'Spellbook_open', '1H_Wand'],
+    recolor: robe('#3a5a4a', '#2a3a2a', '#d8c08a', '#c8a06a'),
+  },
+  {
+    key: 'sacred-bird',
+    model: `${ULTIMATE}/Blob/Birb.glb`,
+    frame: 128,
+    clips: blobClips(),
+    size: 1.4,
+    materials: { Birb_Main: '#e6b84a', Birb_Secondary: '#fff0c8', Birb_Beak: '#c8642a' },
+  },
+  {
+    key: 'le-shangshi',
+    model: `${ADVENTURERS}/Characters/gltf/Mage.glb`,
+    frame: 192,
+    clips: humanoidEnemyClips('Spellcast_Shoot'),
+    size: 2.2,
+    humanoid: true,
+    headScale: 0.84,
+    hide: ['Spellbook', 'Spellbook_open', '1H_Wand'],
+    recolor: robe('#e6b84a', '#3a5a4a', '#fff0c8', '#c83a3a'),
+  },
+  // ---- 第 7 章：天澜草原 ----
+  {
+    key: 'grass-beast',
+    model: `${ULTIMATE}/Flying/Alpaking.glb`,
+    frame: 128,
+    clips: flyingClips('Headbutt'),
+    size: 1.7,
+    materials: { Alpaking_Main: '#c8b08a', Alpaking_Secondary: '#8a6a4a', Wings: '#e8dcc0' },
+  },
+  {
+    key: 'tuwu-rider',
+    model: `${ULTIMATE}/Big/Orc.glb`,
+    frame: 128,
+    clips: bigClips('Weapon'),
+    size: 1.9,
+    materials: { Orc_Main: '#c89a6a', Orc_Secondary: '#6a4a2a', Orc_Hair: '#2a1a12', Belt: '#c83a3a' },
+  },
+  {
+    key: 'tuwu-archer',
+    model: `${ADVENTURERS}/Characters/gltf/Rogue.glb`,
+    frame: 128,
+    clips: humanoidEnemyClips('1H_Ranged_Shoot'),
+    size: 1.7,
+    humanoid: true,
+    hide: ['Knife_Offhand', 'Knife', '2H_Crossbow', 'Throwable'],
+    recolor: [
+      { col: 0, row: 1, span: 2, color: '#6a4a2a' },
+      { col: 1, row: 2, color: '#c83a3a' },
+    ],
+  },
+  {
+    key: 'tuwu-shaman',
+    model: `${ULTIMATE}/Blob/Wizard.glb`,
+    frame: 128,
+    clips: blobClips(),
+    size: 1.5,
+    materials: { Wizard_Main: '#3a2a4a', Wizard_Secondary: '#8ad86a' },
+  },
+  {
+    key: 'totem-golem',
+    model: `${ULTIMATE}/Flying/Goleling.glb`,
+    frame: 128,
+    clips: flyingClips('Headbutt'),
+    size: 1.9,
+    materials: { Goleling_Main: '#8a6a4a', Goleling_Secondary: '#c83a3a' },
+  },
+  {
+    key: 'tuwu-acolyte',
+    model: `${ULTIMATE}/Flying/Tribal.glb`,
+    frame: 128,
+    clips: flyingClips(),
+    size: 1.6,
+    materials: { Tribal_Main: '#2a3a5a', Tribal_Secondary: '#6a4a2a', Tribal_Gold: '#e6b84a' },
+  },
+  {
+    key: 'hu-xianshi',
+    model: `${ULTIMATE}/Big/Ninja.glb`,
+    frame: 192,
+    clips: bigClips('Weapon'),
+    size: 2.4,
+    materials: { Ninja_Main: '#2a3a5a', Ninja_Secondary: '#e6b84a', Belt: '#c83a3a', Gold: '#e6b84a' },
+  },
+  {
+    key: 'tianlan-beast',
+    model: `${ULTIMATE}/Flying/Dragon_Evolved.glb`,
+    frame: 192,
+    clips: flyingClips('Headbutt'),
+    size: 2.7,
+    materials: { Dragon_Main: '#f0e8d4', Dragon_Secondary: '#e6b84a', Dragon_Horn: '#c8a06a' },
+  },
+  npc('cangl-chief', '#8a5a34', '#c83a3a'),
+  npc('cangl-merchant', '#6a4a2a', '#c9a24a'),
+  npc('cangl-guide', '#5a6a8a', '#e8dcc0'),
+  npc('fengyue', '#7a6a4a', '#3a2c20'),
+  npc('cangl-hunter', '#5a4634', '#a8865a'),
+  npc('cangl-scout', '#4a3a2a', '#8a6a4a'),
+  npc('tiandao-envoy', '#3a4a7a', '#b4c8ff'),
 ];

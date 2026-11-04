@@ -110,10 +110,10 @@
   "boss-all": {
     "id": "boss-all",
     "name": "群雄尽伏",
-    "description": "击败全部 13 种 Boss",
+    "description": "击败全部 16 种 Boss",
     "condition": {
       "type": "bossTypes",
-      "count": 13
+      "count": 16
     },
     "reward": {
       "gold": 30000,
@@ -265,7 +265,7 @@
     "description": "图鉴收集全部法器",
     "condition": {
       "type": "codexItems",
-      "count": 42
+      "count": 51
     },
     "reward": {
       "gold": 30000,
@@ -378,10 +378,10 @@
   "side-all": {
     "id": "side-all",
     "name": "有求必应",
-    "description": "完成全部 18 个支线任务",
+    "description": "完成全部 24 个支线任务",
     "condition": {
       "type": "sideQuests",
-      "count": 18
+      "count": 24
     },
     "reward": {
       "gold": 10000,

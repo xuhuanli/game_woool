@@ -2342,5 +2342,498 @@
     },
     "offer": "side-ch6-blood-offer",
     "finish": "side-ch6-blood-finish"
+  },
+  "ch7-depart": {
+    "id": "ch7-depart",
+    "name": "远赴大晋",
+    "giver": "luoyun-elder",
+    "level": 40,
+    "summary": "第二元婴已成，向长老辞行，经天澜草原前往大晋。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "luoyun-gate",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 37000,
+      "gold": 3000,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ],
+      "teleport": {
+        "map": "tianlan-grass",
+        "x": 14,
+        "y": 14
+      }
+    },
+    "offer": "ch7-depart-offer",
+    "finish": "ch7-depart-finish",
+    "prev": "ch6-ending",
+    "main": true
+  },
+  "ch7-beasts": {
+    "id": "ch7-beasts",
+    "name": "草原妖兽",
+    "giver": "cangl-hunter",
+    "level": 40,
+    "summary": "击败 12 只草原妖兽。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "grass-beast",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 92500,
+      "gold": 5000,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch7-beasts-offer",
+    "finish": "ch7-beasts-finish",
+    "prev": "ch7-depart",
+    "main": true
+  },
+  "ch7-pursuit": {
+    "id": "ch7-pursuit",
+    "name": "突兀追兵",
+    "giver": "cangl-hunter",
+    "level": 41,
+    "summary": "击退追来的 12 名突兀骑兵。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "tuwu-rider",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 97000,
+      "gold": 5200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch7-pursuit-offer",
+    "finish": "ch7-pursuit-finish",
+    "prev": "ch7-beasts",
+    "main": true
+  },
+  "ch7-hide": {
+    "id": "ch7-hide",
+    "name": "混入苍鹭部",
+    "giver": "cangl-hunter",
+    "level": 41,
+    "summary": "跟猎户回苍鹭部，见过首领。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "cangl-chief",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 37000,
+      "gold": 3000,
+      "items": []
+    },
+    "offer": "ch7-hide-offer",
+    "finish": "ch7-hide-finish",
+    "prev": "ch7-pursuit",
+    "main": true
+  },
+  "ch7-archers": {
+    "id": "ch7-archers",
+    "name": "突兀射手",
+    "giver": "cangl-chief",
+    "level": 42,
+    "summary": "击退袭扰部落的 12 名突兀射手，把枫岳救回来。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "tuwu-archer",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 101500,
+      "gold": 5400,
+      "items": [
+        {
+          "item": "huge-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch7-archers-offer",
+    "finish": "ch7-archers-finish",
+    "prev": "ch7-hide",
+    "main": true
+  },
+  "ch7-fengyue": {
+    "id": "ch7-fengyue",
+    "name": "冯家钥匙",
+    "giver": "cangl-chief",
+    "level": 42,
+    "summary": "去见被救回来的枫岳。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "fengyue",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 37000,
+      "gold": 3000,
+      "items": [
+        {
+          "item": "fengjia-key",
+          "count": 1
+        }
+      ]
+    },
+    "offer": "ch7-fengyue-offer",
+    "finish": "ch7-fengyue-finish",
+    "prev": "ch7-archers",
+    "main": true
+  },
+  "ch7-shamans": {
+    "id": "ch7-shamans",
+    "name": "突兀巫师",
+    "giver": "fengyue",
+    "level": 43,
+    "summary": "击败突兀营地的 12 名巫师。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "tuwu-shaman",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 106000,
+      "gold": 5600,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch7-shamans-offer",
+    "finish": "ch7-shamans-finish",
+    "prev": "ch7-fengyue",
+    "main": true
+  },
+  "ch7-totems": {
+    "id": "ch7-totems",
+    "name": "图腾傀儡",
+    "giver": "fengyue",
+    "level": 43,
+    "summary": "击毁营地里的 12 尊图腾傀儡。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "totem-golem",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 109000,
+      "gold": 5800,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch7-totems-offer",
+    "finish": "ch7-totems-finish",
+    "prev": "ch7-shamans",
+    "main": true
+  },
+  "ch7-acolytes": {
+    "id": "ch7-acolytes",
+    "name": "仙师弟子",
+    "giver": "fengyue",
+    "level": 44,
+    "summary": "击败 12 名仙师弟子。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "tuwu-acolyte",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 111000,
+      "gold": 6000,
+      "items": [
+        {
+          "item": "huge-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch7-acolytes-offer",
+    "finish": "ch7-acolytes-finish",
+    "prev": "ch7-totems",
+    "main": true
+  },
+  "ch7-hu": {
+    "id": "ch7-hu",
+    "name": "呼大仙师",
+    "giver": "fengyue",
+    "level": 44,
+    "summary": "击败坐镇营地的呼大仙师。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "hu-xianshi",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 129500,
+      "gold": 10000,
+      "items": []
+    },
+    "offer": "ch7-hu-offer",
+    "finish": "ch7-hu-finish",
+    "prev": "ch7-acolytes",
+    "main": true
+  },
+  "ch7-saintess": {
+    "id": "ch7-saintess",
+    "name": "天澜圣女",
+    "giver": "cangl-chief",
+    "level": 44,
+    "summary": "去营地深处找苍鹭部的斥候，打探圣女的动静。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "cangl-scout",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 37000,
+      "gold": 3000,
+      "items": [],
+      "teleport": {
+        "map": "beast-altar",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch7-saintess-offer",
+    "finish": "ch7-saintess-finish",
+    "prev": "ch7-hu",
+    "main": true
+  },
+  "ch7-beast": {
+    "id": "ch7-beast",
+    "name": "圣兽分身",
+    "giver": "cangl-scout",
+    "level": 44,
+    "summary": "击败天澜圣女召来的圣兽分身。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "tianlan-beast",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 166000,
+      "gold": 15000,
+      "items": [],
+      "teleport": {
+        "map": "cangl-tribe",
+        "x": 20,
+        "y": 24
+      }
+    },
+    "offer": "ch7-beast-offer",
+    "finish": "ch7-beast-finish",
+    "prev": "ch7-saintess",
+    "main": true
+  },
+  "side-mulan-call": {
+    "id": "side-mulan-call",
+    "name": "边界告急",
+    "giver": "luoyun-elder",
+    "level": 34,
+    "summary": "慕兰法士进犯天南边界，去边境见天道盟的修士。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "tiandao-envoy",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 15000,
+      "gold": 1500,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-mulan-call-offer",
+    "finish": "side-mulan-call-finish",
+    "prev": "ch6-arrive"
+  },
+  "side-mulan-riders": {
+    "id": "side-mulan-riders",
+    "name": "慕兰骑兵",
+    "giver": "tiandao-envoy",
+    "level": 35,
+    "summary": "击退 12 名慕兰骑兵。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "mulan-rider",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 30000,
+      "gold": 2500,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-mulan-riders-offer",
+    "finish": "side-mulan-riders-finish",
+    "prev": "side-mulan-call"
+  },
+  "side-mulan-mages": {
+    "id": "side-mulan-mages",
+    "name": "破阵",
+    "giver": "tiandao-envoy",
+    "level": 35,
+    "summary": "击败 12 名主持大阵的慕兰法士。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "mulan-mage",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 35000,
+      "gold": 2800,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "side-mulan-mages-offer",
+    "finish": "side-mulan-mages-finish",
+    "prev": "side-mulan-riders"
+  },
+  "side-mulan-lamp": {
+    "id": "side-mulan-lamp",
+    "name": "元明灯",
+    "giver": "tiandao-envoy",
+    "level": 36,
+    "summary": "击败手持元明灯召唤圣禽的乐上师，夺下神灯。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "le-shangshi",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 45000,
+      "gold": 4000,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 1
+        }
+      ]
+    },
+    "offer": "side-mulan-lamp-offer",
+    "finish": "side-mulan-lamp-finish",
+    "prev": "side-mulan-mages"
+  },
+  "side-ch7-hides": {
+    "id": "side-ch7-hides",
+    "name": "草原兽皮",
+    "giver": "cangl-merchant",
+    "level": 41,
+    "summary": "收集 6 张草原兽皮交给苍鹭部商人。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "grass-hide",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 60000,
+      "gold": 4000,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-ch7-hides-offer",
+    "finish": "side-ch7-hides-finish",
+    "prev": "ch7-hide"
+  },
+  "side-ch7-arrows": {
+    "id": "side-ch7-arrows",
+    "name": "突兀箭羽",
+    "giver": "cangl-chief",
+    "level": 42,
+    "summary": "收集 6 支突兀箭羽交给首领。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "tuwu-arrow",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 65000,
+      "gold": 4200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 4
+        }
+      ]
+    },
+    "offer": "side-ch7-arrows-offer",
+    "finish": "side-ch7-arrows-finish",
+    "prev": "ch7-archers"
   }
 }

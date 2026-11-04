@@ -547,6 +547,22 @@
         "y": 12,
         "cost": 1000,
         "requires": "ch6-gate"
+      },
+      {
+        "name": "慕兰边境",
+        "map": "mulan-border",
+        "x": 12,
+        "y": 12,
+        "cost": 800,
+        "requires": "ch6-arrive"
+      },
+      {
+        "name": "苍鹭部",
+        "map": "cangl-tribe",
+        "x": 20,
+        "y": 24,
+        "cost": 1500,
+        "requires": "ch7-hide"
       }
     ]
   },
@@ -598,5 +614,127 @@
     "color": "#8a6a3a",
     "greeting": "lu-gate-greeting",
     "hiddenAfter": "ch6-nanlong"
+  },
+  "cangl-chief": {
+    "id": "cangl-chief",
+    "name": "苍鹭部首领",
+    "map": "cangl-tribe",
+    "x": 20,
+    "y": 16,
+    "color": "#c8a06a",
+    "greeting": "cangl-chief-greeting"
+  },
+  "cangl-merchant": {
+    "id": "cangl-merchant",
+    "name": "苍鹭部商人",
+    "map": "cangl-tribe",
+    "x": 27,
+    "y": 20,
+    "color": "#c9a24a",
+    "greeting": "cangl-merchant-greeting",
+    "storage": true,
+    "shop": [
+      "big-potion",
+      "big-mana",
+      "huge-potion",
+      "huge-mana",
+      "refine-stone",
+      "recall-scroll",
+      "random-scroll",
+      "book-body-brahma",
+      "book-body-charge-2",
+      "book-spell-firewall-2",
+      "book-spirit-miasma-2",
+      "book-body-mingwang-2",
+      "book-spell-qingyuan-2",
+      "book-spirit-corrosion-2",
+      "book-body-brahma-2",
+      "book-spell-bixie-2",
+      "book-spirit-puppet-2",
+      "seed-huichun",
+      "seed-ningqi",
+      "seed-yangyuan",
+      "seed-juling",
+      "seed-jinyuan",
+      "seed-xuanyin"
+    ]
+  },
+  "cangl-guide": {
+    "id": "cangl-guide",
+    "name": "苍鹭部向导",
+    "map": "cangl-tribe",
+    "x": 13,
+    "y": 20,
+    "color": "#9fd0ff",
+    "greeting": "cangl-guide-greeting",
+    "travel": [
+      {
+        "name": "落云宗",
+        "map": "luoyun-sect",
+        "x": 20,
+        "y": 24,
+        "cost": 1500
+      },
+      {
+        "name": "天澜草原",
+        "map": "tianlan-grass",
+        "x": 14,
+        "y": 14,
+        "cost": 800
+      },
+      {
+        "name": "突兀营地",
+        "map": "tuwu-camp",
+        "x": 12,
+        "y": 12,
+        "cost": 1000,
+        "requires": "ch7-fengyue"
+      },
+      {
+        "name": "圣兽降临之地",
+        "map": "beast-altar",
+        "x": 12,
+        "y": 12,
+        "cost": 1200,
+        "requires": "ch7-hu"
+      }
+    ]
+  },
+  "fengyue": {
+    "id": "fengyue",
+    "name": "枫岳",
+    "map": "cangl-tribe",
+    "x": 24,
+    "y": 26,
+    "color": "#8a6a3a",
+    "greeting": "fengyue-greeting",
+    "requires": "ch7-archers"
+  },
+  "cangl-hunter": {
+    "id": "cangl-hunter",
+    "name": "苍鹭部猎户",
+    "map": "tianlan-grass",
+    "x": 15,
+    "y": 12,
+    "color": "#a8865a",
+    "greeting": "cangl-hunter-greeting"
+  },
+  "cangl-scout": {
+    "id": "cangl-scout",
+    "name": "苍鹭部斥候",
+    "map": "tuwu-camp",
+    "x": 84,
+    "y": 88,
+    "color": "#a8865a",
+    "greeting": "cangl-scout-greeting"
+  },
+  "tiandao-envoy": {
+    "id": "tiandao-envoy",
+    "name": "天道盟修士",
+    "map": "mulan-border",
+    "x": 15,
+    "y": 12,
+    "color": "#b4c8ff",
+    "greeting": "tiandao-envoy-greeting"
   }
 }

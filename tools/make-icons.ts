@@ -84,6 +84,18 @@ const GLYPHS: Record<string, string> = {
   'core-pill': 'fire-gem',
   'nascent-pill': 'lotus',
   'ape-fur': 'animal-hide',
+  'sword-44': 'bone-knife',
+  'robe-44': 'wolf-head',
+  'crown-44': 'feather',
+  'pendant-44': 'fangs-circle',
+  'bracelet-44': 'sun',
+  'ring-44': 'totem-head',
+  'boss-mulan-lamp': 'lantern-flame',
+  'boss-hu-staff': 'skull-staff',
+  'boss-tianlan-cauldron': 'cauldron',
+  'grass-hide': 'leather-vest',
+  'tuwu-arrow': 'arrow-flights',
+  'fengjia-key': 'key',
   'herb-huichun': 'herbs-bundle',
   'herb-ningqi': 'lotus-flower',
   'herb-yangyuan': 'tree-roots',
@@ -165,7 +177,7 @@ const GLYPHS: Record<string, string> = {
   'boss-nanlong-blade': 'relic-blade',
 };
 
-const STORY_ITEMS = ['ascension-token', 'jinzhu-brush', 'great-transfer-token', 'xutian-map', 'xutian-cauldron'];
+const STORY_ITEMS = ['ascension-token', 'jinzhu-brush', 'great-transfer-token', 'xutian-map', 'xutian-cauldron', 'fengjia-key'];
 const BREAKTHROUGH = ['foundation-pill', 'core-pill', 'nascent-pill'];
 /** 丹药按档次缩放图形，大还丹最大 */
 const POTION_SCALE: Record<string, number> = {
