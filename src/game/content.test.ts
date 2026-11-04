@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { monsterDrops, validateConfig, type GameConfig } from './config';
 import type { Equipment } from './equipment';
@@ -1045,6 +1045,17 @@ describe('背景音乐', () => {
       else expect(map.music, map.id).toBeTruthy();
     }
     expect(config.maps['xutian-hall']!.music).toBe(config.maps['xutian-mist']!.music);
+  });
+
+  it('地图用到的曲子和 Boss 战曲子都有文件', () => {
+    const source = readFileSync('src/render/audio.ts', 'utf8');
+    const block = source.slice(source.indexOf('const MUSIC'), source.indexOf('};', source.indexOf('const MUSIC')));
+    const files = Object.fromEntries([...block.matchAll(/(\w+): '([\w.-]+)'/g)].map((match) => [match[1], match[2]]));
+    const keys = new Set(['town', 'boss', ...Object.values(config.maps).map((map) => map.music).filter(Boolean)]);
+    for (const key of keys) {
+      expect(files[key!], key).toBeDefined();
+      expect(existsSync(`public/assets/audio/${files[key!]}`), key).toBe(true);
+    }
   });
 });
 

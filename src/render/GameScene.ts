@@ -35,6 +35,8 @@ const DROP_ICON_SIZE = 28;
 const FONT = '"PingFang SC", "Microsoft YaHei", sans-serif';
 const HOLD_REPATH_MS = 200;
 const MAX_FRAME_MS = 250;
+/** 脱离 Boss 战后多久换回地图音乐 */
+const BOSS_MUSIC_LINGER_MS = 4000;
 const UI_DEPTH = 1_000_000;
 const TARGET_RADIUS = 34;
 const TARGET_CENTER_OFFSET = 20;
@@ -81,6 +83,8 @@ export class GameScene extends Phaser.Scene {
   private npcViews: NpcView[] = [];
   private mapObjects: { destroy(): void }[] = [];
   private accumulator = 0;
+  private musicName = '';
+  private bossMusicLeft = 0;
   private holding = false;
   private holdRunning = false;
   private holdTimer = 0;
@@ -181,6 +185,7 @@ export class GameScene extends Phaser.Scene {
     const alpha = this.accumulator / stepMs;
     for (const view of this.unitViews.values()) this.syncUnit(view, alpha);
     this.syncFields();
+    this.updateMusic(delta);
 
     this.updatePointer(delta);
     this.fadeDecorAroundPlayer(delta);
@@ -193,6 +198,19 @@ export class GameScene extends Phaser.Scene {
 
   // ---- 场景搭建 ----
 
+  /** Boss 盯上玩家时换成 Boss 战音乐，脱战几秒后换回地图音乐。 */
+  private updateMusic(delta: number): void {
+    const { player } = this.world;
+    const fighting = this.world.monsters.some(
+      (monster) => monster.def.boss && monster.hp > 0 && monster.target === player,
+    );
+    this.bossMusicLeft = fighting ? BOSS_MUSIC_LINGER_MS : Math.max(0, this.bossMusicLeft - delta);
+    const wanted = this.bossMusicLeft > 0 ? 'boss' : (this.world.map.music ?? 'town');
+    if (wanted === this.musicName) return;
+    this.musicName = wanted;
+    this.audio.playMusic(wanted);
+  }
+
   /** 按当前地图重建地面、NPC、传送点和怪物显示。 */
   private buildMap(): void {
     for (const object of this.mapObjects) object.destroy();
@@ -204,7 +222,8 @@ export class GameScene extends Phaser.Scene {
     for (const item of [...this.itemViews.keys()]) this.removeItemView(item);
 
     this.drawGround();
-    this.audio.playMusic(this.world.map.music ?? 'town');
+    this.bossMusicLeft = 0;
+    this.updateMusic(0);
     for (const portal of this.world.portals) this.addPortal(portal.x, portal.y, portal.name);
     for (const npc of this.world.npcs) this.addNpc(npc);
     for (const monster of this.world.monsters) {

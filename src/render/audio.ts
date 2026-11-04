@@ -26,8 +26,10 @@ const MUSIC: Record<string, string> = {
   forbidden: 'music-forbidden.ogg',
   yanling: 'music-yanling.ogg',
   sea: 'music-sea.ogg',
-  xutian: 'music-xutian.mp3',
+  xutian: 'music-xutian.ogg',
   zhuomo: 'music-zhuomo.mp3',
+  /** Boss 盯上玩家时播放，不属于任何地图 */
+  boss: 'music-boss.mp3',
 };
 
 export type SoundName = keyof typeof SOUNDS;
@@ -49,6 +51,8 @@ export class GameAudio {
     this.master.gain.value = this.muted ? 0 : MASTER_VOLUME;
     this.master.connect(this.context.destination);
     for (const { file } of Object.values(SOUNDS)) void this.load(file);
+    // Boss 战随时可能开打，先把曲子载好，免得开打后才开始下载
+    void this.load(MUSIC.boss!);
     this.playMusic(this.wantedMusic);
   }
 
