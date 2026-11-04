@@ -573,6 +573,11 @@ export class GameScene extends Phaser.Scene {
       case 'skillCast':
         this.showSkill(event.unit, event.skill, event.cells);
         break;
+      case 'achievement':
+        this.hud.log(`达成成就：${event.achievement.name}`, 'gain');
+        this.floatText(this.world.player, event.achievement.name, '#ffd84a', 20);
+        this.audio.play('levelUp');
+        break;
       case 'skillLearned':
         this.hud.log(`学会功法：${event.skill.name}`, 'gain');
         break;

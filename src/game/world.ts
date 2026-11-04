@@ -1,3 +1,4 @@
+import { achievementProgress, recordCodexItems } from './achievements';
 import { AutoPlay, defaultAutoSettings } from './autoPlay';
 import { rollAttack, type AttackOptions } from './combat';
 import type {
@@ -13,6 +14,7 @@ import type {
   PortalDef,
   SkillDef,
 } from './config';
+import { monsterDrops } from './config';
 import { equipmentName, EQUIP_SLOTS, rollEquipment, type Equipment } from './equipment';
 import { cellDistance, Grid, sameCell } from './grid';
 import { Inventory } from './inventory';
@@ -55,6 +57,7 @@ export const HOTBAR_SIZE = 9;
 const REPATH_SECONDS = 0.3;
 const RESPAWN_SECONDS = 3;
 const GROUND_ITEM_SECONDS = 90;
+const ACHIEVEMENT_CHECK_SECONDS = 1;
 const REGEN_DELAY_SECONDS = 5;
 const REGEN_FRACTION_PER_SECOND = 0.02;
 const MANA_FRACTION_PER_SECOND = 0.03;
@@ -79,6 +82,7 @@ export class World {
   readonly items: GroundItem[] = [];
   /** Boss 下次刷新的游戏内时间，切图后继续计时 */
   bossReadyAt: Record<string, number> = {};
+  private achievementLeft = 0;
   deathDrops: DeathDrop[] = [];
   time = 0;
 
@@ -121,7 +125,9 @@ export class World {
       realmPassed: [],
       breakthroughFails: {},
       skillLevels: {},
-      bossKills: {},
+      kills: {},
+      codexItems: {},
+      achievements: [],
       storage: [],
       reviveReadyAt: 0,
       teleportReadyAt: 0,
@@ -278,7 +284,9 @@ export class World {
         realmPassed: player.realmPassed,
         breakthroughFails: player.breakthroughFails,
         skillLevels: player.skillLevels,
-        bossKills: player.bossKills,
+        kills: player.kills,
+        codexItems: player.codexItems,
+        achievements: player.achievements,
         storage: player.storage,
         weakUntil: player.weakUntil,
         lastDeathAt: Number.isFinite(player.lastDeathAt) ? player.lastDeathAt : null,
@@ -326,7 +334,9 @@ export class World {
     player.realmPassed = data.realmPassed;
     player.breakthroughFails = data.breakthroughFails;
     player.skillLevels = data.skillLevels;
-    player.bossKills = data.bossKills ?? {};
+    player.kills = data.kills ?? {};
+    player.codexItems = data.codexItems ?? {};
+    player.achievements = (data.achievements ?? []).filter((id) => this.config.achievements[id]);
     player.storage = data.storage.filter(known);
     player.weakUntil = data.weakUntil;
     player.lastDeathAt = data.lastDeathAt ?? -Infinity;
@@ -793,6 +803,26 @@ export class World {
     for (const summon of [...this.summons]) this.tickSummon(summon, dt);
     this.tickFields(dt);
     this.expireItems();
+    this.achievementLeft -= dt;
+    if (this.achievementLeft <= 0) {
+      this.achievementLeft = ACHIEVEMENT_CHECK_SECONDS;
+      this.checkAchievements();
+    }
+  }
+
+  /** 记下图鉴里新见到的法器，达成的成就发奖励。 */
+  checkAchievements(): void {
+    const { player, config } = this;
+    recordCodexItems(player, config);
+    for (const def of Object.values(config.achievements)) {
+      if (player.achievements.includes(def.id)) continue;
+      const { value, goal } = achievementProgress(def, player, config);
+      if (value < goal) continue;
+      player.achievements.push(def.id);
+      player.gold += def.reward.gold;
+      for (const { item, count } of def.reward.items) this.inventory.addToBag(item, count);
+      this.emit({ type: 'achievement', achievement: def });
+    }
   }
 
   private tickPlayer(dt: number): void {
@@ -1463,6 +1493,7 @@ export class World {
 
   private killMonster(monster: Monster): void {
     if (monster.temporary) {
+      this.player.kills[monster.def.id] = (this.player.kills[monster.def.id] ?? 0) + 1;
       this.monsters.splice(this.monsters.indexOf(monster), 1);
       this.emit({ type: 'death', unit: monster });
       this.gainExp(monster.def.exp);
@@ -1474,16 +1505,15 @@ export class World {
     monster.pending = null;
     monster.target = null;
     monster.effects = [];
-    let firstKill = false;
+    const kills = this.player.kills[monster.def.id] ?? 0;
+    this.player.kills[monster.def.id] = kills + 1;
+    const firstKill = kills === 0;
     if (monster.def.boss) {
       this.bossReadyAt[monster.spawnKey] = this.time + monster.def.respawnSeconds;
-      const kills = this.player.bossKills[monster.def.id] ?? 0;
-      this.player.bossKills[monster.def.id] = kills + 1;
-      firstKill = kills === 0;
       this.emit({ type: 'message', text: firstKill ? `首次击败${monster.name}` : `${monster.name}已被击败` });
     }
     this.emit({ type: 'death', unit: monster });
-    this.rollDrops(monster, firstKill);
+    this.rollDrops(monster, firstKill && !!monster.def.boss);
     this.advanceQuests('kill', monster.def.id);
     this.gainExp(monster.def.exp);
   }
@@ -1513,7 +1543,7 @@ export class World {
   /** Boss 掉的法器至少是中品，首杀必掉专属法器。 */
   private rollDrops(monster: Monster, firstKill = false): void {
     const minGrade = monster.def.boss ? 1 : 0;
-    for (const entry of this.config.drops[monster.def.dropTable] ?? []) {
+    for (const entry of monsterDrops(this.config, monster.def)) {
       if (!(firstKill && entry.firstKill) && !this.rng.chance(entry.chance)) continue;
       const def = this.config.items[entry.item];
       const cell = this.grid.nearest(monster.cell, (c) => this.canDropAt(c));

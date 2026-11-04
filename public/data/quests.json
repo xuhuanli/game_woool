@@ -1883,5 +1883,464 @@
     "offer": "ch6-ending-offer",
     "finish": "ch6-ending-finish",
     "prev": "ch6-nanlong"
+  },
+  "side-ch1-roots": {
+    "id": "side-ch1-roots",
+    "name": "荆棘根",
+    "giver": "mo-doctor",
+    "level": 2,
+    "prev": "ch1-herbs",
+    "summary": "收集 4 截荆棘根交给墨大夫。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "thorn-root",
+        "count": 4
+      }
+    ],
+    "rewards": {
+      "exp": 1500,
+      "gold": 100,
+      "items": [
+        {
+          "item": "small-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-ch1-roots-offer",
+    "finish": "side-ch1-roots-finish"
+  },
+  "side-ch1-silk": {
+    "id": "side-ch1-silk",
+    "name": "毒蛛丝",
+    "giver": "qixuan-steward",
+    "level": 3,
+    "prev": "ch1-spider",
+    "summary": "收集 4 团毒蛛丝交给七玄门执事。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "spider-silk",
+        "count": 4
+      }
+    ],
+    "rewards": {
+      "exp": 2000,
+      "gold": 150,
+      "items": [
+        {
+          "item": "small-mana",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-ch1-silk-offer",
+    "finish": "side-ch1-silk-finish"
+  },
+  "side-ch1-rats": {
+    "id": "side-ch1-rats",
+    "name": "清剿灰鼠",
+    "giver": "qixuan-steward",
+    "level": 4,
+    "prev": "ch1-wolves",
+    "summary": "击败彩霞山的 15 只灰鼠。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "ash-rat",
+        "count": 15
+      }
+    ],
+    "rewards": {
+      "exp": 1500,
+      "gold": 200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 1
+        }
+      ]
+    },
+    "offer": "side-ch1-rats-offer",
+    "finish": "side-ch1-rats-finish"
+  },
+  "side-ch2-wings": {
+    "id": "side-ch2-wings",
+    "name": "夜蝠翼",
+    "giver": "valley-merchant",
+    "level": 7,
+    "prev": "ch2-road",
+    "summary": "收集 5 片夜蝠翼交给太南谷商人。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "bat-wing",
+        "count": 5
+      }
+    ],
+    "rewards": {
+      "exp": 4000,
+      "gold": 300,
+      "items": [
+        {
+          "item": "mid-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-ch2-wings-offer",
+    "finish": "side-ch2-wings-finish"
+  },
+  "side-ch2-gall": {
+    "id": "side-ch2-gall",
+    "name": "青蛇胆",
+    "giver": "valley-merchant",
+    "level": 8,
+    "prev": "ch2-enter",
+    "summary": "收集 4 枚青蛇胆交给太南谷商人。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "snake-gall",
+        "count": 4
+      }
+    ],
+    "rewards": {
+      "exp": 5000,
+      "gold": 350,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "side-ch2-gall-offer",
+    "finish": "side-ch2-gall-finish"
+  },
+  "side-ch2-wolves": {
+    "id": "side-ch2-wolves",
+    "name": "山道狼骑",
+    "giver": "qingyan-elder",
+    "level": 9,
+    "prev": "ch2-market",
+    "summary": "击败太南山的 10 个狼骑。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "wolf-rider",
+        "count": 10
+      }
+    ],
+    "rewards": {
+      "exp": 6000,
+      "gold": 400,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 1
+        }
+      ]
+    },
+    "offer": "side-ch2-wolves-offer",
+    "finish": "side-ch2-wolves-finish"
+  },
+  "side-ch3-silk": {
+    "id": "side-ch3-silk",
+    "name": "血蛛丝",
+    "giver": "herb-keeper",
+    "level": 11,
+    "prev": "ch3-trial",
+    "summary": "收集 5 团血蛛丝交给百药堂掌柜。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "blood-silk",
+        "count": 5
+      }
+    ],
+    "rewards": {
+      "exp": 5000,
+      "gold": 400,
+      "items": [
+        {
+          "item": "mid-mana",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-ch3-silk-offer",
+    "finish": "side-ch3-silk-finish"
+  },
+  "side-ch3-snakes": {
+    "id": "side-ch3-snakes",
+    "name": "赤蛇为患",
+    "giver": "vault-keeper",
+    "level": 12,
+    "prev": "ch3-trial",
+    "summary": "击败血色禁地的 15 条赤蛇。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "red-snake",
+        "count": 15
+      }
+    ],
+    "rewards": {
+      "exp": 6000,
+      "gold": 500,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "side-ch3-snakes-offer",
+    "finish": "side-ch3-snakes-finish"
+  },
+  "side-ch4-blood": {
+    "id": "side-ch4-blood",
+    "name": "血蝠精血",
+    "giver": "mine-steward",
+    "level": 18,
+    "prev": "ch4-corpse",
+    "summary": "收集 6 滴血蝠精血交给灵矿管事。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "bat-blood",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 14000,
+      "gold": 900,
+      "items": [
+        {
+          "item": "mid-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "side-ch4-blood-offer",
+    "finish": "side-ch4-blood-finish"
+  },
+  "side-ch4-venom": {
+    "id": "side-ch4-venom",
+    "name": "毒蟾酥",
+    "giver": "front-commander",
+    "level": 22,
+    "prev": "ch4-front",
+    "summary": "收集 6 份毒蟾酥交给前线统领。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "toad-venom",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 25000,
+      "gold": 1500,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "side-ch4-venom-offer",
+    "finish": "side-ch4-venom-finish"
+  },
+  "side-ch4-swords": {
+    "id": "side-ch4-swords",
+    "name": "魔剑客",
+    "giver": "front-commander",
+    "level": 23,
+    "prev": "ch4-toads",
+    "summary": "击败金鼓原的 20 个魔剑客。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "demon-swordsman",
+        "count": 20
+      }
+    ],
+    "rewards": {
+      "exp": 28000,
+      "gold": 1800,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "side-ch4-swords-offer",
+    "finish": "side-ch4-swords-finish"
+  },
+  "side-ch5-ink": {
+    "id": "side-ch5-ink",
+    "name": "乌贼墨",
+    "giver": "star-merchant",
+    "level": 27,
+    "prev": "ch5-arrive",
+    "summary": "收集 6 份乌贼墨交给天星城商人。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "squid-ink",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 22000,
+      "gold": 1800,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-ch5-ink-offer",
+    "finish": "side-ch5-ink-finish"
+  },
+  "side-ch5-fins": {
+    "id": "side-ch5-fins",
+    "name": "飞魟鳍",
+    "giver": "sea-hunter",
+    "level": 28,
+    "prev": "ch5-fish",
+    "summary": "收集 6 片飞魟鳍交给猎妖人。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "ray-fin",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 25000,
+      "gold": 2000,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "side-ch5-fins-offer",
+    "finish": "side-ch5-fins-finish"
+  },
+  "side-ch5-shards": {
+    "id": "side-ch5-shards",
+    "name": "骷髅骨片",
+    "giver": "star-merchant",
+    "level": 31,
+    "prev": "ch5-skull",
+    "summary": "收集 6 片骷髅骨片交给天星城商人。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "skull-shard",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 30000,
+      "gold": 2400,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "side-ch5-shards-offer",
+    "finish": "side-ch5-shards-finish"
+  },
+  "side-ch6-hide": {
+    "id": "side-ch6-hide",
+    "name": "魔兽皮",
+    "giver": "luoyun-merchant",
+    "level": 35,
+    "prev": "ch6-invite",
+    "summary": "收集 6 张魔兽皮交给落云宗商人。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "demon-hide",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 45000,
+      "gold": 3000,
+      "items": [
+        {
+          "item": "big-mana",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-ch6-hide-offer",
+    "finish": "side-ch6-hide-finish"
+  },
+  "side-ch6-wraiths": {
+    "id": "side-ch6-wraiths",
+    "name": "谷中魔魂",
+    "giver": "luoyun-steward",
+    "level": 36,
+    "prev": "ch6-beasts",
+    "summary": "击败坠魔谷外谷的 20 个魔魂。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "valley-wraith",
+        "count": 20
+      }
+    ],
+    "rewards": {
+      "exp": 50000,
+      "gold": 3500,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "side-ch6-wraiths-offer",
+    "finish": "side-ch6-wraiths-finish"
+  },
+  "side-ch6-blood": {
+    "id": "side-ch6-blood",
+    "name": "血魔猿精血",
+    "giver": "luoyun-merchant",
+    "level": 37,
+    "prev": "ch6-meet-lu",
+    "summary": "收集 6 滴血魔猿精血交给落云宗商人。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "ape-blood",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 50000,
+      "gold": 3500,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 4
+        }
+      ]
+    },
+    "offer": "side-ch6-blood-offer",
+    "finish": "side-ch6-blood-finish"
   }
 }

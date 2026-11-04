@@ -4,6 +4,7 @@ import type {
   CombatStats,
   DamageStat,
   AbilityDef,
+  AchievementDef,
   ItemDef,
   MonsterDef,
   NpcDef,
@@ -140,8 +141,12 @@ export interface Player extends Unit {
   breakthroughFails: Record<string, number>;
   /** 功法等级，缺省为 1 */
   skillLevels: Record<string, number>;
-  /** 各 Boss 的击杀次数 */
-  bossKills: Record<string, number>;
+  /** 各种怪的击杀次数，图鉴和 Boss 首杀都看它 */
+  kills: Record<string, number>;
+  /** 图鉴里见过的法器和见过的最高品阶下标 */
+  codexItems: Record<string, number>;
+  /** 已达成的成就 */
+  achievements: string[];
   /** 仓库里的法器 */
   storage: Equipment[];
   reviveReadyAt: number;
@@ -194,6 +199,7 @@ export type GameEvent =
   | { type: 'attackStart'; unit: Unit; target: Unit | null; color: string | null }
   | { type: 'skillCast'; unit: Unit; skill: SkillDef; cells: Cell[] }
   | { type: 'skillLearned'; skill: SkillDef }
+  | { type: 'achievement'; achievement: AchievementDef }
   | { type: 'summoned'; unit: Summon }
   | { type: 'damage'; unit: Unit; amount: number; maxRoll: boolean; source: Unit }
   | { type: 'miss'; unit: Unit }

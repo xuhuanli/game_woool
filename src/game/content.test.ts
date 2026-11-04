@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { validateConfig, type GameConfig } from './config';
+import { monsterDrops, validateConfig, type GameConfig } from './config';
 import type { Equipment } from './equipment';
 import { cellDistance, Grid } from './grid';
 import { findPath } from './pathfinding';
@@ -9,6 +9,7 @@ import { questStatus } from './quests';
 import { loadConfigFromDisk } from './testConfig';
 import { breakthroughChance, realmName } from './realm';
 import { Rng } from './rng';
+import { itemSources } from './sources';
 import { TICK_SECONDS, World, type GameEvent } from './world';
 
 const config = await loadConfigFromDisk();
@@ -1158,10 +1159,10 @@ describe('Boss 掉落', () => {
     const drops = world.items.filter((item) => item.equipment);
     expect(drops.some((item) => item.def.id === 'boss-serpent-armor')).toBe(true);
     for (const item of drops) expect(item.equipment!.grade).not.toBe('low');
-    expect(world.toSave(0).player.bossKills).toEqual({ 'flood-serpent': 1 });
+    expect(world.toSave(0).player.kills).toEqual({ 'flood-serpent': 1 });
 
     const again = World.fromSave(config, world.toSave(0), 2);
-    expect(again.player.bossKills['flood-serpent']).toBe(1);
+    expect(again.player.kills['flood-serpent']).toBe(1);
     let signature = 0;
     for (let i = 0; i < 40; i++) {
       again.items.length = 0;
@@ -1742,5 +1743,109 @@ describe('章节主线', () => {
     world.player.quests.completed.push('ch2-enter');
     expect(world.npcs.map((npc) => npc.id)).not.toContain('wan-xiaoshan');
     expect(world.npcs.map((npc) => npc.id)).toContain('sect-judge');
+  });
+});
+
+describe('支线任务', () => {
+  const side = Object.values(config.quests).filter((quest) => !quest.main);
+
+  it('每章都有支线，发布者、前置和目标都对得上', () => {
+    expect(side.length).toBeGreaterThanOrEqual(18);
+    const spawned = new Set(Object.values(config.maps).flatMap((map) => map.spawns.map((spawn) => spawn.monster)));
+    for (const quest of side) {
+      expect(config.npcs[quest.giver], quest.id).toBeDefined();
+      if (quest.prev) expect(config.quests[quest.prev], quest.id).toBeDefined();
+      for (const objective of quest.objectives) {
+        if (objective.type === 'kill') expect(spawned.has(objective.target), quest.id).toBe(true);
+        if (objective.type === 'collect') {
+          const droppers = Object.values(config.monsters).filter(
+            (monster) =>
+              spawned.has(monster.id) &&
+              monsterDrops(config, monster).some((entry) => entry.item === objective.target),
+          );
+          expect(droppers.length, quest.id).toBeGreaterThan(0);
+        }
+      }
+      expect(config.dialogues[quest.offer], quest.id).toBeDefined();
+      expect(config.dialogues[quest.finish], quest.id).toBeDefined();
+    }
+    for (const chapter of ['ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'ch6']) {
+      const count = side.filter((quest) => quest.prev?.startsWith(chapter) || quest.id.startsWith(`side-${chapter}`)).length;
+      expect(count, chapter).toBeGreaterThanOrEqual(2);
+    }
+  });
+
+  it('支线经验不超过同章主线的三成', () => {
+    for (const chapter of ['ch1', 'ch2', 'ch3', 'ch4', 'ch5', 'ch6']) {
+      const main = Object.values(config.quests)
+        .filter((quest) => quest.id.startsWith(chapter))
+        .reduce((sum, quest) => sum + quest.rewards.exp, 0);
+      const extra = side
+        .filter((quest) => quest.id.startsWith(`side-${chapter}`))
+        .reduce((sum, quest) => sum + quest.rewards.exp, 0);
+      expect(extra / main, chapter).toBeLessThan(0.3);
+    }
+  });
+});
+
+describe('图鉴和成就', () => {
+  it('全收集类成就的目标数和实际内容一致', () => {
+    const goal = (id: string) => {
+      const condition = config.achievements[id]!.condition;
+      return 'count' in condition ? condition.count : 0;
+    };
+    expect(goal('codex-all')).toBe(Object.values(config.items).filter((item) => item.kind === 'equip').length);
+    expect(goal('boss-all')).toBe(Object.values(config.monsters).filter((monster) => monster.boss).length);
+    expect(goal('side-all')).toBe(Object.values(config.quests).filter((quest) => !quest.main).length);
+  });
+
+  it('击败妖兽记进图鉴，达成成就发奖励，进度随存档保留', () => {
+    const world = new World(config, 'taina-mountain', 'body', 1);
+    const ape = world.monsters.find((monster) => monster.def.id === 'mountain-ape')!;
+    (world as unknown as { killMonster(monster: unknown): void }).killMonster(ape);
+    world.player.equipBag.push({ uid: 9999, itemId: 'rusty-sword', grade: 'mid', affixes: [], luck: 0 });
+    const gold = world.player.gold;
+    world.drainEvents();
+    world.checkAchievements();
+    expect(world.player.kills['mountain-ape']).toBe(1);
+    expect(world.player.achievements).toContain('first-blood');
+    expect(world.player.gold).toBe(gold + config.achievements['first-blood']!.reward.gold);
+    expect(world.drainEvents().some((event) => event.type === 'achievement')).toBe(true);
+    expect(world.player.codexItems['rusty-sword']).toBe(1);
+
+    const loaded = World.fromSave(config, world.toSave(0), 2);
+    expect(loaded.player.kills['mountain-ape']).toBe(1);
+    expect(loaded.player.achievements).toContain('first-blood');
+    expect(loaded.player.codexItems).toEqual(world.player.codexItems);
+    loaded.checkAchievements();
+    expect(loaded.player.achievements.filter((id) => id === 'first-blood')).toHaveLength(1);
+  });
+});
+
+describe('物品来源', () => {
+  it('商店和 Boss 专属一直公开，怪物掉落打过才写名字，打满 50 只才有掉率', () => {
+    const world = new World(config, 'taina-mountain', 'body', 1);
+    const { player } = world;
+    expect(itemSources(config, player, 'boss-serpent-armor')[0]).toContain('铁甲蛟');
+    expect(itemSources(config, player, 'small-potion').some((source) => source.includes('有售'))).toBe(true);
+
+    expect(itemSources(config, player, 'bat-wing')).toEqual(['？？？（太南山）']);
+    player.kills['night-bat'] = 1;
+    expect(itemSources(config, player, 'bat-wing')).toEqual(['夜蝠（太南山）']);
+    player.kills['night-bat'] = 50;
+    expect(itemSources(config, player, 'bat-wing')[0]).toMatch(/约 35%$/);
+  });
+
+  it('每件法器和任务材料都至少有一个来源', () => {
+    const world = new World(config, 'taina-mountain', 'body', 1);
+    const collected = Object.values(config.quests).flatMap((quest) =>
+      quest.objectives.filter((objective) => objective.type === 'collect').map((objective) => objective.target),
+    );
+    const story = new Set(['ascension-token', 'great-transfer-token', 'xutian-cauldron', 'jade-marrow', 'purple-monkey', 'sky-fruit']);
+    for (const item of Object.values(config.items)) {
+      if (item.kind !== 'equip' && !collected.includes(item.id)) continue;
+      if (story.has(item.id)) continue;
+      expect(itemSources(config, world.player, item.id).length, item.id).toBeGreaterThan(0);
+    }
   });
 });

@@ -1,4 +1,4 @@
-import type { PortalDef, QuestDef } from './config';
+import { monsterDrops, type PortalDef, type QuestDef } from './config';
 import { questStatus } from './quests';
 import type { Player, RouteTarget } from './types';
 import type { World } from './world';
@@ -34,9 +34,9 @@ function mapWithMonster(world: World, monsterId: string): RouteTarget | null {
 }
 
 function mapDropping(world: World, itemId: string): RouteTarget | null {
-  const { monsters, drops } = world.config;
-  const source = Object.values(monsters).find((monster) =>
-    drops[monster.dropTable]?.some((entry) => entry.item === itemId),
+  const { config } = world;
+  const source = Object.values(config.monsters).find((monster) =>
+    monsterDrops(config, monster).some((entry) => entry.item === itemId),
   );
   return source ? mapWithMonster(world, source.id) : null;
 }

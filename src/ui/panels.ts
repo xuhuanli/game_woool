@@ -9,6 +9,7 @@ import {
   type EquipSlot,
   type Equipment,
 } from '../game/equipment';
+import { itemSources } from '../game/sources';
 import { breakthroughChance, pendingBreakthrough, realmName } from '../game/realm';
 import type { World } from '../game/world';
 import { iconImage } from './icons';
@@ -245,13 +246,18 @@ export class Panels {
       box.append(el('div', 'detail-name', item.name));
       if (item.heal) box.append(el('div', '', `回复 ${item.heal} 点生命`));
       if (item.mana) box.append(el('div', '', `回复 ${item.mana} 点灵力`));
-      if (item.kind === 'material') box.append(el('div', '', '用于祭炼武器'));
+      if (item.id === this.config.affixes.refine.material) box.append(el('div', '', '用于祭炼武器'));
+      else if (item.id === this.config.game.skillUpgrade.material) box.append(el('div', '', '用于修炼功法'));
+      else if (this.questsCollecting(item.id).length) {
+        box.append(el('div', '', `任务材料：${this.questsCollecting(item.id).join('、')}`));
+      }
       if (item.scroll) box.append(el('div', '', item.scroll === 'recall' ? '回到主城' : '在当前地图随机传送'));
       const skill = this.config.skills[item.skill ?? ''];
       if (item.kind === 'book' && skill) {
         const owner = this.config.classes[skill.classId]?.name ?? '';
         box.append(el('div', '', `${owner}功法，${skill.level} 级可研读`));
       }
+      box.append(this.sourceInfo(item.id));
       if (item.kind === 'potion' || item.kind === 'scroll') {
         box.append(this.action('使用', () => this.world.inventory.useItem(selection.id)));
       } else if (item.kind === 'book') {
@@ -282,6 +288,7 @@ export class Panels {
     if (boss) box.append(el('div', 'detail-special', `${boss.name}专属，首次击败必掉`));
     const set = Object.values(this.config.sets).find((candidate) => candidate.pieces.includes(item.id));
     if (set) box.append(this.setInfo(set));
+    box.append(this.sourceInfo(item.id));
     if (!wornSlot) box.append(this.comparison(equipment));
 
     const actions = el('div', 'detail-actions');
@@ -298,6 +305,20 @@ export class Panels {
       box.append(el('div', 'detail-hint', `祭炼消耗祭炼石 1（有 ${stones}）、灵石 ${goldCost}`));
     }
     box.append(actions);
+    return box;
+  }
+
+  private questsCollecting(itemId: string): string[] {
+    return Object.values(this.config.quests)
+      .filter((quest) => quest.objectives.some((objective) => objective.type === 'collect' && objective.target === itemId))
+      .map((quest) => quest.name);
+  }
+
+  private sourceInfo(itemId: string): HTMLElement {
+    const sources = itemSources(this.config, this.world.player, itemId);
+    const box = el('div', 'detail-source');
+    box.append(el('div', '', sources.length ? '来源：' : '来源：暂无'));
+    for (const source of sources) box.append(el('div', '', `· ${source}`));
     return box;
   }
 

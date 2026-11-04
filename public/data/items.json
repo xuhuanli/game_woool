@@ -794,5 +794,77 @@
     },
     "price": 30000,
     "boss": "demon-nanlong"
+  },
+  "thorn-root": {
+    "id": "thorn-root",
+    "name": "荆棘根",
+    "kind": "material",
+    "price": 5
+  },
+  "spider-silk": {
+    "id": "spider-silk",
+    "name": "毒蛛丝",
+    "kind": "material",
+    "price": 5
+  },
+  "bat-wing": {
+    "id": "bat-wing",
+    "name": "夜蝠翼",
+    "kind": "material",
+    "price": 15
+  },
+  "snake-gall": {
+    "id": "snake-gall",
+    "name": "青蛇胆",
+    "kind": "material",
+    "price": 15
+  },
+  "blood-silk": {
+    "id": "blood-silk",
+    "name": "血蛛丝",
+    "kind": "material",
+    "price": 30
+  },
+  "bat-blood": {
+    "id": "bat-blood",
+    "name": "血蝠精血",
+    "kind": "material",
+    "price": 60
+  },
+  "toad-venom": {
+    "id": "toad-venom",
+    "name": "毒蟾酥",
+    "kind": "material",
+    "price": 80
+  },
+  "squid-ink": {
+    "id": "squid-ink",
+    "name": "乌贼墨",
+    "kind": "material",
+    "price": 100
+  },
+  "ray-fin": {
+    "id": "ray-fin",
+    "name": "飞魟鳍",
+    "kind": "material",
+    "price": 110
+  },
+  "skull-shard": {
+    "id": "skull-shard",
+    "name": "骷髅骨片",
+    "kind": "material",
+    "price": 120
+  },
+  "demon-hide": {
+    "id": "demon-hide",
+    "name": "魔兽皮",
+    "kind": "material",
+    "price": 150
+  },
+  "ape-blood": {
+    "id": "ape-blood",
+    "name": "血魔猿精血",
+    "kind": "material",
+    "price": 160
   }
 }

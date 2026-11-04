@@ -131,6 +131,8 @@ export interface MonsterDef {
   exp: number;
   respawnSeconds: number;
   dropTable: string;
+  /** 共用掉落表之外，只有这种怪才掉的东西 */
+  extraDrops?: DropEntry[];
   /** 普攻距离，缺省为近战 */
   attackRange?: number;
   boss?: boolean;
@@ -337,6 +339,20 @@ export interface QuestDef {
   finish: string;
 }
 
+export type AchievementCondition =
+  | { type: 'kills' | 'bossTypes' | 'level' | 'codexItems' | 'refine' | 'set' | 'sideQuests' | 'gold'; count: number }
+  | { type: 'killMonster'; target: string }
+  /** 收集到至少这个品阶的法器 */
+  | { type: 'grade'; target: string };
+
+export interface AchievementDef {
+  id: string;
+  name: string;
+  description: string;
+  condition: AchievementCondition;
+  reward: { gold: number; items: { item: string; count: number }[] };
+}
+
 export interface GameSettings {
   startMap: string;
   /** 跑步相对行走的速度倍数 */
@@ -362,6 +378,7 @@ export interface GameConfig {
   maps: Record<string, MapDef>;
   npcs: Record<string, NpcDef>;
   quests: Record<string, QuestDef>;
+  achievements: Record<string, AchievementDef>;
   dialogues: Record<string, string[]>;
 }
 
@@ -383,7 +400,13 @@ export const CONFIG_FILES = [
   'npcs',
   'quests',
   'dialogues',
+  'achievements',
 ] as const;
+
+/** 一种怪的全部掉落：共用掉落表加上它自己的专属掉落。 */
+export function monsterDrops(config: GameConfig, monster: MonsterDef): DropEntry[] {
+  return [...(config.drops[monster.dropTable] ?? []), ...(monster.extraDrops ?? [])];
+}
 
 /** 返回配置表中所有悬空引用，空数组表示配置有效。 */
 export function validateConfig(config: GameConfig): string[] {
@@ -391,6 +414,9 @@ export function validateConfig(config: GameConfig): string[] {
   for (const monster of Object.values(config.monsters)) {
     if (!config.drops[monster.dropTable]) {
       errors.push(`怪物 ${monster.id} 的掉落表 ${monster.dropTable} 不存在`);
+    }
+    for (const entry of monster.extraDrops ?? []) {
+      if (!config.items[entry.item]) errors.push(`怪物 ${monster.id} 的专属掉落 ${entry.item} 不存在`);
     }
   }
   for (const [tableId, table] of Object.entries(config.drops)) {
@@ -464,6 +490,18 @@ export function validateConfig(config: GameConfig): string[] {
   for (const classDef of Object.values(config.classes)) {
     const count = Object.values(config.skills).filter((skill) => skill.classId === classDef.id).length;
     if (count > SKILL_SLOTS) errors.push(`职业 ${classDef.id} 的技能超过快捷栏 ${SKILL_SLOTS} 格`);
+  }
+  for (const achievement of Object.values(config.achievements)) {
+    const { condition, reward } = achievement;
+    if (condition.type === 'killMonster' && !config.monsters[condition.target]) {
+      errors.push(`成就 ${achievement.id} 的怪物 ${condition.target} 不存在`);
+    }
+    if (condition.type === 'grade' && !config.affixes.grades.some((grade) => grade.id === condition.target)) {
+      errors.push(`成就 ${achievement.id} 的品阶 ${condition.target} 不存在`);
+    }
+    for (const { item } of reward.items) {
+      if (!config.items[item]) errors.push(`成就 ${achievement.id} 的奖励 ${item} 不存在`);
+    }
   }
   for (const set of Object.values(config.sets)) {
     for (const piece of set.pieces) {

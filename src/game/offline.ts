@@ -1,5 +1,5 @@
 import { hitChance } from './combat';
-import type { CombatStats, GameConfig, MapDef, MonsterDef, SkillDef } from './config';
+import { monsterDrops, type CombatStats, type GameConfig, type MapDef, type MonsterDef, type SkillDef } from './config';
 
 export const OFFLINE_MAX_SECONDS = 8 * 3600;
 export const OFFLINE_EFFICIENCY = 0.5;
@@ -103,7 +103,7 @@ export function estimateIncome(config: GameConfig, map: MapDef, fighter: Fighter
     seconds += monster.stats.maxHp / damagePerSecond(config, fighter, monster) + TRAVEL_SECONDS;
     exp += monster.exp;
     kills += 1;
-    for (const entry of config.drops[monster.dropTable] ?? []) {
+    for (const entry of monsterDrops(config, monster)) {
       if (entry.item === 'gold') {
         gold += entry.chance * average({ min: entry.min ?? 1, max: entry.max ?? 1 });
       } else if (config.items[entry.item]?.kind === 'equip') {

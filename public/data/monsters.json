@@ -300,7 +300,13 @@
       "head": "#7ab35a",
       "scale": 0.9
     },
-    "attackRange": 5
+    "attackRange": 5,
+    "extraDrops": [
+      {
+        "item": "thorn-root",
+        "chance": 0.35
+      }
+    ]
   },
   "venom-spider": {
     "id": "venom-spider",
@@ -361,6 +367,12 @@
           "damage": 2,
           "duration": 6
         }
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "spider-silk",
+        "chance": 0.35
       }
     ]
   },
@@ -624,6 +636,12 @@
           "duration": 6
         }
       }
+    ],
+    "extraDrops": [
+      {
+        "item": "snake-gall",
+        "chance": 0.35
+      }
     ]
   },
   "night-bat": {
@@ -669,7 +687,13 @@
       "fur": "#4a3a5a",
       "head": "#6a5a7a",
       "scale": 1
-    }
+    },
+    "extraDrops": [
+      {
+        "item": "bat-wing",
+        "chance": 0.35
+      }
+    ]
   },
   "qingwen-daoren": {
     "id": "qingwen-daoren",
@@ -823,6 +847,12 @@
           "damage": 4,
           "duration": 6
         }
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "blood-silk",
+        "chance": 0.35
       }
     ]
   },
@@ -1447,7 +1477,13 @@
       "fur": "#5a1a1a",
       "head": "#8a3a2a",
       "scale": 1
-    }
+    },
+    "extraDrops": [
+      {
+        "item": "bat-blood",
+        "chance": 0.3
+      }
+    ]
   },
   "blood-guardian": {
     "id": "blood-guardian",
@@ -1644,6 +1680,12 @@
           "damage": 8,
           "duration": 6
         }
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "toad-venom",
+        "chance": 0.3
       }
     ]
   },
@@ -1859,6 +1901,12 @@
           "duration": 5
         }
       }
+    ],
+    "extraDrops": [
+      {
+        "item": "squid-ink",
+        "chance": 0.3
+      }
     ]
   },
   "fish-demon": {
@@ -1976,6 +2024,12 @@
         "shape": "circle",
         "size": 1,
         "multiplier": 1.2
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "ray-fin",
+        "chance": 0.3
       }
     ]
   },
@@ -2189,6 +2243,12 @@
         "shape": "circle",
         "size": 1,
         "multiplier": 1.2
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "skull-shard",
+        "chance": 0.3
       }
     ]
   },
@@ -2674,6 +2734,12 @@
         "multiplier": 1.2,
         "charge": true
       }
+    ],
+    "extraDrops": [
+      {
+        "item": "demon-hide",
+        "chance": 0.3
+      }
     ]
   },
   "valley-wraith": {
@@ -2883,6 +2949,12 @@
         "shape": "around",
         "size": 2,
         "multiplier": 1.3
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "ape-blood",
+        "chance": 0.3
       }
     ]
   },
