@@ -23,6 +23,7 @@ export interface SavedPlayer {
   realmPassed: string[];
   breakthroughFails: Record<string, number>;
   skillLevels: Record<string, number>;
+  bossKills?: Record<string, number>;
   storage: Equipment[];
   weakUntil: number;
   lastDeathAt: number | null;

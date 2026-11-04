@@ -620,5 +620,179 @@
     "kind": "book",
     "skill": "body-charge",
     "price": 1800
+  },
+  "boss-golden-pendant": {
+    "id": "boss-golden-pendant",
+    "name": "金光佩",
+    "kind": "equip",
+    "slot": "necklace",
+    "level": 5,
+    "bonus": {
+      "maxMp": 25,
+      "primary": 1,
+      "magicDefense": 1
+    },
+    "price": 400,
+    "boss": "golden-master"
+  },
+  "boss-serpent-armor": {
+    "id": "boss-serpent-armor",
+    "name": "蛟鳞甲",
+    "kind": "equip",
+    "slot": "armor",
+    "level": 10,
+    "bonus": {
+      "defense": 6,
+      "maxHp": 50
+    },
+    "price": 800,
+    "boss": "flood-serpent"
+  },
+  "boss-qingwen-crown": {
+    "id": "boss-qingwen-crown",
+    "name": "青纹道冠",
+    "kind": "equip",
+    "slot": "helmet",
+    "level": 12,
+    "bonus": {
+      "defense": 3,
+      "magicDefense": 3,
+      "maxHp": 20
+    },
+    "price": 900,
+    "boss": "qingwen-daoren"
+  },
+  "boss-fengyue-bracer": {
+    "id": "boss-fengyue-bracer",
+    "name": "封岳护腕",
+    "kind": "equip",
+    "slot": "bracelet",
+    "level": 18,
+    "bonus": {
+      "defense": 4,
+      "primary": 2
+    },
+    "price": 1500,
+    "boss": "feng-yue"
+  },
+  "boss-mojiao-ring": {
+    "id": "boss-mojiao-ring",
+    "name": "墨蛟戒",
+    "kind": "equip",
+    "slot": "ring",
+    "level": 20,
+    "bonus": {
+      "primary": 5,
+      "maxHp": 30
+    },
+    "price": 1800,
+    "boss": "mo-jiao"
+  },
+  "boss-blood-sword": {
+    "id": "boss-blood-sword",
+    "name": "血灵剑",
+    "kind": "equip",
+    "slot": "weapon",
+    "level": 24,
+    "bonus": {
+      "primary": 24,
+      "accuracy": 2
+    },
+    "price": 4500,
+    "boss": "wang-chan"
+  },
+  "boss-blood-orb": {
+    "id": "boss-blood-orb",
+    "name": "血煞珠",
+    "kind": "equip",
+    "slot": "necklace",
+    "level": 26,
+    "bonus": {
+      "maxMp": 110,
+      "primary": 3,
+      "magicDefense": 4
+    },
+    "price": 3000,
+    "boss": "blood-guardian"
+  },
+  "boss-demon-armor": {
+    "id": "boss-demon-armor",
+    "name": "玄魔甲",
+    "kind": "equip",
+    "slot": "armor",
+    "level": 28,
+    "bonus": {
+      "defense": 13,
+      "maxHp": 170
+    },
+    "price": 3500,
+    "boss": "demon-commander"
+  },
+  "boss-sea-crown": {
+    "id": "boss-sea-crown",
+    "name": "海妖王冠",
+    "kind": "equip",
+    "slot": "helmet",
+    "level": 30,
+    "bonus": {
+      "defense": 7,
+      "magicDefense": 8,
+      "maxHp": 40
+    },
+    "price": 4000,
+    "boss": "sea-king"
+  },
+  "boss-jiyin-banner": {
+    "id": "boss-jiyin-banner",
+    "name": "极阴魔幡",
+    "kind": "equip",
+    "slot": "weapon",
+    "level": 32,
+    "bonus": {
+      "primary": 38,
+      "luck": 1
+    },
+    "price": 15000,
+    "boss": "jiyin"
+  },
+  "boss-xuangu-ring": {
+    "id": "boss-xuangu-ring",
+    "name": "玄骨戒",
+    "kind": "equip",
+    "slot": "ring",
+    "level": 34,
+    "bonus": {
+      "primary": 10,
+      "maxMp": 40
+    },
+    "price": 9000,
+    "boss": "xuangu"
+  },
+  "boss-warden-bracelet": {
+    "id": "boss-warden-bracelet",
+    "name": "守谷魔镯",
+    "kind": "equip",
+    "slot": "bracelet",
+    "level": 36,
+    "bonus": {
+      "defense": 9,
+      "evasion": 4,
+      "primary": 3
+    },
+    "price": 12000,
+    "boss": "valley-warden"
+  },
+  "boss-nanlong-blade": {
+    "id": "boss-nanlong-blade",
+    "name": "南陇魔刃",
+    "kind": "equip",
+    "slot": "weapon",
+    "level": 38,
+    "bonus": {
+      "primary": 48,
+      "accuracy": 3
+    },
+    "price": 30000,
+    "boss": "demon-nanlong"
   }
 }

@@ -142,6 +142,11 @@
     {
       "item": "blink-ring",
       "chance": 0.08
+    },
+    {
+      "item": "boss-serpent-armor",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "golden-master": [
@@ -180,6 +185,11 @@
     {
       "item": "jade-ring",
       "chance": 0.25
+    },
+    {
+      "item": "boss-golden-pendant",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "green-snake": [
@@ -254,6 +264,11 @@
     {
       "item": "jade-ring",
       "chance": 0.3
+    },
+    {
+      "item": "boss-qingwen-crown",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "blood-spider": [
@@ -418,6 +433,11 @@
     {
       "item": "jade-ring",
       "chance": 0.3
+    },
+    {
+      "item": "boss-fengyue-bracer",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "mo-jiao": [
@@ -454,6 +474,11 @@
     {
       "item": "guard-ring",
       "chance": 0.1
+    },
+    {
+      "item": "boss-mojiao-ring",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "yan-band": [
@@ -692,6 +717,11 @@
     {
       "item": "stun-ring",
       "chance": 0.12
+    },
+    {
+      "item": "boss-blood-sword",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "blood-guardian": [
@@ -734,6 +764,11 @@
     {
       "item": "guard-ring",
       "chance": 0.1
+    },
+    {
+      "item": "boss-blood-orb",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "demon-commander": [
@@ -776,6 +811,11 @@
     {
       "item": "stun-ring",
       "chance": 0.1
+    },
+    {
+      "item": "boss-demon-armor",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "sea-band": [
@@ -1030,6 +1070,11 @@
     {
       "item": "guard-ring",
       "chance": 0.1
+    },
+    {
+      "item": "boss-sea-crown",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "jiyin": [
@@ -1068,6 +1113,11 @@
     {
       "item": "revive-ring",
       "chance": 0.12
+    },
+    {
+      "item": "boss-jiyin-banner",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "xuangu": [
@@ -1118,6 +1168,11 @@
     {
       "item": "blink-ring",
       "chance": 0.12
+    },
+    {
+      "item": "boss-xuangu-ring",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "zhuomo-band": [
@@ -1252,6 +1307,11 @@
     {
       "item": "guard-ring",
       "chance": 0.12
+    },
+    {
+      "item": "boss-warden-bracelet",
+      "chance": 0.08,
+      "firstKill": true
     }
   ],
   "demon-nanlong": [
@@ -1310,6 +1370,11 @@
     {
       "item": "blink-ring",
       "chance": 0.15
+    },
+    {
+      "item": "boss-nanlong-blade",
+      "chance": 0.08,
+      "firstKill": true
     }
   ]
 }

@@ -140,6 +140,8 @@ export interface Player extends Unit {
   breakthroughFails: Record<string, number>;
   /** 功法等级，缺省为 1 */
   skillLevels: Record<string, number>;
+  /** 各 Boss 的击杀次数 */
+  bossKills: Record<string, number>;
   /** 仓库里的法器 */
   storage: Equipment[];
   reviveReadyAt: number;

@@ -278,6 +278,8 @@ export class Panels {
       box.append(el('div', '', `${this.bonusName(bonus.stat)} +${bonus.value}`));
     }
     if (item.special) box.append(el('div', 'detail-special', this.specialText(item.special)));
+    const boss = item.boss && this.config.monsters[item.boss];
+    if (boss) box.append(el('div', 'detail-special', `${boss.name}专属，首次击败必掉`));
     const set = Object.values(this.config.sets).find((candidate) => candidate.pieces.includes(item.id));
     if (set) box.append(this.setInfo(set));
     if (!wornSlot) box.append(this.comparison(equipment));

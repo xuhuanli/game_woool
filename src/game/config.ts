@@ -166,6 +166,8 @@ export interface ItemDef {
   skill?: string;
   scroll?: 'recall' | 'random';
   special?: SpecialDef;
+  /** Boss 专属法器，填掉落它的 Boss */
+  boss?: string;
   heal?: number;
   mana?: number;
   slot?: 'weapon' | 'armor' | 'helmet' | 'necklace' | 'bracelet' | 'ring';
@@ -228,6 +230,8 @@ export interface SetDef {
 export interface DropEntry {
   item: string;
   chance: number;
+  /** 首次击杀必掉 */
+  firstKill?: boolean;
   min?: number;
   max?: number;
 }
@@ -445,6 +449,13 @@ export function validateConfig(config: GameConfig): string[] {
   for (const item of Object.values(config.items)) {
     if (item.kind === 'equip' && !item.slot) errors.push(`法器 ${item.id} 缺少栏位`);
     if (item.kind === 'book' && !config.skills[item.skill ?? '']) errors.push(`功法书 ${item.id} 的功法不存在`);
+    if (item.boss) {
+      const boss = config.monsters[item.boss];
+      const table = boss ? config.drops[boss.dropTable] : undefined;
+      if (!table?.some((entry) => entry.item === item.id && entry.firstKill)) {
+        errors.push(`专属法器 ${item.id} 不在 ${item.boss} 的首杀掉落里`);
+      }
+    }
   }
   for (const skill of Object.values(config.skills)) {
     const hasBook = Object.values(config.items).some((item) => item.kind === 'book' && item.skill === skill.id);

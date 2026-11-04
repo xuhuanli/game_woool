@@ -978,7 +978,7 @@ describe('40 级内容', () => {
     const slots = ['weapon', 'armor', 'helmet', 'necklace', 'bracelet', 'ring'] as const;
     for (const slot of slots) {
       const tiers = Object.values(config.items)
-        .filter((item) => item.slot === slot)
+        .filter((item) => item.slot === slot && !item.boss)
         .sort((a, b) => (a.level ?? 1) - (b.level ?? 1));
       const highest = tiers.at(-1)!;
       expect(highest.level, slot).toBe(35);
@@ -1136,6 +1136,39 @@ describe('地面持续功法', () => {
     expect(charge.classId).toBe('body');
     expect(charge.level).toBe(20);
     expect(config.items['book-body-charge']?.skill).toBe('body-charge');
+  });
+});
+
+describe('Boss 掉落', () => {
+  const kill = (world: World, monster: unknown) =>
+    (world as unknown as { killMonster(monster: unknown): void }).killMonster(monster);
+
+  it('每个 Boss 都有一件专属法器', () => {
+    const bosses = Object.values(config.monsters).filter((monster) => monster.boss);
+    for (const boss of bosses) {
+      const own = Object.values(config.items).filter((item) => item.boss === boss.id);
+      expect(own, boss.id).toHaveLength(1);
+    }
+  });
+
+  it('首杀必掉专属法器，Boss 掉的法器至少是中品，击杀次数进存档', () => {
+    const world = new World(config, 'taina-mountain', 'body', 1);
+    const serpent = world.monsters.find((monster) => monster.def.id === 'flood-serpent')!;
+    kill(world, serpent);
+    const drops = world.items.filter((item) => item.equipment);
+    expect(drops.some((item) => item.def.id === 'boss-serpent-armor')).toBe(true);
+    for (const item of drops) expect(item.equipment!.grade).not.toBe('low');
+    expect(world.toSave(0).player.bossKills).toEqual({ 'flood-serpent': 1 });
+
+    const again = World.fromSave(config, world.toSave(0), 2);
+    expect(again.player.bossKills['flood-serpent']).toBe(1);
+    let signature = 0;
+    for (let i = 0; i < 40; i++) {
+      again.items.length = 0;
+      kill(again, again.monsters.find((monster) => monster.def.id === 'flood-serpent')!);
+      signature += again.items.filter((item) => item.def.id === 'boss-serpent-armor').length;
+    }
+    expect(signature).toBeLessThan(15);
   });
 });
 

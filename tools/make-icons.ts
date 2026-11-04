@@ -27,6 +27,7 @@ const TIERS: [number, Theme][] = [
   [14, theme('#2a7a4a', '#0e2a1a', '#e0ffe8', '#6ad08a')],
   [0, theme('#5a5248', '#1e1b18', '#ece4d4', '#9a8e7a')],
 ];
+const BOSS = theme('#9a2a2a', '#2e0a0a', '#ffe0d0', '#ff8a6a');
 const SPECIAL = theme('#9a6a1a', '#2e1e08', '#fff0c0', '#ffd27a');
 const HEAL = theme('#a83a3a', '#2e0e0e', '#ffe0d8');
 const MANA = theme('#2a5ab0', '#0c1a3a', '#d8e8ff');
@@ -121,6 +122,19 @@ const GLYPHS: Record<string, string> = {
   'revive-ring': 'diamond-ring',
   'guard-ring': 'diamond-ring',
   'blink-ring': 'diamond-ring',
+  'boss-golden-pendant': 'gem-pendant',
+  'boss-serpent-armor': 'scale-mail',
+  'boss-qingwen-crown': 'crown',
+  'boss-fengyue-bracer': 'bracer',
+  'boss-mojiao-ring': 'ring',
+  'boss-blood-sword': 'bloody-sword',
+  'boss-blood-orb': 'crystal-ball',
+  'boss-demon-armor': 'breastplate',
+  'boss-sea-crown': 'crown-coin',
+  'boss-jiyin-banner': 'flying-flag',
+  'boss-xuangu-ring': 'skull-ring',
+  'boss-warden-bracelet': 'bracer',
+  'boss-nanlong-blade': 'broadsword',
 };
 
 const STORY_ITEMS = ['ascension-token', 'jinzhu-brush', 'great-transfer-token', 'xutian-map', 'xutian-cauldron'];
@@ -169,6 +183,7 @@ function itemTheme(item: ItemDef): Theme {
   if (item.kind === 'scroll') return SCROLL;
   if (item.kind === 'equip') {
     if (item.special) return SPECIAL;
+    if (item.boss) return BOSS;
     return TIERS.find(([level]) => (item.level ?? 1) >= level)![1];
   }
   if (STORY_ITEMS.includes(item.id)) return STORY;

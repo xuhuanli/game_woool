@@ -53,8 +53,10 @@ export function rollEquipment(
   affixes: AffixConfig,
   rng: Rng,
   uid: number,
+  /** 最低品级的下标，Boss 掉落从中品起 */
+  minGrade = 0,
 ): Equipment {
-  const grade = rollGrade(affixes.grades, rng);
+  const grade = rollGrade(affixes.grades.slice(minGrade), rng);
   const pool = [...affixes.pool];
   const rolled: Affix[] = [];
   for (let i = 0; i < grade.affixes && pool.length > 0; i++) {

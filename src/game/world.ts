@@ -121,6 +121,7 @@ export class World {
       realmPassed: [],
       breakthroughFails: {},
       skillLevels: {},
+      bossKills: {},
       storage: [],
       reviveReadyAt: 0,
       teleportReadyAt: 0,
@@ -277,6 +278,7 @@ export class World {
         realmPassed: player.realmPassed,
         breakthroughFails: player.breakthroughFails,
         skillLevels: player.skillLevels,
+        bossKills: player.bossKills,
         storage: player.storage,
         weakUntil: player.weakUntil,
         lastDeathAt: Number.isFinite(player.lastDeathAt) ? player.lastDeathAt : null,
@@ -324,6 +326,7 @@ export class World {
     player.realmPassed = data.realmPassed;
     player.breakthroughFails = data.breakthroughFails;
     player.skillLevels = data.skillLevels;
+    player.bossKills = data.bossKills ?? {};
     player.storage = data.storage.filter(known);
     player.weakUntil = data.weakUntil;
     player.lastDeathAt = data.lastDeathAt ?? -Infinity;
@@ -1471,12 +1474,16 @@ export class World {
     monster.pending = null;
     monster.target = null;
     monster.effects = [];
+    let firstKill = false;
     if (monster.def.boss) {
       this.bossReadyAt[monster.spawnKey] = this.time + monster.def.respawnSeconds;
-      this.emit({ type: 'message', text: `${monster.name}已被击败` });
+      const kills = this.player.bossKills[monster.def.id] ?? 0;
+      this.player.bossKills[monster.def.id] = kills + 1;
+      firstKill = kills === 0;
+      this.emit({ type: 'message', text: firstKill ? `首次击败${monster.name}` : `${monster.name}已被击败` });
     }
     this.emit({ type: 'death', unit: monster });
-    this.rollDrops(monster);
+    this.rollDrops(monster, firstKill);
     this.advanceQuests('kill', monster.def.id);
     this.gainExp(monster.def.exp);
   }
@@ -1503,15 +1510,17 @@ export class World {
     this.emit({ type: 'respawn', unit: monster });
   }
 
-  private rollDrops(monster: Monster): void {
+  /** Boss 掉的法器至少是中品，首杀必掉专属法器。 */
+  private rollDrops(monster: Monster, firstKill = false): void {
+    const minGrade = monster.def.boss ? 1 : 0;
     for (const entry of this.config.drops[monster.def.dropTable] ?? []) {
-      if (!this.rng.chance(entry.chance)) continue;
+      if (!(firstKill && entry.firstKill) && !this.rng.chance(entry.chance)) continue;
       const def = this.config.items[entry.item];
       const cell = this.grid.nearest(monster.cell, (c) => this.canDropAt(c));
       if (!def || !cell) continue;
       const equipment =
         def.kind === 'equip'
-          ? rollEquipment(def, this.config.affixes, this.rng, this.nextId++)
+          ? rollEquipment(def, this.config.affixes, this.rng, this.nextId++, minGrade)
           : null;
       this.spawnItem(def, this.rng.int(entry.min ?? 1, entry.max ?? 1), equipment, cell);
     }
