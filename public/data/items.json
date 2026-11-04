@@ -866,5 +866,89 @@
     "name": "血魔猿精血",
     "kind": "material",
     "price": 160
+  },
+  "herb-huichun": {
+    "id": "herb-huichun",
+    "name": "回春草",
+    "kind": "material",
+    "price": 27
+  },
+  "seed-huichun": {
+    "id": "seed-huichun",
+    "name": "回春草种子",
+    "kind": "material",
+    "seed": "herb-huichun",
+    "level": 1,
+    "price": 20
+  },
+  "herb-ningqi": {
+    "id": "herb-ningqi",
+    "name": "凝气花",
+    "kind": "material",
+    "price": 27
+  },
+  "seed-ningqi": {
+    "id": "seed-ningqi",
+    "name": "凝气花种子",
+    "kind": "material",
+    "seed": "herb-ningqi",
+    "level": 1,
+    "price": 20
+  },
+  "herb-yangyuan": {
+    "id": "herb-yangyuan",
+    "name": "养元参",
+    "kind": "material",
+    "price": 80
+  },
+  "seed-yangyuan": {
+    "id": "seed-yangyuan",
+    "name": "养元参种子",
+    "kind": "material",
+    "seed": "herb-yangyuan",
+    "level": 14,
+    "price": 60
+  },
+  "herb-juling": {
+    "id": "herb-juling",
+    "name": "聚灵藤",
+    "kind": "material",
+    "price": 80
+  },
+  "seed-juling": {
+    "id": "seed-juling",
+    "name": "聚灵藤种子",
+    "kind": "material",
+    "seed": "herb-juling",
+    "level": 14,
+    "price": 60
+  },
+  "herb-jinyuan": {
+    "id": "herb-jinyuan",
+    "name": "金元参",
+    "kind": "material",
+    "price": 320
+  },
+  "seed-jinyuan": {
+    "id": "seed-jinyuan",
+    "name": "金元参种子",
+    "kind": "material",
+    "seed": "herb-jinyuan",
+    "level": 26,
+    "price": 240
+  },
+  "herb-xuanyin": {
+    "id": "herb-xuanyin",
+    "name": "玄阴草",
+    "kind": "material",
+    "price": 320
+  },
+  "seed-xuanyin": {
+    "id": "seed-xuanyin",
+    "name": "玄阴草种子",
+    "kind": "material",
+    "seed": "herb-xuanyin",
+    "level": 26,
+    "price": 240
   }
 }

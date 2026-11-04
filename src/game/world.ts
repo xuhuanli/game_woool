@@ -1,5 +1,6 @@
 import { achievementProgress, recordCodexItems } from './achievements';
 import { AutoPlay, defaultAutoSettings } from './autoPlay';
+import { emptyGarden, Garden } from './garden';
 import { rollAttack, type AttackOptions } from './combat';
 import type {
   AbilityDef,
@@ -74,6 +75,7 @@ export class World {
   mapId: string;
   readonly player: Player;
   readonly inventory: Inventory;
+  readonly garden: Garden;
   readonly autoPlay: AutoPlay;
   readonly monsters: Monster[] = [];
   readonly summons: Summon[] = [];
@@ -97,6 +99,8 @@ export class World {
     classId: string,
     seed: number,
     playerName = '无名修士',
+    /** 真实时钟，药园用；测试和模拟传假时钟 */
+    private readonly clock: () => number = Date.now,
   ) {
     const map = config.maps[mapId];
     const classDef = config.classes[classId];
@@ -128,6 +132,7 @@ export class World {
       kills: {},
       codexItems: {},
       achievements: [],
+      garden: emptyGarden(config, clock()),
       storage: [],
       reviveReadyAt: 0,
       teleportReadyAt: 0,
@@ -153,6 +158,7 @@ export class World {
       (event) => this.emit(event),
       (item) => this.useScroll(item),
     );
+    this.garden = new Garden(config, this.player, this.inventory, clock, (event) => this.emit(event));
     this.autoPlay = new AutoPlay(this);
     this.learnSkills();
     this.loadMap(mapId);
@@ -244,9 +250,9 @@ export class World {
   }
 
   /** 从存档恢复世界，怪物和地面物品按地图重新生成。 */
-  static fromSave(config: GameConfig, save: SaveData, seed: number): World {
+  static fromSave(config: GameConfig, save: SaveData, seed: number, clock: () => number = Date.now): World {
     const { player } = save;
-    const world = new World(config, save.mapId, player.classId, seed, player.name);
+    const world = new World(config, save.mapId, player.classId, seed, player.name, clock);
     world.restore(save);
     return world;
   }
@@ -287,6 +293,7 @@ export class World {
         kills: player.kills,
         codexItems: player.codexItems,
         achievements: player.achievements,
+        garden: player.garden,
         storage: player.storage,
         weakUntil: player.weakUntil,
         lastDeathAt: Number.isFinite(player.lastDeathAt) ? player.lastDeathAt : null,
@@ -337,6 +344,7 @@ export class World {
     player.kills = data.kills ?? {};
     player.codexItems = data.codexItems ?? {};
     player.achievements = (data.achievements ?? []).filter((id) => this.config.achievements[id]);
+    player.garden = data.garden ?? emptyGarden(this.config, this.clock());
     player.storage = data.storage.filter(known);
     player.weakUntil = data.weakUntil;
     player.lastDeathAt = data.lastDeathAt ?? -Infinity;
@@ -350,6 +358,7 @@ export class World {
     // 快捷栏变长时在丹药格前面补空格，丹药仍在最后两格
     const missing = Math.max(0, HOTBAR_SIZE - hotbar.length);
     player.hotbar = [...hotbar.slice(0, -2), ...Array<null>(missing).fill(null), ...hotbar.slice(-2)];
+    this.garden.clamp();
     refreshStats(this.player, this.config, this.time);
     this.learnSkills();
     this.drainEvents();
@@ -514,7 +523,11 @@ export class World {
     gold += soldGold;
     player.gold += gold;
     this.gainExp(exp);
-    return { seconds, exp, gold, equipment, soldCount };
+    this.garden.refresh();
+    const garden = this.garden.unlocked
+      ? { ready: this.garden.readyCount, dew: this.player.garden.dew }
+      : null;
+    return { seconds, exp, gold, equipment, soldCount, garden };
   }
 
   /** 闭关只出普通法器，不出极品和 Boss 掉落，放不下的换成灵石。 */
@@ -807,6 +820,7 @@ export class World {
     if (this.achievementLeft <= 0) {
       this.achievementLeft = ACHIEVEMENT_CHECK_SECONDS;
       this.checkAchievements();
+      this.garden.refresh();
     }
   }
 

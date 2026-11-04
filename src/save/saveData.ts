@@ -1,6 +1,7 @@
 import type { Cell } from '../game/config';
 import type { EquipSlot, Equipment } from '../game/equipment';
 import type { QuestState } from '../game/quests';
+import type { GardenState } from '../game/types';
 import type { AutoSettings, HotbarEntry } from '../game/world';
 
 export const SAVE_VERSION = 6;
@@ -26,6 +27,7 @@ export interface SavedPlayer {
   kills?: Record<string, number>;
   codexItems?: Record<string, number>;
   achievements?: string[];
+  garden?: GardenState;
   storage: Equipment[];
   weakUntil: number;
   lastDeathAt: number | null;

@@ -1,0 +1,83 @@
+{
+  "unlockQuest": "ch1-herbs",
+  "dew": {
+    "perSeconds": [
+      1200,
+      960,
+      720,
+      600
+    ],
+    "max": [
+      6,
+      8,
+      10,
+      12
+    ],
+    "minGrowth": 0.5
+  },
+  "plots": {
+    "initial": 2,
+    "expansions": [
+      {
+        "level": 14,
+        "gold": 2000
+      },
+      {
+        "level": 22,
+        "gold": 8000
+      },
+      {
+        "level": 30,
+        "gold": 30000
+      },
+      {
+        "level": 38,
+        "gold": 80000
+      }
+    ]
+  },
+  "herbs": [
+    {
+      "item": "herb-huichun",
+      "seed": "seed-huichun",
+      "growSeconds": 1800,
+      "yield": 2,
+      "level": 1
+    },
+    {
+      "item": "herb-ningqi",
+      "seed": "seed-ningqi",
+      "growSeconds": 1800,
+      "yield": 2,
+      "level": 1
+    },
+    {
+      "item": "herb-yangyuan",
+      "seed": "seed-yangyuan",
+      "growSeconds": 3600,
+      "yield": 2,
+      "level": 14
+    },
+    {
+      "item": "herb-juling",
+      "seed": "seed-juling",
+      "growSeconds": 3600,
+      "yield": 2,
+      "level": 14
+    },
+    {
+      "item": "herb-jinyuan",
+      "seed": "seed-jinyuan",
+      "growSeconds": 7200,
+      "yield": 3,
+      "level": 26
+    },
+    {
+      "item": "herb-xuanyin",
+      "seed": "seed-xuanyin",
+      "growSeconds": 7200,
+      "yield": 3,
+      "level": 26
+    }
+  ]
+}

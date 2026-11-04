@@ -26,6 +26,11 @@ export function showOfflineReport(report: OfflineReport): void {
     sold.textContent = `背包已满，${report.soldCount} 件法器换成了灵石`;
     lines.push(sold);
   }
+  if (report.garden) {
+    const garden = document.createElement('div');
+    garden.textContent = `药园：${report.garden.ready} 株成熟，绿液 ${report.garden.dew} 滴`;
+    lines.push(garden);
+  }
   const close = document.createElement('button');
   close.className = 'detail-action';
   close.textContent = '出关';

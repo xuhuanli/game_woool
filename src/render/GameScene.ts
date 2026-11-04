@@ -29,6 +29,7 @@ import {
   type SpriteManifests,
 } from './placeholders';
 import { paintGround } from './groundPainter';
+import { addContactShadow, ensureShadowTexture, SHADOW_DEPTH_GAP, SHADOW_SPREAD } from './shadows';
 
 /** 地上物品图标的边长 */
 const DROP_ICON_SIZE = 28;
@@ -59,6 +60,8 @@ interface UnitView {
   unit: Unit;
   texture: string;
   sprite: Phaser.GameObjects.Sprite;
+  /** 脚底接触阴影，和精灵同步位置和透明度 */
+  shadow: Phaser.GameObjects.Image;
   hpBar: Phaser.GameObjects.Graphics | null;
   previous: Vec;
   attacking: boolean;
@@ -131,6 +134,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   create(): void {
+    ensureShadowTexture(this);
     createPlaceholderArt(this, this.world.config, this.sprites);
     createSpriteAnimations(this, this.sprites);
 
@@ -263,7 +267,13 @@ export class GameScene extends Phaser.Scene {
   /** 大地图：预渲染地表，摆放树石，再叠上色调和飘叶。 */
   private drawScenery(): void {
     const { map } = this.world;
-    const painted = paintGround(this, map);
+    const painted = paintGround(this, map, (item) => {
+      const placement = this.props[item.prop];
+      if (!placement) return 0;
+      // 精灵比实际占地宽（树冠、屋檐都算进去了），阴影按六成收窄
+      const width = placement.w * PROP_DISPLAY_SCALE * item.scale * 0.6;
+      return width < 12 ? 0 : Math.min(150, width);
+    });
     const ground = this.add.image(painted.x, painted.y, painted.key).setOrigin(0).setDepth(0);
     const shimmer = this.add
       .image(painted.x, painted.y, painted.shimmerKey)
@@ -375,9 +385,10 @@ export class GameScene extends Phaser.Scene {
       .setScale(manifest?.displayScale ?? 1)
       .setDepth(y);
     if (manifest) sprite.play(`${key}-idle-2`);
+    const shadow = addContactShadow(this, x, y, sprite.displayWidth * SHADOW_SPREAD);
     const label = this.addLabel(x, y - 66, npc.name, '#9fe0ff');
     const marker = this.addLabel(x, y - 84, '', '#ffd84a').setFontSize(22);
-    this.mapObjects.push(sprite, label, marker);
+    this.mapObjects.push(sprite, shadow, label, marker);
     this.npcViews.push({ npc, marker });
   }
 
@@ -412,11 +423,13 @@ export class GameScene extends Phaser.Scene {
       .sprite(x, y, texture, 0)
       .setOrigin(0.5, manifest?.originY ?? SHEET.originY)
       .setScale(scale * (manifest?.displayScale ?? 1));
+    const shadow = addContactShadow(this, x, y, sprite.displayWidth * SHADOW_SPREAD);
     const hpBar = unit === this.world.player ? null : this.add.graphics().setDepth(UI_DEPTH - 1);
     this.unitViews.set(unit, {
       unit,
       texture,
       sprite,
+      shadow,
       hpBar,
       previous: { ...unit.pos },
       attacking: false,
@@ -432,6 +445,10 @@ export class GameScene extends Phaser.Scene {
       y: view.previous.y + (unit.pos.y - view.previous.y) * alpha,
     });
     sprite.setPosition(screen.x, screen.y).setDepth(screen.y);
+    view.shadow
+      .setPosition(screen.x, screen.y)
+      .setDepth(screen.y - SHADOW_DEPTH_GAP)
+      .setAlpha(sprite.alpha);
 
     if (unit.hp > 0 && !view.attacking) {
       const moving = unit.path.length > 0 || unit.pos.x !== unit.cell.x || unit.pos.y !== unit.cell.y;
@@ -592,6 +609,9 @@ export class GameScene extends Phaser.Scene {
       case 'skillCast':
         this.showSkill(event.unit, event.skill, event.cells);
         break;
+      case 'gardenReady':
+        this.hud.log(`药园有 ${event.count} 株灵药成熟，按 G 收获`, 'gain');
+        break;
       case 'achievement':
         this.hud.log(`达成成就：${event.achievement.name}`, 'gain');
         this.floatText(this.world.player, event.achievement.name, '#ffd84a', 20);
@@ -749,6 +769,7 @@ export class GameScene extends Phaser.Scene {
   private removeUnitView(view: UnitView): void {
     if (this.hovered === view) this.hovered = null;
     view.sprite.destroy();
+    view.shadow.destroy();
     view.hpBar?.destroy();
     this.unitViews.delete(view.unit);
   }

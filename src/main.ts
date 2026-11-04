@@ -13,6 +13,7 @@ import { showOfflineReport } from './ui/offlineDialog';
 import { Panels } from './ui/panels';
 import { SavePanel } from './ui/savePanel';
 import { CodexPanel } from './ui/codexPanel';
+import { GardenPanel } from './ui/gardenPanel';
 import { SkillPanel } from './ui/skillPanel';
 import { showStartScreen } from './ui/startScreen';
 import './ui/hud.css';
@@ -163,6 +164,7 @@ new SavePanel(world, store, saver, hud);
 const autoPanel = new AutoPanel(world);
 new SkillPanel(world);
 new CodexPanel(world);
+new GardenPanel(world);
 void saver.saveNow();
 if (report) showOfflineReport(report);
 

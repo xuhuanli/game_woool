@@ -33,6 +33,8 @@ const HEAL = theme('#a83a3a', '#2e0e0e', '#ffe0d8');
 const MANA = theme('#2a5ab0', '#0c1a3a', '#d8e8ff');
 const PILL = theme('#b8862a', '#2e2008', '#fff4d0', '#ffd27a');
 const MATERIAL = theme('#6a5a3a', '#1e1810', '#f4e8c8');
+const HERB = theme('#3a7a3a', '#0e260e', '#e4ffd8', '#8ad86a');
+const SEED = theme('#7a5a2a', '#241a0c', '#f8e8c8', '#d8b070');
 const STORY = theme('#7a2a5a', '#240a1a', '#ffe0f0', '#e08ac0');
 const SCROLL = theme('#8a7a4a', '#24200e', '#fff8d8');
 const GOLD = theme('#3a8a8a', '#0e2424', '#d8fff8', '#7ae0d0');
@@ -80,6 +82,18 @@ const GLYPHS: Record<string, string> = {
   'core-pill': 'fire-gem',
   'nascent-pill': 'lotus',
   'ape-fur': 'animal-hide',
+  'herb-huichun': 'herbs-bundle',
+  'herb-ningqi': 'lotus-flower',
+  'herb-yangyuan': 'tree-roots',
+  'herb-juling': 'curling-vines',
+  'herb-jinyuan': 'root-tip',
+  'herb-xuanyin': 'dandelion-flower',
+  'seed-huichun': 'plant-seed',
+  'seed-ningqi': 'plant-seed',
+  'seed-yangyuan': 'plant-seed',
+  'seed-juling': 'plant-seed',
+  'seed-jinyuan': 'plant-seed',
+  'seed-xuanyin': 'plant-seed',
   'thorn-root': 'plant-roots',
   'spider-silk': 'spider-web',
   'bat-wing': 'bat-wing',
@@ -198,6 +212,8 @@ function itemTheme(item: ItemDef): Theme {
     if (item.boss) return BOSS;
     return TIERS.find(([level]) => (item.level ?? 1) >= level)![1];
   }
+  if (item.seed) return SEED;
+  if (item.id.startsWith('herb-')) return HERB;
   if (STORY_ITEMS.includes(item.id)) return STORY;
   if (BREAKTHROUGH.includes(item.id)) return PILL;
   return MATERIAL;

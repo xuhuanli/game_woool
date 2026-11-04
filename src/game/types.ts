@@ -121,6 +121,26 @@ export interface AutoSettings {
   recallBelow: number;
 }
 
+export interface GardenPlot {
+  /** 种下的灵药 id，空地是 null */
+  herb: string | null;
+  /** 真实时间毫秒 */
+  plantedAt: number;
+  readyAt: number;
+  /** 一键补种用：这块地上次种的灵药 */
+  last: string | null;
+}
+
+export interface GardenState {
+  plots: GardenPlot[];
+  /** 掌天瓶绿液 */
+  dew: number;
+  /** 上一滴绿液凝成的真实时间毫秒 */
+  dewAt: number;
+  /** 累计收获，成就用 */
+  harvested: Record<string, number>;
+}
+
 export interface Player extends Unit {
   kind: 'player';
   def: ClassDef;
@@ -147,6 +167,7 @@ export interface Player extends Unit {
   codexItems: Record<string, number>;
   /** 已达成的成就 */
   achievements: string[];
+  garden: GardenState;
   /** 仓库里的法器 */
   storage: Equipment[];
   reviveReadyAt: number;
@@ -187,6 +208,8 @@ export interface OfflineReport {
   equipment: string[];
   /** 背包放不下、换成灵石的法器件数 */
   soldCount: number;
+  /** 药园里成熟的株数和绿液，没开掌天瓶时为 null */
+  garden: { ready: number; dew: number } | null;
 }
 
 /** 死亡掉落的法器，切图后仍然保留，限时内可以回去捡。 */
@@ -200,6 +223,8 @@ export type GameEvent =
   | { type: 'skillCast'; unit: Unit; skill: SkillDef; cells: Cell[] }
   | { type: 'skillLearned'; skill: SkillDef }
   | { type: 'achievement'; achievement: AchievementDef }
+  | { type: 'gardenChanged' }
+  | { type: 'gardenReady'; count: number }
   | { type: 'summoned'; unit: Summon }
   | { type: 'damage'; unit: Unit; amount: number; maxRoll: boolean; source: Unit }
   | { type: 'miss'; unit: Unit }

@@ -1,5 +1,5 @@
 import type Phaser from 'phaser';
-import type { MapDef } from '../game/config';
+import type { DecorDef, MapDef } from '../game/config';
 import { Rng } from '../game/rng';
 import { TILE_H, TILE_W, toScreen } from './iso';
 
@@ -165,8 +165,50 @@ function paintShimmer(painter: Painter, rng: Rng): HTMLCanvasElement {
   return shimmer.canvas;
 }
 
-/** 预渲染一张地图的地表和水面波光，贴图按地图缓存。 */
-export function paintGround(scene: Phaser.Scene, map: MapDef): PaintedGround {
+/** 景观按脚底宽度取阴影尺寸；返回 0 表示这件不画阴影。 */
+export type ShadowWidth = (item: DecorDef) => number;
+
+let stamp: HTMLCanvasElement | null = null;
+
+/** 复用同一张软边椭圆，画几千件景观时只算一次渐变。 */
+function shadowStamp(): HTMLCanvasElement {
+  if (stamp) return stamp;
+  const size = 128;
+  const { canvas, context } = createCanvas(size, size / 2);
+  context.translate(size / 2, size / 4);
+  context.scale(1, 0.5);
+  const gradient = context.createRadialGradient(0, 0, 0, 0, 0, size / 2);
+  gradient.addColorStop(0, 'rgba(16, 12, 8, 0.46)');
+  gradient.addColorStop(0.5, 'rgba(16, 12, 8, 0.3)');
+  gradient.addColorStop(1, 'rgba(16, 12, 8, 0)');
+  context.fillStyle = gradient;
+  context.beginPath();
+  context.arc(0, 0, size / 2, 0, Math.PI * 2);
+  context.fill();
+  stamp = canvas;
+  return canvas;
+}
+
+/**
+ * 把全部景观的接触阴影烘进地表贴图。
+ * 一张图上千件树石，逐个加精灵会拖累每帧的深度排序，画进地面是零开销的。
+ */
+function paintDecorShadows(
+  context: CanvasRenderingContext2D,
+  painter: Painter,
+  map: MapDef,
+  width: ShadowWidth,
+): void {
+  const image = shadowStamp();
+  for (const item of map.decor ?? []) {
+    const w = width(item);
+    if (w <= 0) continue;
+    const { x, y } = toScreen(item);
+    context.drawImage(image, x + painter.offsetX - w / 2, y + painter.offsetY - w / 4, w, w / 2);
+  }
+}
+
+/** 预渲染一张地图的地表和水面波光，贴图按地图缓存。 */export function paintGround(scene: Phaser.Scene, map: MapDef, shadowWidth?: ShadowWidth): PaintedGround {
   const key = `ground-${map.id}`;
   const shimmerKey = `${key}-shimmer`;
   const painted = { key, shimmerKey, x: -map.height * (TILE_W / 2), y: -TILE_H };
@@ -203,6 +245,7 @@ export function paintGround(scene: Phaser.Scene, map: MapDef): PaintedGround {
   softLayer(context, painter, [TILE.water, TILE.bridge], '#2f6e8c', 4, 2);
   softLayer(context, painter, [TILE.water, TILE.bridge], '#25597a', 9, -8);
   paintBridge(context, painter);
+  if (shadowWidth) paintDecorShadows(context, painter, map, shadowWidth);
 
   scene.textures.addCanvas(key, canvas);
   scene.textures.addCanvas(shimmerKey, paintShimmer(painter, rng));

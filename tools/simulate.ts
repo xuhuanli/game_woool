@@ -98,7 +98,8 @@ function breakThrough(world: World): void {
 }
 
 function simulate(classId: string, seed: number): Result {
-  const world = new World(config, 'huangfeng-valley', classId, seed);
+  // 药园按真实时间长，模拟里不用，给固定时钟保证结果可复现
+  const world = new World(config, 'huangfeng-valley', classId, seed, undefined, () => 0);
   const { player } = world;
   const move = (mapId: string) => {
     const target = config.maps[mapId]!;

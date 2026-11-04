@@ -170,6 +170,8 @@ export interface ItemDef {
   special?: SpecialDef;
   /** Boss 专属法器，填掉落它的 Boss */
   boss?: string;
+  /** 种子种出的灵药 */
+  seed?: string;
   heal?: number;
   mana?: number;
   slot?: 'weapon' | 'armor' | 'helmet' | 'necklace' | 'bracelet' | 'ring';
@@ -353,6 +355,25 @@ export interface AchievementDef {
   reward: { gold: number; items: { item: string; count: number }[] };
 }
 
+export interface GardenHerbDef {
+  /** 收获的灵药 */
+  item: string;
+  seed: string;
+  growSeconds: number;
+  /** 每株收几个 */
+  yield: number;
+  level: number;
+}
+
+export interface GardenConfig {
+  /** 完成这个任务后开启掌天瓶 */
+  unlockQuest: string;
+  /** 按境界取值：凝一滴绿液的秒数、绿液上限；灵药长到 minGrowth 以后才能催熟 */
+  dew: { perSeconds: number[]; max: number[]; minGrowth: number };
+  plots: { initial: number; expansions: { level: number; gold: number }[] };
+  herbs: GardenHerbDef[];
+}
+
 export interface GameSettings {
   startMap: string;
   /** 跑步相对行走的速度倍数 */
@@ -379,6 +400,7 @@ export interface GameConfig {
   npcs: Record<string, NpcDef>;
   quests: Record<string, QuestDef>;
   achievements: Record<string, AchievementDef>;
+  garden: GardenConfig;
   dialogues: Record<string, string[]>;
 }
 
@@ -401,6 +423,7 @@ export const CONFIG_FILES = [
   'quests',
   'dialogues',
   'achievements',
+  'garden',
 ] as const;
 
 /** 一种怪的全部掉落：共用掉落表加上它自己的专属掉落。 */
@@ -502,6 +525,13 @@ export function validateConfig(config: GameConfig): string[] {
     for (const { item } of reward.items) {
       if (!config.items[item]) errors.push(`成就 ${achievement.id} 的奖励 ${item} 不存在`);
     }
+  }
+  const { garden } = config;
+  if (!config.quests[garden.unlockQuest]) errors.push(`药园的开启任务 ${garden.unlockQuest} 不存在`);
+  for (const herb of garden.herbs) {
+    const seed = config.items[herb.seed];
+    if (!config.items[herb.item]) errors.push(`灵药 ${herb.item} 不存在`);
+    if (seed?.seed !== herb.item) errors.push(`灵药 ${herb.item} 的种子 ${herb.seed} 不存在或种不出它`);
   }
   for (const set of Object.values(config.sets)) {
     for (const piece of set.pieces) {

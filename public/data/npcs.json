@@ -41,7 +41,13 @@
       "book-spell-shield",
       "book-spirit-summon",
       "book-body-whirl",
-      "book-spell-gale"
+      "book-spell-gale",
+      "seed-huichun",
+      "seed-ningqi",
+      "seed-yangyuan",
+      "seed-juling",
+      "seed-jinyuan",
+      "seed-xuanyin"
     ]
   },
   "guide-senior": {
@@ -85,7 +91,13 @@
       "book-spell-firewall",
       "book-spirit-miasma",
       "book-body-charge",
-      "book-body-vajra"
+      "book-body-vajra",
+      "seed-huichun",
+      "seed-ningqi",
+      "seed-yangyuan",
+      "seed-juling",
+      "seed-jinyuan",
+      "seed-xuanyin"
     ]
   },
   "vault-keeper": {
@@ -202,7 +214,13 @@
       "book-spell-shield",
       "book-spirit-summon",
       "book-body-whirl",
-      "book-spell-gale"
+      "book-spell-gale",
+      "seed-huichun",
+      "seed-ningqi",
+      "seed-yangyuan",
+      "seed-juling",
+      "seed-jinyuan",
+      "seed-xuanyin"
     ]
   },
   "sect-judge": {
@@ -329,7 +347,13 @@
       "book-body-vajra",
       "book-spell-bixie",
       "book-spirit-corrosion",
-      "book-body-brahma"
+      "book-body-brahma",
+      "seed-huichun",
+      "seed-ningqi",
+      "seed-yangyuan",
+      "seed-juling",
+      "seed-jinyuan",
+      "seed-xuanyin"
     ]
   },
   "star-gate": {
@@ -464,7 +488,13 @@
       "book-body-vajra",
       "book-spell-bixie",
       "book-spirit-corrosion",
-      "book-body-brahma"
+      "book-body-brahma",
+      "seed-huichun",
+      "seed-ningqi",
+      "seed-yangyuan",
+      "seed-juling",
+      "seed-jinyuan",
+      "seed-xuanyin"
     ]
   },
   "luoyun-gate": {
