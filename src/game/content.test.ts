@@ -1569,7 +1569,7 @@ describe('章节主线', () => {
       ['ch5-demons'],
       ['ch5-shadows'],
       ['ch5-cauldron', 'tianxing-city'],
-      ['ch5-return'],
+      ['ch5-return', 'luoyun-sect'],
     ];
     for (const [questId, mapId] of steps) {
       reach(config.quests[questId]!.level);
@@ -1614,6 +1614,60 @@ describe('章节主线', () => {
       ['yanling-fort', 'wang-chan'],
       ['spirit-mine', 'blood-guardian'],
       ['jingu-plain', 'demon-commander'],
+    ] as const) {
+      const boss = config.maps[mapId]!.spawns.find((spawn) => spawn.monster === bossId)!;
+      for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === mapId)) {
+        expect(Math.hypot(npc.x - boss.x, npc.y - boss.y) - 2, npc.id).toBeGreaterThan(config.monsters[bossId]!.aggroRange);
+      }
+    }
+  });
+
+  it('第 6 章：随南陇侯入坠魔谷，古魔夺舍，斩魔后回落云宗', () => {
+    const world = new World(config, 'luoyun-sect', 'body', 1);
+    world.player.quests.completed.push('ch5-return');
+    world.player.realmPassed.push('qi', 'foundation', 'core');
+    const reach = (level: number) => {
+      while (world.player.level < level) {
+        world.player.exp = world.expToNext!;
+        (world as unknown as { gainExp(amount: number): void }).gainExp(0);
+      }
+    };
+    expect(world.portals.find((portal) => portal.name === '坠魔谷')!.requires).toBe('ch6-invite');
+    const steps: [string, string?][] = [
+      ['ch6-arrive'],
+      ['ch6-invite', 'zhuomo-outer'],
+      ['ch6-beasts'],
+      ['ch6-wraiths'],
+      ['ch6-warden'],
+      ['ch6-meet-lu'],
+      ['ch6-apes'],
+      ['ch6-spirits'],
+      ['ch6-cultists'],
+      ['ch6-gate', 'blood-gate'],
+      ['ch6-shades'],
+      ['ch6-nanlong', 'luoyun-sect'],
+      ['ch6-ending'],
+    ];
+    for (const [questId, mapId] of steps) {
+      reach(config.quests[questId]!.level);
+      finish(world, questId);
+      if (mapId) expect(world.mapId, questId).toBe(mapId);
+    }
+    expect(world.npcs.map((npc) => npc.id)).not.toContain('nanlong-hou');
+  });
+
+  it('坠魔谷三张图按任务解锁，第 6 章经验约四成来自任务，Boss 离 NPC 足够远', () => {
+    expect(config.maps['zhuomo-outer']!.portals!.find((portal) => portal.toMap === 'zhuomo-inner')!.requires).toBe('ch6-warden');
+    expect(config.maps['zhuomo-inner']!.portals!.find((portal) => portal.toMap === 'blood-gate')!.requires).toBe('ch6-gate');
+    const levels = config.levels.expToNext.slice(33, 39).reduce((sum, exp) => sum + exp, 0);
+    const quests = Object.values(config.quests)
+      .filter((quest) => quest.id.startsWith('ch6'))
+      .reduce((sum, quest) => sum + quest.rewards.exp, 0);
+    expect(quests / levels).toBeGreaterThan(0.3);
+    expect(quests / levels).toBeLessThan(0.5);
+    for (const [mapId, bossId] of [
+      ['zhuomo-outer', 'valley-warden'],
+      ['blood-gate', 'demon-nanlong'],
     ] as const) {
       const boss = config.maps[mapId]!.spawns.find((spawn) => spawn.monster === bossId)!;
       for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === mapId)) {

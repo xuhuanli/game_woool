@@ -27,6 +27,7 @@ const MUSIC: Record<string, string> = {
   yanling: 'music-yanling.ogg',
   sea: 'music-sea.ogg',
   xutian: 'music-xutian.mp3',
+  zhuomo: 'music-zhuomo.mp3',
 };
 
 export type SoundName = keyof typeof SOUNDS;

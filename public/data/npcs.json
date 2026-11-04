@@ -420,5 +420,139 @@
     "color": "#d8d0c0",
     "greeting": "xuangu-core-greeting",
     "hiddenAfter": "ch5-cauldron"
+  },
+  "luoyun-steward": {
+    "id": "luoyun-steward",
+    "name": "落云宗执事",
+    "map": "luoyun-sect",
+    "x": 20,
+    "y": 16,
+    "color": "#b4c8ff",
+    "greeting": "luoyun-greeting"
+  },
+  "luoyun-elder": {
+    "id": "luoyun-elder",
+    "name": "落云宗长老",
+    "map": "luoyun-sect",
+    "x": 24,
+    "y": 14,
+    "color": "#e6e6f0",
+    "greeting": "luoyun-elder-greeting"
+  },
+  "luoyun-merchant": {
+    "id": "luoyun-merchant",
+    "name": "落云坊主",
+    "map": "luoyun-sect",
+    "x": 27,
+    "y": 20,
+    "color": "#c9a24a",
+    "greeting": "luoyun-merchant-greeting",
+    "storage": true,
+    "shop": [
+      "mid-potion",
+      "mid-mana",
+      "big-potion",
+      "big-mana",
+      "refine-stone",
+      "recall-scroll",
+      "random-scroll",
+      "book-spell-firewall",
+      "book-spirit-miasma",
+      "book-body-vajra",
+      "book-spell-bixie",
+      "book-spirit-corrosion",
+      "book-body-brahma"
+    ]
+  },
+  "luoyun-gate": {
+    "id": "luoyun-gate",
+    "name": "传送阵执事",
+    "map": "luoyun-sect",
+    "x": 13,
+    "y": 20,
+    "color": "#9fd0ff",
+    "greeting": "luoyun-gate-greeting",
+    "travel": [
+      {
+        "name": "天星城",
+        "map": "tianxing-city",
+        "x": 20,
+        "y": 24,
+        "cost": 500
+      },
+      {
+        "name": "坠魔谷外谷",
+        "map": "zhuomo-outer",
+        "x": 12,
+        "y": 12,
+        "cost": 800,
+        "requires": "ch6-invite"
+      },
+      {
+        "name": "坠魔谷内谷",
+        "map": "zhuomo-inner",
+        "x": 12,
+        "y": 12,
+        "cost": 900,
+        "requires": "ch6-warden"
+      },
+      {
+        "name": "血咒之门",
+        "map": "blood-gate",
+        "x": 12,
+        "y": 12,
+        "cost": 1000,
+        "requires": "ch6-gate"
+      }
+    ]
+  },
+  "nanlong-hou": {
+    "id": "nanlong-hou",
+    "name": "南陇侯",
+    "map": "luoyun-sect",
+    "x": 24,
+    "y": 26,
+    "color": "#5a4a6a",
+    "greeting": "nanlong-greeting",
+    "requires": "ch6-arrive",
+    "hiddenAfter": "ch6-invite"
+  },
+  "nanlong-outer": {
+    "id": "nanlong-outer",
+    "name": "南陇侯",
+    "map": "zhuomo-outer",
+    "x": 15,
+    "y": 12,
+    "color": "#5a4a6a",
+    "greeting": "nanlong-outer-greeting"
+  },
+  "lu-weiying": {
+    "id": "lu-weiying",
+    "name": "鲁卫英",
+    "map": "zhuomo-inner",
+    "x": 15,
+    "y": 12,
+    "color": "#8a6a3a",
+    "greeting": "lu-greeting"
+  },
+  "nanlong-inner": {
+    "id": "nanlong-inner",
+    "name": "南陇侯",
+    "map": "zhuomo-inner",
+    "x": 13,
+    "y": 16,
+    "color": "#5a4a6a",
+    "greeting": "nanlong-inner-greeting",
+    "hiddenAfter": "ch6-gate"
+  },
+  "lu-weiying-gate": {
+    "id": "lu-weiying-gate",
+    "name": "鲁卫英",
+    "map": "blood-gate",
+    "x": 15,
+    "y": 12,
+    "color": "#8a6a3a",
+    "greeting": "lu-gate-greeting",
+    "hiddenAfter": "ch6-nanlong"
   }
 }

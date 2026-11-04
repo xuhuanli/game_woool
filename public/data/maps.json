@@ -208,5 +208,65 @@
       "alpha": 0.14
     },
     "music": "xutian"
+  },
+  "luoyun-sect": {
+    "id": "luoyun-sect",
+    "name": "落云宗",
+    "safe": true,
+    "tiled": "luoyun-sect.tmj",
+    "respawn": {
+      "map": "luoyun-sect",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#b4c8ff",
+      "alpha": 0.06
+    }
+  },
+  "zhuomo-outer": {
+    "id": "zhuomo-outer",
+    "name": "坠魔谷·外谷",
+    "tiled": "zhuomo-outer.tmj",
+    "respawn": {
+      "map": "luoyun-sect",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#6a5a7a",
+      "alpha": 0.14
+    },
+    "music": "zhuomo"
+  },
+  "zhuomo-inner": {
+    "id": "zhuomo-inner",
+    "name": "坠魔谷·内谷",
+    "tiled": "zhuomo-inner.tmj",
+    "respawn": {
+      "map": "luoyun-sect",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#7a3a5a",
+      "alpha": 0.16
+    },
+    "music": "zhuomo"
+  },
+  "blood-gate": {
+    "id": "blood-gate",
+    "name": "坠魔谷·血咒之门",
+    "tiled": "blood-gate.tmj",
+    "respawn": {
+      "map": "luoyun-sect",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#8a1a2a",
+      "alpha": 0.2
+    },
+    "music": "zhuomo"
   }
 }

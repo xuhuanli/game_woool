@@ -1119,5 +1119,197 @@
       "item": "blink-ring",
       "chance": 0.12
     }
+  ],
+  "zhuomo-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 60,
+      "max": 90
+    },
+    {
+      "item": "big-potion",
+      "chance": 0.12
+    },
+    {
+      "item": "big-mana",
+      "chance": 0.1
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.025
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.015
+    },
+    {
+      "item": "sword-27",
+      "chance": 0.004
+    },
+    {
+      "item": "robe-27",
+      "chance": 0.004
+    },
+    {
+      "item": "crown-27",
+      "chance": 0.004
+    },
+    {
+      "item": "pendant-27",
+      "chance": 0.004
+    },
+    {
+      "item": "bracelet-27",
+      "chance": 0.004
+    },
+    {
+      "item": "ring-27",
+      "chance": 0.004
+    },
+    {
+      "item": "sword-35",
+      "chance": 0.00201
+    },
+    {
+      "item": "robe-35",
+      "chance": 0.003
+    },
+    {
+      "item": "crown-35",
+      "chance": 0.003
+    },
+    {
+      "item": "pendant-35",
+      "chance": 0.003
+    },
+    {
+      "item": "bracelet-35",
+      "chance": 0.003
+    },
+    {
+      "item": "ring-35",
+      "chance": 0.003
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    }
+  ],
+  "valley-warden": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 4000,
+      "max": 6000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 4
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-35",
+      "chance": 0.15
+    },
+    {
+      "item": "robe-35",
+      "chance": 0.15
+    },
+    {
+      "item": "crown-35",
+      "chance": 0.15
+    },
+    {
+      "item": "pendant-35",
+      "chance": 0.15
+    },
+    {
+      "item": "bracelet-35",
+      "chance": 0.15
+    },
+    {
+      "item": "ring-35",
+      "chance": 0.15
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.12
+    }
+  ],
+  "demon-nanlong": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 6000,
+      "max": 9000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 4
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-35",
+      "chance": 0.3
+    },
+    {
+      "item": "robe-35",
+      "chance": 0.3
+    },
+    {
+      "item": "crown-35",
+      "chance": 0.3
+    },
+    {
+      "item": "pendant-35",
+      "chance": 0.3
+    },
+    {
+      "item": "bracelet-35",
+      "chance": 0.3
+    },
+    {
+      "item": "ring-35",
+      "chance": 0.3
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.15
+    }
   ]
 }

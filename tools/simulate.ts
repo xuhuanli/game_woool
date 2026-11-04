@@ -7,11 +7,14 @@ import { pendingBreakthrough } from '../src/game/realm';
 import { loadConfigFromDisk } from '../src/game/testConfig';
 import { TICK_SECONDS, World } from '../src/game/world';
 
-const MAX_HOURS = 40;
-const TARGET_LEVEL = 34;
+const MAX_HOURS = 60;
+const TARGET_LEVEL = 40;
 const SEEDS = [1, 2, 3];
 /** 按等级选挂机地图，和各章节的等级段一致 */
 const FIELDS: [number, string][] = [
+  [39, 'blood-gate'],
+  [37, 'zhuomo-inner'],
+  [35, 'zhuomo-outer'],
   [33, 'xutian-core'],
   [31, 'xutian-hall'],
   [29, 'xutian-mist'],
@@ -163,8 +166,8 @@ const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0)
 const round = (value: number) => Math.round(value).toLocaleString('en-US');
 
 console.log(`模拟：挂机到 ${TARGET_LEVEL} 级，最多 ${MAX_HOURS} 小时，每职业 ${SEEDS.length} 个种子。\n`);
-console.log('| 职业 | 到 10 级 | 到 13 级 | 到 18 级 | 到 22 级 | 到 26 级 | 到 30 级 | 到 34 级 | 死亡 | 回城 | 法器 | 经验/时 | 灵石/时 |');
-console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+console.log('| 职业 | 到 13 级 | 到 26 级 | 到 30 级 | 到 34 级 | 到 37 级 | 到 40 级 | 死亡 | 回城 | 法器 | 经验/时 | 灵石/时 |');
+console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
 const rows: Result[][] = [];
 for (const classId of Object.keys(config.classes)) {
   const runs = SEEDS.map((seed) => simulate(classId, seed));
@@ -174,7 +177,7 @@ for (const classId of Object.keys(config.classes)) {
     return times.length === runs.length ? `${(mean(times) / 3600).toFixed(1)} 时` : '未到';
   };
   console.log(
-    `| ${config.classes[classId]!.name} | ${at(10)} | ${at(13)} | ${at(18)} | ${at(22)} | ${at(26)} | ${at(30)} | ${at(34)} | ` +
+    `| ${config.classes[classId]!.name} | ${at(13)} | ${at(26)} | ${at(30)} | ${at(34)} | ${at(37)} | ${at(40)} | ` +
       `${round(mean(runs.map((run) => run.deaths)))} | ${round(mean(runs.map((run) => run.recalls)))} | ` +
       `${round(mean(runs.map((run) => run.equipment)))} | ${round(mean(runs.map((run) => run.expPerHour)))} | ` +
       `${round(mean(runs.map((run) => run.goldPerHour)))} |`,

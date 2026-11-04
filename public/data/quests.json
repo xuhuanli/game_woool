@@ -1524,10 +1524,364 @@
           "item": "nascent-pill",
           "count": 1
         }
-      ]
+      ],
+      "teleport": {
+        "map": "luoyun-sect",
+        "x": 20,
+        "y": 24
+      }
     },
     "offer": "ch5-return-offer",
     "finish": "ch5-return-finish",
     "prev": "ch5-cauldron"
+  },
+  "ch6-arrive": {
+    "id": "ch6-arrive",
+    "name": "入落云宗",
+    "giver": "luoyun-steward",
+    "level": 34,
+    "main": true,
+    "summary": "去拜见落云宗长老，在宗门安顿下来。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "luoyun-elder",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 26000,
+      "gold": 3000,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch6-arrive-offer",
+    "finish": "ch6-arrive-finish",
+    "prev": "ch5-return"
+  },
+  "ch6-invite": {
+    "id": "ch6-invite",
+    "name": "南陇侯来访",
+    "giver": "luoyun-elder",
+    "level": 35,
+    "main": true,
+    "summary": "南陇侯登门拜访，点名要见你。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "nanlong-hou",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 26000,
+      "gold": 2000,
+      "items": [],
+      "teleport": {
+        "map": "zhuomo-outer",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch6-invite-offer",
+    "finish": "ch6-invite-finish",
+    "prev": "ch6-arrive"
+  },
+  "ch6-beasts": {
+    "id": "ch6-beasts",
+    "name": "谷口妖兽",
+    "giver": "nanlong-outer",
+    "level": 35,
+    "main": true,
+    "summary": "击败谷口的 12 只魔化妖兽。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "demon-beast",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 69000,
+      "gold": 4000,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch6-beasts-offer",
+    "finish": "ch6-beasts-finish",
+    "prev": "ch6-invite"
+  },
+  "ch6-wraiths": {
+    "id": "ch6-wraiths",
+    "name": "谷中魔魂",
+    "giver": "nanlong-outer",
+    "level": 36,
+    "main": true,
+    "summary": "击败谷中游荡的 12 道魔魂。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "valley-wraith",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 73000,
+      "gold": 4200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch6-wraiths-offer",
+    "finish": "ch6-wraiths-finish",
+    "prev": "ch6-beasts"
+  },
+  "ch6-warden": {
+    "id": "ch6-warden",
+    "name": "守谷魔将",
+    "giver": "nanlong-outer",
+    "level": 36,
+    "main": true,
+    "summary": "击败把守内谷入口的守谷魔将。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "valley-warden",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 86000,
+      "gold": 6000,
+      "items": []
+    },
+    "offer": "ch6-warden-offer",
+    "finish": "ch6-warden-finish",
+    "prev": "ch6-wraiths"
+  },
+  "ch6-meet-lu": {
+    "id": "ch6-meet-lu",
+    "name": "鲁卫英",
+    "giver": "nanlong-outer",
+    "level": 37,
+    "main": true,
+    "summary": "进入内谷，和先到一步的鲁卫英会合。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "lu-weiying",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 26000,
+      "gold": 2000,
+      "items": []
+    },
+    "offer": "ch6-meet-lu-offer",
+    "finish": "ch6-meet-lu-finish",
+    "prev": "ch6-warden"
+  },
+  "ch6-apes": {
+    "id": "ch6-apes",
+    "name": "血魔猿",
+    "giver": "lu-weiying",
+    "level": 37,
+    "main": true,
+    "summary": "击败内谷里的 12 只血魔猿。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "blood-ape",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 77500,
+      "gold": 4400,
+      "items": [
+        {
+          "item": "big-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch6-apes-offer",
+    "finish": "ch6-apes-finish",
+    "prev": "ch6-meet-lu"
+  },
+  "ch6-spirits": {
+    "id": "ch6-spirits",
+    "name": "血咒怨灵",
+    "giver": "lu-weiying",
+    "level": 38,
+    "main": true,
+    "summary": "击败缠在血咒之门附近的 12 道怨灵。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "curse-spirit",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 81500,
+      "gold": 4600,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch6-spirits-offer",
+    "finish": "ch6-spirits-finish",
+    "prev": "ch6-apes"
+  },
+  "ch6-cultists": {
+    "id": "ch6-cultists",
+    "name": "魔化修士",
+    "giver": "lu-weiying",
+    "level": 38,
+    "main": true,
+    "summary": "击败 12 名早年困死在谷中、已被魔气侵蚀的修士。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "demon-cultivator",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 84500,
+      "gold": 4800,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch6-cultists-offer",
+    "finish": "ch6-cultists-finish",
+    "prev": "ch6-spirits"
+  },
+  "ch6-gate": {
+    "id": "ch6-gate",
+    "name": "血咒之门",
+    "giver": "lu-weiying",
+    "level": 38,
+    "main": true,
+    "summary": "去血咒之门前找南陇侯。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "nanlong-inner",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 30000,
+      "gold": 2000,
+      "items": [],
+      "teleport": {
+        "map": "blood-gate",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch6-gate-offer",
+    "finish": "ch6-gate-finish",
+    "prev": "ch6-cultists"
+  },
+  "ch6-shades": {
+    "id": "ch6-shades",
+    "name": "古魔残影",
+    "giver": "lu-weiying-gate",
+    "level": 39,
+    "main": true,
+    "summary": "击败从门后涌出的 12 道古魔残影。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "ancient-shade",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 90500,
+      "gold": 5000,
+      "items": [
+        {
+          "item": "big-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch6-shades-offer",
+    "finish": "ch6-shades-finish",
+    "prev": "ch6-gate"
+  },
+  "ch6-nanlong": {
+    "id": "ch6-nanlong",
+    "name": "古魔",
+    "giver": "lu-weiying-gate",
+    "level": 39,
+    "main": true,
+    "summary": "击败被古魔夺舍的南陇侯，活着逃出坠魔谷。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "demon-nanlong",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 120500,
+      "gold": 10000,
+      "items": [],
+      "teleport": {
+        "map": "luoyun-sect",
+        "x": 20,
+        "y": 24
+      }
+    },
+    "offer": "ch6-nanlong-offer",
+    "finish": "ch6-nanlong-finish",
+    "prev": "ch6-shades"
+  },
+  "ch6-ending": {
+    "id": "ch6-ending",
+    "name": "长生路",
+    "giver": "luoyun-steward",
+    "level": 39,
+    "main": true,
+    "summary": "回到落云宗，向长老复命。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "luoyun-elder",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 34500,
+      "gold": 5000,
+      "items": []
+    },
+    "offer": "ch6-ending-offer",
+    "finish": "ch6-ending-finish",
+    "prev": "ch6-nanlong"
   }
 }
