@@ -221,7 +221,7 @@ export interface DeathDrop {
 export type GameEvent =
   | { type: 'attackStart'; unit: Unit; target: Unit | null; color: string | null }
   | { type: 'skillCast'; unit: Unit; skill: SkillDef; cells: Cell[] }
-  | { type: 'skillLearned'; skill: SkillDef }
+  | { type: 'skillLearned'; skill: SkillDef; replaced?: SkillDef }
   | { type: 'achievement'; achievement: AchievementDef }
   | { type: 'gardenChanged' }
   | { type: 'gardenReady'; count: number }

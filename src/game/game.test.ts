@@ -259,7 +259,10 @@ describe('境界', () => {
     expect(realmName(realmConfig(), 13)).toBe('练气十三层');
     expect(realmName(realmConfig(), 14)).toBe('筑基初期');
     expect(realmName(realmConfig(), 26)).toBe('筑基后期');
-    expect(realmName(realmConfig(), 40)).toBe('元婴后期');
+    // 元婴按原著进度划分：坠魔谷之前初期，之后到昆吾山都是中期
+    expect(realmName(realmConfig(), 40)).toBe('元婴初期');
+    expect(realmName(realmConfig(), 41)).toBe('元婴中期');
+    expect(realmName(realmConfig(), 55)).toBe('元婴中期');
   });
 });
 

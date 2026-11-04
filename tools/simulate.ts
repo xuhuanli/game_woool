@@ -1,14 +1,15 @@
 /**
  * 数值模拟：用真实游戏逻辑无界面地挂机，输出各职业的升级耗时和产出。
- * 用法：npm run sim
+ * 用法：npm run sim，或 npm run sim -- 55 挂到 55 级（小时上限跟着放宽）
  */
 import { estimateIncome, OFFLINE_EFFICIENCY } from '../src/game/offline';
 import { pendingBreakthrough } from '../src/game/realm';
 import { loadConfigFromDisk } from '../src/game/testConfig';
 import { TICK_SECONDS, World } from '../src/game/world';
 
-const MAX_HOURS = 60;
-const TARGET_LEVEL = 40;
+/** 新章节做好以前，40 级以后只能留在血咒之门，所以缺省仍挂到 40 级 */
+const TARGET_LEVEL = Number(process.argv[2] ?? 40);
+const MAX_HOURS = TARGET_LEVEL > 40 ? 100 : 60;
 const SEEDS = [1, 2, 3];
 /** 按等级选挂机地图，和各章节的等级段一致 */
 const FIELDS: [number, string][] = [
@@ -28,7 +29,8 @@ const FIELDS: [number, string][] = [
 ];
 const POTIONS_PER_TRIP = 10;
 /** 14 级起改买养元丹，27 级起改买大还丹，低一档的丹药到下一章就不够用了。 */
-const potionFor = (level: number) => (level >= 27 ? 'big-potion' : level >= 14 ? 'mid-potion' : 'small-potion');
+const potionFor = (level: number) =>
+  level >= 41 ? 'huge-potion' : level >= 27 ? 'big-potion' : level >= 14 ? 'mid-potion' : 'small-potion';
 
 const config = await loadConfigFromDisk();
 
@@ -61,7 +63,7 @@ function resupply(world: World): void {
   for (const item of Object.values(config.items)) {
     const skill = config.skills[item.skill ?? ''];
     if (item.kind !== 'book' || !skill || skill.classId !== player.def.id || skill.level > player.level) continue;
-    if (player.skills.includes(skill.id) || player.gold < (item.price ?? 0)) continue;
+    if (inventory.knowsSkill(skill.id) || player.gold < (item.price ?? 0)) continue;
     player.gold -= item.price ?? 0;
     inventory.addToBag(item.id, 1);
     inventory.useItem(item.id);

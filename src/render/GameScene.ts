@@ -618,7 +618,7 @@ export class GameScene extends Phaser.Scene {
         this.audio.play('achievement');
         break;
       case 'skillLearned':
-        this.hud.log(`学会功法：${event.skill.name}`, 'gain');
+        this.hud.log(event.replaced ? `${event.replaced.name}进阶为${event.skill.name}` : `学会功法：${event.skill.name}`, 'gain');
         break;
       case 'summoned':
         this.addUnitView(event.unit, event.unit.def.id);

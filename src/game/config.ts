@@ -75,6 +75,8 @@ export interface SkillDef {
   range: number;
   color: string;
   effect: SkillEffect;
+  /** 进阶功法：学会后替换掉这门旧功法，占同一格 */
+  replaces?: string;
 }
 
 export interface RealmDef {
@@ -83,6 +85,8 @@ export interface RealmDef {
   minLevel: number;
   maxLevel: number;
   stages: 'layers' | 'phases';
+  /** 每个小境界的起始等级，按原著进度对齐；不填就把境界平均分成初、中、后期 */
+  phaseStarts?: number[];
   /** 进入下一境界的条件，最高境界没有 */
   breakthrough?: {
     chance: number;
@@ -510,8 +514,19 @@ export function validateConfig(config: GameConfig): string[] {
     const hasBook = Object.values(config.items).some((item) => item.kind === 'book' && item.skill === skill.id);
     if (skill.level > 1 && !hasBook) errors.push(`功法 ${skill.id} 没有功法书`);
   }
+  for (const skill of Object.values(config.skills)) {
+    if (!skill.replaces) continue;
+    const old = config.skills[skill.replaces];
+    if (!old || old.classId !== skill.classId || old.level >= skill.level) {
+      errors.push(`进阶功法 ${skill.id} 替换的 ${skill.replaces} 不存在、不是同职业或等级不低于它`);
+    }
+  }
+  const replaced = new Set(Object.values(config.skills).map((skill) => skill.replaces).filter(Boolean));
   for (const classDef of Object.values(config.classes)) {
-    const count = Object.values(config.skills).filter((skill) => skill.classId === classDef.id).length;
+    // 被进阶替换掉的旧功法不再占格
+    const count = Object.values(config.skills).filter(
+      (skill) => skill.classId === classDef.id && !replaced.has(skill.id),
+    ).length;
     if (count > SKILL_SLOTS) errors.push(`职业 ${classDef.id} 的技能超过快捷栏 ${SKILL_SLOTS} 格`);
   }
   for (const achievement of Object.values(config.achievements)) {

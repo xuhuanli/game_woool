@@ -23,5 +23,6 @@
       "requires": [{ "item": "nascent-pill", "count": 1 }]
     }
   },
-  { "id": "nascent", "name": "元婴", "minLevel": 35, "maxLevel": 40, "stages": "phases" }
+  { "id": "nascent", "name": "元婴", "minLevel": 35, "maxLevel": 55, "stages": "phases",
+    "phaseStarts": [35, 41] }
 ]

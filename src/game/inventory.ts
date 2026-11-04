@@ -92,8 +92,11 @@ export class Inventory {
     if (!skill) return;
     let refusal = '';
     if (skill.classId !== player.def.id) refusal = `${item.name}不是本职业的功法`;
-    else if (player.skills.includes(skill.id)) refusal = `已经学会${skill.name}`;
+    else if (this.knowsSkill(skill.id)) refusal = `已经学会${skill.name}`;
     else if (skill.level > player.level) refusal = `${skill.level} 级才能研读${item.name}`;
+    else if (skill.replaces && !player.skills.includes(skill.replaces)) {
+      refusal = `先学会${this.config.skills[skill.replaces]?.name}才能研读${item.name}`;
+    }
     if (refusal) {
       this.emit({ type: 'message', text: refusal });
       return;
@@ -102,11 +105,33 @@ export class Inventory {
     this.learnSkill(skill.id);
   }
 
-  /** 学会功法，放进快捷栏第一个空格。 */
+  /** 学会了这门功法，或者已经把它进阶成了别的功法。 */
+  knowsSkill(skillId: string): boolean {
+    return this.player.skills.some((id) => {
+      for (let skill = this.config.skills[id]; skill; skill = this.config.skills[skill.replaces ?? '']) {
+        if (skill.id === skillId) return true;
+      }
+      return false;
+    });
+  }
+
+  /** 学会功法，放进快捷栏第一个空格；进阶功法顶替旧功法的位置和层数。 */
   learnSkill(skillId: string): void {
     const player = this.player;
     const skill = this.config.skills[skillId];
     if (!skill || player.skills.includes(skillId)) return;
+    const old = skill.replaces ? this.config.skills[skill.replaces] : undefined;
+    if (old && player.skills.includes(old.id)) {
+      player.skills[player.skills.indexOf(old.id)] = skillId;
+      player.hotbar = player.hotbar.map((entry) =>
+        entry?.kind === 'skill' && entry.id === old.id ? { kind: 'skill', id: skillId } : entry,
+      );
+      if (player.skillLevels[old.id]) player.skillLevels[skillId] = player.skillLevels[old.id]!;
+      delete player.skillLevels[old.id];
+      delete player.skillCooldowns[old.id];
+      this.emit({ type: 'skillLearned', skill, replaced: old });
+      return;
+    }
     player.skills.push(skillId);
     const slot = player.hotbar.indexOf(null);
     if (slot >= 0) player.hotbar[slot] = { kind: 'skill', id: skillId };

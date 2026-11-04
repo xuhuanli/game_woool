@@ -9,6 +9,10 @@ export function realmName(realms: RealmDef[], level: number): string {
   if (!realm) return '';
   const step = level - realm.minLevel;
   if (realm.stages === 'layers') return `${realm.name}${LAYERS.at(step) ?? ''}层`;
+  if (realm.phaseStarts) {
+    const phase = realm.phaseStarts.filter((start) => level >= start).length - 1;
+    return `${realm.name}${PHASES.at(Math.max(0, phase))}`;
+  }
   const span = realm.maxLevel - realm.minLevel + 1;
   return `${realm.name}${PHASES.at(Math.floor((step * PHASES.length) / span))}`;
 }

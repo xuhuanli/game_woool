@@ -950,5 +950,82 @@
     "seed": "herb-xuanyin",
     "level": 26,
     "price": 240
+  },
+  "book-body-charge-2": {
+    "id": "book-body-charge-2",
+    "name": "《撼山冲·大成》",
+    "kind": "book",
+    "skill": "body-charge-2",
+    "price": 5950
+  },
+  "book-body-mingwang-2": {
+    "id": "book-body-mingwang-2",
+    "name": "《明王诀·大成》",
+    "kind": "book",
+    "skill": "body-mingwang-2",
+    "price": 7100
+  },
+  "book-body-brahma-2": {
+    "id": "book-body-brahma-2",
+    "name": "《梵圣真魔功·大成》",
+    "kind": "book",
+    "skill": "body-brahma-2",
+    "price": 8350
+  },
+  "book-spell-firewall-2": {
+    "id": "book-spell-firewall-2",
+    "name": "《火墙术·大成》",
+    "kind": "book",
+    "skill": "spell-firewall-2",
+    "price": 5950
+  },
+  "book-spell-qingyuan-2": {
+    "id": "book-spell-qingyuan-2",
+    "name": "《青元剑诀·大成》",
+    "kind": "book",
+    "skill": "spell-qingyuan-2",
+    "price": 7100
+  },
+  "book-spell-bixie-2": {
+    "id": "book-spell-bixie-2",
+    "name": "《辟邪神雷·大成》",
+    "kind": "book",
+    "skill": "spell-bixie-2",
+    "price": 8350
+  },
+  "book-spirit-miasma-2": {
+    "id": "book-spirit-miasma-2",
+    "name": "《瘴毒术·大成》",
+    "kind": "book",
+    "skill": "spirit-miasma-2",
+    "price": 5950
+  },
+  "book-spirit-corrosion-2": {
+    "id": "book-spirit-corrosion-2",
+    "name": "《腐骨毒·大成》",
+    "kind": "book",
+    "skill": "spirit-corrosion-2",
+    "price": 7100
+  },
+  "book-spirit-puppet-2": {
+    "id": "book-spirit-puppet-2",
+    "name": "《傀儡术·大成》",
+    "kind": "book",
+    "skill": "spirit-puppet-2",
+    "price": 8350
+  },
+  "huge-potion": {
+    "id": "huge-potion",
+    "name": "回天丹",
+    "kind": "potion",
+    "heal": 450,
+    "price": 300
+  },
+  "huge-mana": {
+    "id": "huge-mana",
+    "name": "玄元丹",
+    "kind": "potion",
+    "mana": 340,
+    "price": 300
   }
 }

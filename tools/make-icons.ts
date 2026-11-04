@@ -77,6 +77,8 @@ const GLYPHS: Record<string, string> = {
   'small-mana': 'pill-drop',
   'mid-mana': 'pill-drop',
   'big-mana': 'pill-drop',
+  'huge-potion': 'pill',
+  'huge-mana': 'pill-drop',
   'refine-stone': 'stone-block',
   'foundation-pill': 'pill',
   'core-pill': 'fire-gem',
@@ -173,6 +175,8 @@ const POTION_SCALE: Record<string, number> = {
   'mid-mana': 0.72,
   'big-potion': 0.82,
   'big-mana': 0.82,
+  'huge-potion': 0.92,
+  'huge-mana': 0.92,
 };
 
 const index = JSON.parse(readFileSync(`${SOURCE}/index.json`, 'utf8')) as { icons: { name: string; path: string }[] };
@@ -229,13 +233,15 @@ const missing: string[] = [];
 const write = (id: string, svg: string) => writeFileSync(`${OUTPUT}/${id}.svg`, svg);
 
 for (const skill of Object.values(skills)) {
-  const glyph = GLYPHS[skill.id];
+  // 进阶功法沿用旧功法的图形
+  const glyph = GLYPHS[skill.id] ?? GLYPHS[skill.replaces ?? ''];
   if (!glyph) missing.push(skill.id);
   else write(skill.id, render(glyph, CLASSES[skill.classId]!));
 }
 for (const item of Object.values(items)) {
   // 功法书用所授功法的图形，底色是纸色
-  const glyph = item.kind === 'book' ? GLYPHS[item.skill ?? ''] : GLYPHS[item.id];
+  const taught = skills[item.skill ?? ''];
+  const glyph = item.kind === 'book' ? (GLYPHS[taught?.id ?? ''] ?? GLYPHS[taught?.replaces ?? '']) : GLYPHS[item.id];
   if (!glyph) {
     missing.push(item.id);
     continue;

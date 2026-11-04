@@ -155,7 +155,9 @@ export class NpcPanel {
       if (!item) continue;
       // 功法书只卖本职业、还没学会的
       const skill = config.skills[item.skill ?? ''];
-      if (skill && (skill.classId !== player.def.id || player.skills.includes(skill.id))) continue;
+      if (skill && (skill.classId !== player.def.id || this.world.inventory.knowsSkill(skill.id))) continue;
+      // 种子到等级才卖
+      if (item.seed && (item.level ?? 1) > player.level) continue;
       const option = this.option(`${item.name}（${item.price} 灵石）`, () => world.buy(npc, itemId));
       option.prepend(iconImage(itemId));
       body.append(option);

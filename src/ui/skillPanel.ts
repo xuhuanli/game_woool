@@ -60,8 +60,10 @@ export class SkillPanel {
     const title = document.createElement('header');
     title.className = 'panel-title';
     title.textContent = `功法 · ${player.def.name}`;
+    // 已经进阶的旧功法不再列出
+    const advanced = new Set(player.skills.map((id) => config.skills[id]?.replaces).filter(Boolean));
     const skills = Object.values(config.skills)
-      .filter((skill) => skill.classId === player.def.id)
+      .filter((skill) => skill.classId === player.def.id && !advanced.has(skill.id))
       .sort((a, b) => a.level - b.level);
     this.panel.replaceChildren(title, ...skills.map((skill) => this.row(skill)));
   }
@@ -77,7 +79,10 @@ export class SkillPanel {
     const level = this.world.player.skillLevels[skill.id] ?? 1;
     const power = Math.round((this.world.inventory.skillPower(skill.id) - 1) * 100);
     const bonus = power > 0 ? `，威力 +${power}%` : '';
-    state.textContent = learned ? `${level} 层 · 灵力 ${skill.mpCost}${bonus}` : `${skill.level} 级可研读《${skill.name}》`;
+    const replaces = skill.replaces ? `，替换${this.world.config.skills[skill.replaces]?.name}` : '';
+    state.textContent = learned
+      ? `${level} 层 · 灵力 ${skill.mpCost}${bonus}`
+      : `${skill.level} 级可研读《${skill.name}》${replaces}`;
     const detail = document.createElement('small');
     detail.textContent = `${describeEffect(skill.effect, skill.range)}，冷却 ${skill.cooldown} 秒`;
     row.append(name, state, detail);

@@ -365,5 +365,174 @@
       "multiplier": 2.0,
       "stun": 1.5
     }
+  },
+  "body-charge-2": {
+    "id": "body-charge-2",
+    "name": "撼山冲·大成",
+    "classId": "body",
+    "level": 42,
+    "mpCost": 10,
+    "cooldown": 7,
+    "windup": 0.15,
+    "range": 6,
+    "color": "#ff9f43",
+    "effect": {
+      "type": "charge",
+      "stat": "attack",
+      "multiplier": 2.6,
+      "stun": 2
+    },
+    "replaces": "body-charge"
+  },
+  "body-mingwang-2": {
+    "id": "body-mingwang-2",
+    "name": "明王诀·大成",
+    "classId": "body",
+    "level": 47,
+    "mpCost": 24,
+    "cooldown": 9,
+    "windup": 0.3,
+    "range": 0,
+    "color": "#ffcf5a",
+    "effect": {
+      "type": "damage",
+      "stat": "attack",
+      "multiplier": 2.6,
+      "shape": "around",
+      "size": 3
+    },
+    "replaces": "body-mingwang"
+  },
+  "body-brahma-2": {
+    "id": "body-brahma-2",
+    "name": "梵圣真魔功·大成",
+    "classId": "body",
+    "level": 52,
+    "mpCost": 40,
+    "cooldown": 45,
+    "windup": 0.3,
+    "range": 0,
+    "color": "#ff5a3c",
+    "effect": {
+      "type": "empower",
+      "multiplier": 0.6,
+      "duration": 18
+    },
+    "replaces": "body-brahma"
+  },
+  "spell-firewall-2": {
+    "id": "spell-firewall-2",
+    "name": "火墙术·大成",
+    "classId": "spell",
+    "level": 42,
+    "mpCost": 40,
+    "cooldown": 10,
+    "windup": 0.5,
+    "range": 6,
+    "color": "#ff7a3a",
+    "effect": {
+      "type": "field",
+      "stat": "magic",
+      "multiplier": 0.55,
+      "size": 2,
+      "duration": 7,
+      "interval": 1
+    },
+    "replaces": "spell-firewall"
+  },
+  "spell-qingyuan-2": {
+    "id": "spell-qingyuan-2",
+    "name": "青元剑诀·大成",
+    "classId": "spell",
+    "level": 47,
+    "mpCost": 28,
+    "cooldown": 6,
+    "windup": 0.3,
+    "range": 9,
+    "color": "#7fe0c0",
+    "effect": {
+      "type": "damage",
+      "stat": "magic",
+      "multiplier": 2.8,
+      "shape": "line",
+      "size": 9
+    },
+    "replaces": "spell-qingyuan"
+  },
+  "spell-bixie-2": {
+    "id": "spell-bixie-2",
+    "name": "辟邪神雷·大成",
+    "classId": "spell",
+    "level": 52,
+    "mpCost": 56,
+    "cooldown": 11,
+    "windup": 0.5,
+    "range": 8,
+    "color": "#d0a0ff",
+    "effect": {
+      "type": "damage",
+      "stat": "magic",
+      "multiplier": 2.8,
+      "shape": "circle",
+      "size": 4
+    },
+    "replaces": "spell-bixie"
+  },
+  "spirit-miasma-2": {
+    "id": "spirit-miasma-2",
+    "name": "瘴毒术·大成",
+    "classId": "spirit",
+    "level": 42,
+    "mpCost": 36,
+    "cooldown": 12,
+    "windup": 0.5,
+    "range": 6,
+    "color": "#7ad04a",
+    "effect": {
+      "type": "field",
+      "stat": "dao",
+      "multiplier": 0.35,
+      "size": 2,
+      "duration": 9,
+      "interval": 1
+    },
+    "replaces": "spirit-miasma"
+  },
+  "spirit-corrosion-2": {
+    "id": "spirit-corrosion-2",
+    "name": "腐骨毒·大成",
+    "classId": "spirit",
+    "level": 47,
+    "mpCost": 36,
+    "cooldown": 6,
+    "windup": 0.3,
+    "range": 7,
+    "color": "#b6e04a",
+    "effect": {
+      "type": "dot",
+      "stat": "dao",
+      "multiplier": 2.1,
+      "duration": 10,
+      "interval": 1
+    },
+    "replaces": "spirit-corrosion"
+  },
+  "spirit-puppet-2": {
+    "id": "spirit-puppet-2",
+    "name": "傀儡术·大成",
+    "classId": "spirit",
+    "level": 52,
+    "mpCost": 48,
+    "cooldown": 25,
+    "windup": 0.5,
+    "range": 0,
+    "color": "#a8b0bc",
+    "effect": {
+      "type": "summon",
+      "monster": "iron-puppet",
+      "hpPerLevel": 30,
+      "duration": 120
+    },
+    "replaces": "spirit-puppet"
   }
 }

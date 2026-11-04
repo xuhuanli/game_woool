@@ -966,12 +966,54 @@ describe('40 级内容', () => {
     for (const classId of Object.keys(config.classes)) {
       const world = new World(config, 'huangfeng-valley', classId, 1);
       levelTo(world, 40);
-      const skills = Object.values(config.skills).filter((skill) => skill.classId === classId);
+      const skills = Object.values(config.skills).filter((skill) => skill.classId === classId && skill.level <= 40);
       expect(world.player.skills, classId).toHaveLength(skills.length);
       expect(skills.length, classId).toBeGreaterThanOrEqual(6);
       const slotted = world.player.hotbar.filter((entry) => entry?.kind === 'skill');
       expect(slotted, classId).toHaveLength(skills.length);
       expect(world.player.hotbar.filter((entry) => entry?.kind === 'item')).toHaveLength(2);
+    }
+  });
+
+  it('进阶功法替换旧功法，占原来的快捷栏格子，层数带过去', () => {
+    const world = new World(config, 'huangfeng-valley', 'spell', 1);
+    levelTo(world, 40);
+    const { player } = world;
+    const slot = player.hotbar.findIndex((entry) => entry?.kind === 'skill' && entry.id === 'spell-qingyuan');
+    player.skillLevels['spell-qingyuan'] = 3;
+    player.bag['book-spell-qingyuan-2'] = 1;
+    world.inventory.useItem('book-spell-qingyuan-2');
+    expect(player.skills).not.toContain('spell-qingyuan-2');
+    levelTo(world, 47);
+    expect(player.skills).toContain('spell-qingyuan-2');
+    expect(player.skills).not.toContain('spell-qingyuan');
+    expect(player.hotbar[slot]).toEqual({ kind: 'skill', id: 'spell-qingyuan-2' });
+    expect(player.skillLevels['spell-qingyuan-2']).toBe(3);
+    player.bag['book-spell-qingyuan'] = 1;
+    world.inventory.useItem('book-spell-qingyuan');
+    expect(player.skills).not.toContain('spell-qingyuan');
+  });
+
+  it('三职业到 55 级学全进阶功法，功法仍是 7 门，丹药格不被占用', () => {
+    for (const classId of Object.keys(config.classes)) {
+      const world = new World(config, 'huangfeng-valley', classId, 1);
+      levelTo(world, 55);
+      const advanced = Object.values(config.skills).filter((skill) => skill.classId === classId && skill.replaces);
+      expect(advanced, classId).toHaveLength(3);
+      for (const skill of advanced) {
+        expect(world.player.skills, classId).toContain(skill.id);
+        expect(world.player.skills, classId).not.toContain(skill.replaces);
+      }
+      expect(world.player.skills, classId).toHaveLength(7);
+      expect(world.player.hotbar.filter((entry) => entry?.kind === 'item')).toHaveLength(2);
+    }
+  });
+
+  it('等级到 55 级，40 级以后每级多要的经验不超过 8%', () => {
+    const curve = config.levels.expToNext;
+    expect(curve).toHaveLength(54);
+    for (let level = 40; level < 55; level++) {
+      expect(curve[level - 1]! / curve[level - 2]!, String(level)).toBeLessThanOrEqual(1.08);
     }
   });
 
@@ -1119,7 +1161,7 @@ describe('地面持续功法', () => {
   });
 
   it('法修和御灵修士 20 级各有一门地面功法，快捷栏放得下', () => {
-    const fields = Object.values(config.skills).filter((skill) => skill.effect.type === 'field');
+    const fields = Object.values(config.skills).filter((skill) => skill.effect.type === 'field' && !skill.replaces);
     expect(fields.map((skill) => skill.classId).sort()).toEqual(['spell', 'spirit']);
     for (const skill of fields) expect(skill.level).toBe(20);
   });
