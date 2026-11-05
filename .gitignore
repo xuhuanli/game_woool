@@ -2,3 +2,5 @@ node_modules
 dist
 .DS_Store
 assets-src/
+# 图标方案等中间产物
+output/
