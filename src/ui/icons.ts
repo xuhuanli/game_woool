@@ -1,4 +1,4 @@
-import { HD_ICON_IDS } from './iconManifest';
+import { HD_ICON_IDS, VECTOR_ICON_IDS } from './iconManifest';
 
 /**
  * 技能和物品图标的地址，按优先级取：
@@ -12,9 +12,17 @@ export function iconUrl(id: string): string {
   return `${base}assets/icons/v2/${id}.svg`;
 }
 
-/** 这个图标是不是高清位图（jpg）。位图要走 image 加载器，SVG 加载器解析不了。 */
-export function isHdIcon(id: string): boolean {
-  return HD_ICON_IDS.has(id);
+/**
+ * 掉在地上的物品图标。手绘位图是带深色底板的方卡，掉在地上会成一块方片，
+ * 所以地上优先用透明底的矢量图，没有矢量图时才用位图。
+ */
+export function dropIconUrl(id: string): string {
+  return VECTOR_ICON_IDS.has(id) ? `${import.meta.env.BASE_URL}assets/icons/v2/${id}.svg` : iconUrl(id);
+}
+
+/** 地上图标是不是位图（jpg）。位图要走 image 加载器，SVG 加载器解析不了。 */
+export function isBitmapDropIcon(id: string): boolean {
+  return !VECTOR_ICON_IDS.has(id) && HD_ICON_IDS.has(id);
 }
 
 export function iconImage(id: string, className = 'item-icon'): HTMLImageElement {
