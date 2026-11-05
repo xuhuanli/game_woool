@@ -71,6 +71,8 @@ const SUMMON_FOLLOW_DISTANCE = 2;
 const SUMMON_TELEPORT_DISTANCE = 12;
 const NOTICE_SECONDS = 3;
 const TALK_RANGE = 2;
+/** 寻路去刷怪时，离刷怪点这么近就算到了 */
+const HUNT_ARRIVE_CELLS = 3;
 /** 怪物和召唤物寻路最多展开的格数，目标被围住时不搜整张图 */
 const MONSTER_SEARCH_LIMIT = 1500;
 const INTERACT_RANGE = 4;
@@ -562,7 +564,8 @@ export class World {
       this.talkTo(route.npc);
       return;
     }
-    this.walkTo(route.cell);
+    // 已经在刷怪点附近（飞行靴落地）就不用再走，直接开打
+    if (!route.hunt || cellDistance(this.player.cell, route.cell) > HUNT_ARRIVE_CELLS) this.walkTo(route.cell);
     if (route.hunt && !this.map.safe) {
       this.autoPlay.hunt = route.hunt;
       if (!this.player.auto.enabled) {
@@ -1709,8 +1712,11 @@ export class World {
         if (!this.isFree(next, unit)) {
           unit.path = [];
           unit.repathLeft = 0;
-          if (unit === this.player && this.player.order?.type === 'move') {
-            this.planPath(unit, this.player.order.cell, false);
+          const order = this.player.order;
+          if (unit === this.player && order?.type === 'move') {
+            // 终点被占了（多半是怪站在上面），走到旁边就算到了，否则会一直重算同一步
+            if (cellDistance(unit.cell, order.cell) <= 1) this.player.order = null;
+            else this.planPath(unit, order.cell, false);
           }
           return;
         }

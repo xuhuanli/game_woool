@@ -11,6 +11,7 @@ import { breakthroughChance, realmName } from './realm';
 import { Rng } from './rng';
 import { itemSources } from './sources';
 import { mapAssets } from '../render/mapAssets';
+import { HD_ICON_IDS, VECTOR_ICON_IDS } from '../ui/iconManifest';
 import { TICK_SECONDS, World, type GameEvent } from './world';
 
 const config = await loadConfigFromDisk();
@@ -1079,6 +1080,27 @@ describe('图标', () => {
     const missing = ids.filter((id) => !existsSync(`public/assets/icons/${id}.svg`));
     expect(missing).toEqual([]);
   });
+
+  it('高清图标清单里的图都有对应文件', () => {
+    const missing = [...HD_ICON_IDS].filter((id) => !existsSync(`public/assets/icons/hd/${id}.jpg`));
+    expect(missing).toEqual([]);
+  });
+
+  it('高清图标只覆盖确实存在的技能和物品', () => {
+    const known = new Set([...Object.keys(config.skills), ...Object.keys(config.items)]);
+    const unknown = [...HD_ICON_IDS].filter((id) => !known.has(id));
+    expect(unknown).toEqual([]);
+  });
+
+  it('矢量图标清单里的图都有对应文件', () => {
+    const missing = [...VECTOR_ICON_IDS].filter((id) => !existsSync(`public/assets/icons/v2/${id}.svg`));
+    expect(missing).toEqual([]);
+  });
+
+  it('矢量图标只覆盖确实存在的道具', () => {
+    const unknown = [...VECTOR_ICON_IDS].filter((id) => !(id in config.items));
+    expect(unknown).toEqual([]);
+  });
 });
 
 describe('背景音乐', () => {
@@ -1570,6 +1592,20 @@ describe('自动寻路', () => {
     expect(world.player.bag['flying-boots']).toBe(1);
     expect(world.player.auto.enabled).toBe(true);
     expect(cellDistance(world.player.cell, target.cell)).toBeLessThanOrEqual(3);
+  });
+
+  it('飞行靴落在怪堆里也会马上开打，不会卡在原地', () => {
+    const { world, target } = herbQuest();
+    world.player.bag['flying-boots'] = 1;
+    world.flyTo(target);
+    // 让一只任务怪站在刷怪点上，模拟落地时终点被占
+    const hunted = world.monsters.find((monster) => monster.def.id === target.hunt && monster.hp > 0)!;
+    hunted.cell = { ...target.cell };
+    hunted.pos = { ...target.cell };
+    hunted.home = { ...target.cell };
+    const kills = () => world.player.kills[target.hunt!] ?? 0;
+    run(world, 60, () => kills() > 0);
+    expect(kills()).toBeGreaterThan(0);
   });
 
   it('任务完成后飞行靴飞回交任务的 NPC 并对话', () => {
