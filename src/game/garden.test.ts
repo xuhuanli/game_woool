@@ -139,3 +139,102 @@ describe('掌天瓶药园', () => {
     expect(report?.garden).toEqual({ ready: 1, dew: 6 });
   });
 });
+
+describe('炼丹', () => {
+  it('材料够就必成：扣材料和灵石出丹，不够就拒绝', () => {
+    const { world, garden } = setup(30);
+    const { player } = world;
+    player.bag['herb-jinyuan'] = 2;
+    player.bag['herb-yangyuan'] = 1;
+    const gold = player.gold;
+    expect(garden.brew('brew-big-potion')).toBe(1);
+    expect(player.bag['big-potion']).toBe(1);
+    expect(player.bag['herb-jinyuan']).toBe(1);
+    expect(player.bag['herb-yangyuan'] ?? 0).toBe(0);
+    expect(player.gold).toBe(gold - 30);
+    expect(garden.brew('brew-big-potion')).toBe(0);
+    expect(player.bag['herb-jinyuan']).toBe(1);
+  });
+
+  it('一次炼多炉按材料和灵石能炼的最多炉数算', () => {
+    const { world, garden } = setup(1);
+    world.player.bag['herb-huichun'] = 5;
+    expect(garden.maxBrews(garden.recipe('brew-small-potion')!)).toBe(5);
+    expect(garden.brew('brew-small-potion', 99)).toBe(5);
+    expect(world.player.bag['small-potion']).toBe(5);
+    world.player.bag['jade-marrow'] = 3;
+    world.player.bag['purple-monkey'] = 3;
+    world.player.bag['sky-fruit'] = 3;
+    world.player.level = 11;
+    world.player.gold = 150;
+    expect(garden.brew('brew-foundation-pill', 3)).toBe(1);
+  });
+
+  it('等级不够的丹方炼不了', () => {
+    const { world, garden } = setup(20);
+    world.player.bag['herb-jinsui'] = 1;
+    world.player.bag['herb-jinyuan'] = 1;
+    expect(garden.brew('brew-core-pill')).toBe(0);
+    expect(world.player.bag['core-pill'] ?? 0).toBe(0);
+  });
+
+  it('突破丹的丹方和主药不晚于要用它的突破等级', () => {
+    for (const realm of config.realms) {
+      for (const { item } of realm.breakthrough?.requires ?? []) {
+        const recipe = config.garden.recipes.find((candidate) => candidate.output === item);
+        if (!recipe) continue;
+        expect(recipe.level, recipe.id).toBeLessThanOrEqual(realm.maxLevel);
+        for (const material of recipe.materials) {
+          const herb = config.garden.herbs.find((candidate) => candidate.item === material.item);
+          if (herb) expect(herb.level, herb.item).toBeLessThanOrEqual(realm.maxLevel);
+        }
+      }
+    }
+  });
+
+  it('突破主药的种子买不到，只能打怪掉', () => {
+    const { world, garden } = setup(40);
+    expect(garden.plant(0, 'herb-jinsui')).toBe(false);
+    expect(garden.plant(0, 'herb-longwen')).toBe(false);
+    expect(world.player.gold).toBe(100_000);
+    world.player.bag['seed-longwen'] = 1;
+    expect(garden.plant(0, 'herb-longwen')).toBe(true);
+  });
+
+  it('结丹失败一次后，用掉落的金髓草种子种出主药，炼成降尘丹再突破', () => {
+    const { world, garden, advance } = setup(26);
+    const { player } = world;
+    player.exp = world.expToNext!;
+    player.bag['core-pill'] = 1;
+    // 第一次突破失败：把成功率压成 0
+    const realm = config.realms.find((candidate) => candidate.id === 'foundation')!;
+    const chance = realm.breakthrough!.chance;
+    realm.breakthrough!.chance = -1;
+    world.attemptBreakthrough();
+    realm.breakthrough!.chance = chance;
+    expect(player.bag['core-pill'] ?? 0).toBe(0);
+    expect(player.realmPassed).not.toContain('foundation');
+
+    // 外星海的常规怪会掉金髓草种子
+    const dropper = config.maps['outer-sea']!.spawns
+      .map((spawn) => config.monsters[spawn.monster]!)
+      .find((monster) => monster.extraDrops?.some((entry) => entry.item === 'seed-jinsui'));
+    expect(dropper).toBeDefined();
+    player.bag['seed-jinsui'] = 1;
+    player.bag['seed-jinyuan'] = 1;
+    garden.plant(0, 'herb-jinsui');
+    garden.plant(1, 'herb-jinyuan');
+    advance(5 * 60 * MINUTE);
+    garden.harvestAll();
+    expect(garden.brew('brew-core-pill')).toBe(1);
+    expect(player.bag['core-pill']).toBe(1);
+
+    player.weakUntil = 0;
+    for (let attempt = 0; attempt < 20 && !player.realmPassed.includes('foundation'); attempt++) {
+      player.bag['core-pill'] = Math.max(player.bag['core-pill'] ?? 0, 1);
+      world.attemptBreakthrough();
+      player.weakUntil = 0;
+    }
+    expect(player.realmPassed).toContain('foundation');
+  });
+});

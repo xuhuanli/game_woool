@@ -1,4 +1,4 @@
-import type { GameConfig, GardenHerbDef } from './config';
+import type { GameConfig, GardenHerbDef, RecipeDef } from './config';
 import type { Inventory } from './inventory';
 import type { GameEvent, GardenPlot, GardenState, Player } from './types';
 
@@ -148,7 +148,8 @@ export class Garden {
     if (this.player.level < herb.level) return fail(`${herb.level} 级才能种`);
     if (!this.player.bag[herb.seed]) {
       const price = this.config.items[herb.seed]?.price ?? 0;
-      if (!price || this.player.gold < price) return fail('种子不够，灵石也不够');
+      if (!price) return fail(`${this.config.items[herb.seed]?.name ?? '种子'}买不到，只能打怪得到`);
+      if (this.player.gold < price) return fail('种子不够，灵石也不够');
       this.player.gold -= price;
       this.emit({ type: 'goldChanged', amount: -price });
     } else {
@@ -201,6 +202,46 @@ export class Garden {
       if (!plot.herb && plot.last && this.plant(index, plot.last, true)) count += 1;
     });
     return count;
+  }
+
+  recipe(id: string): RecipeDef | undefined {
+    return this.config.garden.recipes.find((recipe) => recipe.id === id);
+  }
+
+  /** 现有材料和灵石最多能炼几炉，等级不够是 0。 */
+  maxBrews(recipe: RecipeDef): number {
+    const { player } = this;
+    if (!this.unlocked || player.level < recipe.level) return 0;
+    let times = recipe.gold > 0 ? Math.floor(player.gold / recipe.gold) : Infinity;
+    for (const { item, count } of recipe.materials) times = Math.min(times, Math.floor((player.bag[item] ?? 0) / count));
+    return Number.isFinite(times) ? times : 0;
+  }
+
+  /** 炼丹必成：扣材料和灵石，出丹。times 超过能炼的炉数时按能炼的算。 */
+  brew(recipeId: string, times = 1): number {
+    const recipe = this.recipe(recipeId);
+    if (!recipe || !this.unlocked) return 0;
+    if (this.player.level < recipe.level) {
+      this.emit({ type: 'message', text: `${recipe.level} 级才能炼` });
+      return 0;
+    }
+    const brews = Math.min(times, this.maxBrews(recipe));
+    if (brews <= 0) {
+      this.emit({ type: 'message', text: '材料或灵石不够' });
+      return 0;
+    }
+    for (const { item, count } of recipe.materials) {
+      for (let i = 0; i < count * brews; i++) this.inventory.removeFromBag(item);
+    }
+    if (recipe.gold > 0) {
+      this.player.gold -= recipe.gold * brews;
+      this.emit({ type: 'goldChanged', amount: -recipe.gold * brews });
+    }
+    const made = recipe.count * brews;
+    this.inventory.addToBag(recipe.output, made);
+    this.emit({ type: 'brewed', name: this.config.items[recipe.output]?.name ?? recipe.output, count: made });
+    this.emit({ type: 'gardenChanged' });
+    return made;
   }
 
   expand(): boolean {

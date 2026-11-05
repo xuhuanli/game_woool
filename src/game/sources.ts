@@ -35,6 +35,9 @@ export function itemSources(config: GameConfig, player: Player, itemId: string):
   for (const quest of Object.values(config.quests)) {
     if (quest.rewards.items.some((reward) => reward.item === itemId)) fixed.push(`任务「${quest.name}」奖励`);
   }
+  if (config.garden.herbs.some((herb) => herb.item === itemId)) fixed.push('洞府药园种植');
+  const recipe = config.garden.recipes.find((candidate) => candidate.output === itemId);
+  if (recipe) fixed.push(`洞府炼丹（${recipe.level} 级）`);
   for (const achievement of Object.values(config.achievements)) {
     if (achievement.reward.items.some((reward) => reward.item === itemId)) fixed.push(`成就「${achievement.name}」奖励`);
   }

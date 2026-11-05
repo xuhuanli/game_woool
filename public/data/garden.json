@@ -78,6 +78,205 @@
       "growSeconds": 7200,
       "yield": 3,
       "level": 26
+    },
+    {
+      "item": "herb-jinsui",
+      "seed": "seed-jinsui",
+      "growSeconds": 18000,
+      "yield": 1,
+      "level": 26
+    },
+    {
+      "item": "herb-longwen",
+      "seed": "seed-longwen",
+      "growSeconds": 21600,
+      "yield": 1,
+      "level": 34
+    }
+  ],
+  "recipes": [
+    {
+      "id": "brew-small-potion",
+      "output": "small-potion",
+      "count": 1,
+      "gold": 0,
+      "level": 1,
+      "materials": [
+        {
+          "item": "herb-huichun",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-small-mana",
+      "output": "small-mana",
+      "count": 1,
+      "gold": 0,
+      "level": 1,
+      "materials": [
+        {
+          "item": "herb-ningqi",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-mid-potion",
+      "output": "mid-potion",
+      "count": 1,
+      "gold": 0,
+      "level": 14,
+      "materials": [
+        {
+          "item": "herb-yangyuan",
+          "count": 1
+        },
+        {
+          "item": "herb-huichun",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-mid-mana",
+      "output": "mid-mana",
+      "count": 1,
+      "gold": 0,
+      "level": 14,
+      "materials": [
+        {
+          "item": "herb-juling",
+          "count": 1
+        },
+        {
+          "item": "herb-ningqi",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-big-potion",
+      "output": "big-potion",
+      "count": 1,
+      "gold": 30,
+      "level": 26,
+      "materials": [
+        {
+          "item": "herb-jinyuan",
+          "count": 1
+        },
+        {
+          "item": "herb-yangyuan",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-big-mana",
+      "output": "big-mana",
+      "count": 1,
+      "gold": 30,
+      "level": 26,
+      "materials": [
+        {
+          "item": "herb-xuanyin",
+          "count": 1
+        },
+        {
+          "item": "herb-juling",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-huge-potion",
+      "output": "huge-potion",
+      "count": 1,
+      "gold": 60,
+      "level": 41,
+      "materials": [
+        {
+          "item": "herb-jinyuan",
+          "count": 2
+        },
+        {
+          "item": "herb-huichun",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-huge-mana",
+      "output": "huge-mana",
+      "count": 1,
+      "gold": 60,
+      "level": 41,
+      "materials": [
+        {
+          "item": "herb-xuanyin",
+          "count": 2
+        },
+        {
+          "item": "herb-ningqi",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-foundation-pill",
+      "output": "foundation-pill",
+      "count": 1,
+      "gold": 100,
+      "level": 11,
+      "materials": [
+        {
+          "item": "jade-marrow",
+          "count": 1
+        },
+        {
+          "item": "purple-monkey",
+          "count": 1
+        },
+        {
+          "item": "sky-fruit",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-core-pill",
+      "output": "core-pill",
+      "count": 1,
+      "gold": 500,
+      "level": 26,
+      "materials": [
+        {
+          "item": "herb-jinsui",
+          "count": 1
+        },
+        {
+          "item": "herb-jinyuan",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-nascent-pill",
+      "output": "nascent-pill",
+      "count": 1,
+      "gold": 2000,
+      "level": 34,
+      "materials": [
+        {
+          "item": "herb-longwen",
+          "count": 1
+        },
+        {
+          "item": "herb-xuanyin",
+          "count": 1
+        }
+      ]
     }
   ]
 }

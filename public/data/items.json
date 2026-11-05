@@ -963,6 +963,32 @@
     "level": 26,
     "price": 240
   },
+  "herb-jinsui": {
+    "id": "herb-jinsui",
+    "name": "金髓草",
+    "kind": "material",
+    "price": 1000
+  },
+  "seed-jinsui": {
+    "id": "seed-jinsui",
+    "name": "金髓草种子",
+    "kind": "material",
+    "seed": "herb-jinsui",
+    "level": 26
+  },
+  "herb-longwen": {
+    "id": "herb-longwen",
+    "name": "龙纹草",
+    "kind": "material",
+    "price": 3700
+  },
+  "seed-longwen": {
+    "id": "seed-longwen",
+    "name": "龙纹草种子",
+    "kind": "material",
+    "seed": "herb-longwen",
+    "level": 34
+  },
   "book-body-charge-2": {
     "id": "book-body-charge-2",
     "name": "《撼山冲·大成》",

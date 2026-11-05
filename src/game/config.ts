@@ -373,6 +373,16 @@ export interface GardenHerbDef {
   level: number;
 }
 
+/** 炼丹的丹方：材料加灵石，必成 */
+export interface RecipeDef {
+  id: string;
+  output: string;
+  count: number;
+  gold: number;
+  level: number;
+  materials: { item: string; count: number }[];
+}
+
 export interface GardenConfig {
   /** 完成这个任务后开启掌天瓶 */
   unlockQuest: string;
@@ -380,6 +390,7 @@ export interface GardenConfig {
   dew: { perSeconds: number[]; max: number[]; minGrowth: number };
   plots: { initial: number; expansions: { level: number; gold: number }[] };
   herbs: GardenHerbDef[];
+  recipes: RecipeDef[];
 }
 
 export interface GameSettings {
@@ -564,6 +575,15 @@ export function validateConfig(config: GameConfig): string[] {
     const seed = config.items[herb.seed];
     if (!config.items[herb.item]) errors.push(`灵药 ${herb.item} 不存在`);
     if (seed?.seed !== herb.item) errors.push(`灵药 ${herb.item} 的种子 ${herb.seed} 不存在或种不出它`);
+    if (!garden.recipes.some((recipe) => recipe.materials.some((material) => material.item === herb.item))) {
+      errors.push(`灵药 ${herb.item} 没有丹方用得上`);
+    }
+  }
+  for (const recipe of garden.recipes) {
+    if (!config.items[recipe.output]) errors.push(`丹方 ${recipe.id} 的成品 ${recipe.output} 不存在`);
+    for (const { item } of recipe.materials) {
+      if (!config.items[item]) errors.push(`丹方 ${recipe.id} 的材料 ${item} 不存在`);
+    }
   }
   for (const set of Object.values(config.sets)) {
     for (const piece of set.pieces) {

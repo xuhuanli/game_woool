@@ -231,6 +231,7 @@ export type GameEvent =
   | { type: 'achievement'; achievement: AchievementDef }
   | { type: 'gardenChanged' }
   | { type: 'gardenReady'; count: number }
+  | { type: 'brewed'; name: string; count: number }
   | { type: 'summoned'; unit: Summon }
   | { type: 'damage'; unit: Unit; amount: number; maxRoll: boolean; source: Unit }
   | { type: 'miss'; unit: Unit }

@@ -753,6 +753,10 @@ export class GameScene extends Phaser.Scene {
       case 'skillCast':
         this.effects.skill(event.unit, event.skill.color, event.cells);
         break;
+      case 'brewed':
+        this.hud.log(`炼成 ${event.name} ×${event.count}`, 'gain');
+        this.audio.play('pickup');
+        break;
       case 'gardenReady':
         this.hud.log(`药园有 ${event.count} 株灵药成熟，按 G 收获`, 'gain');
         break;

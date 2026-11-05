@@ -1,5 +1,8 @@
+import type { RecipeDef } from '../game/config';
 import type { World } from '../game/world';
 import { iconImage } from './icons';
+import { itemDetail } from './itemInfo';
+import { attachTooltip, hideTooltip } from './tooltip';
 
 const TIER_NAMES = ['一', '二', '三', '四'];
 const REFRESH_MS = 250;
@@ -20,9 +23,12 @@ function clock(ms: number): string {
   return hours > 0 ? `${hours}:${String(minutes).padStart(2, '0')}:${seconds}` : `${minutes}:${seconds}`;
 }
 
-/** 洞府药园面板：播种、收获、绿液催熟、扩建。G 键开关。 */
+type Tab = 'garden' | 'alchemy';
+
+/** 洞府药园面板：药园页播种、收获、绿液催熟、扩建；炼丹页按丹方炼丹。G 键开关。 */
 export class GardenPanel {
   private readonly panel = document.createElement('section');
+  private tab: Tab = 'garden';
   private signature = '';
   private timer = 0;
   /** 每块空地下拉框里选中的灵药 */
@@ -54,6 +60,7 @@ export class GardenPanel {
   private close(): void {
     this.panel.hidden = true;
     window.clearInterval(this.timer);
+    hideTooltip();
   }
 
   /** 状态变了才重建，进度条和倒计时每次都刷新。 */
@@ -61,8 +68,11 @@ export class GardenPanel {
     const { garden, player } = this.world;
     garden.refresh();
     const plots = player.garden.plots.map((plot, index) => [plot.herb, garden.isReady(index), garden.growth(index) >= this.world.config.garden.dew.minGrowth]);
-    const seeds = this.world.config.garden.herbs.map((herb) => player.bag[herb.seed] ?? 0);
-    const signature = JSON.stringify([garden.unlocked, plots, seeds, player.garden.dew, player.gold, player.level]);
+    const { herbs, recipes } = this.world.config.garden;
+    const stock = [...herbs.map((herb) => herb.seed), ...recipes.flatMap((recipe) => [recipe.output, ...recipe.materials.map((m) => m.item)])].map(
+      (id) => player.bag[id] ?? 0,
+    );
+    const signature = JSON.stringify([this.tab, garden.unlocked, plots, stock, player.garden.dew, player.gold, player.level]);
     if (signature !== this.signature) {
       this.signature = signature;
       this.render();
@@ -76,6 +86,19 @@ export class GardenPanel {
     if (!garden.unlocked) {
       const quest = config.quests[config.garden.unlockQuest];
       this.panel.replaceChildren(title, el('div', 'detail-hint', `完成「${quest?.name}」后得到掌天瓶，才能开辟药园`));
+      return;
+    }
+    const tabs = el('div', 'garden-tabs');
+    for (const [tab, label] of [['garden', `药园${garden.readyCount ? `（${garden.readyCount} 株成熟）` : ''}`], ['alchemy', '炼丹']] as const) {
+      const button = el('button', this.tab === tab ? 'garden-tab active' : 'garden-tab', label);
+      button.addEventListener('click', () => {
+        this.tab = tab;
+        this.update();
+      });
+      tabs.append(button);
+    }
+    if (this.tab === 'alchemy') {
+      this.panel.replaceChildren(title, tabs, this.alchemy());
       return;
     }
     const realm = config.realms[garden.tier]?.name ?? '';
@@ -98,7 +121,48 @@ export class GardenPanel {
 
     const grid = el('div', 'garden-plots');
     player.garden.plots.forEach((_, index) => grid.append(this.plotCard(index)));
-    this.panel.replaceChildren(title, bottle, actions, grid);
+    this.panel.replaceChildren(title, tabs, bottle, actions, grid);
+  }
+
+  /** 炼丹页：每张丹方一行，成品、材料有/需、灵石，等级够了才能炼。 */
+  private alchemy(): HTMLElement {
+    const { config, player } = this.world;
+    const list = el('div', 'alchemy-list');
+    const recipes = [...config.garden.recipes].sort((a, b) => a.level - b.level);
+    for (const recipe of recipes) list.append(this.recipeRow(recipe));
+    list.prepend(el('div', 'detail-hint', `炼丹必成。灵石 ${player.gold}`));
+    return list;
+  }
+
+  private recipeRow(recipe: RecipeDef): HTMLElement {
+    const { config, player, garden } = this.world;
+    const locked = player.level < recipe.level;
+    const row = el('div', locked ? 'alchemy-row locked' : 'alchemy-row');
+    const output = el('b', 'alchemy-output');
+    output.append(iconImage(recipe.output), `${config.items[recipe.output]?.name ?? recipe.output}${recipe.count > 1 ? ` ×${recipe.count}` : ''}`);
+    attachTooltip(output, () => itemDetail(this.world, { kind: 'stack', id: recipe.output }));
+    const have = el('small', 'alchemy-have', `有 ${player.bag[recipe.output] ?? 0}`);
+    const materials = el('div', 'alchemy-materials');
+    for (const { item, count } of recipe.materials) {
+      const owned = player.bag[item] ?? 0;
+      const chip = el('span', owned >= count ? 'alchemy-chip' : 'alchemy-chip short');
+      chip.append(iconImage(item), `${config.items[item]?.name ?? item} ${owned}/${count}`);
+      attachTooltip(chip, () => itemDetail(this.world, { kind: 'stack', id: item }));
+      materials.append(chip);
+    }
+    if (recipe.gold > 0) materials.append(el('span', player.gold >= recipe.gold ? 'alchemy-chip' : 'alchemy-chip short', `灵石 ${recipe.gold}`));
+    const max = garden.maxBrews(recipe);
+    const actions = el('div', 'alchemy-actions');
+    if (locked) {
+      actions.append(el('small', 'detail-hint', `${recipe.level} 级可炼`));
+    } else {
+      actions.append(
+        this.button('炼制', () => garden.brew(recipe.id), max < 1),
+        this.button(max > 1 ? `全部 ×${max}` : '全部', () => garden.brew(recipe.id, max), max < 2),
+      );
+    }
+    row.append(output, have, materials, actions);
+    return row;
   }
 
   private plotCard(index: number): HTMLElement {
@@ -116,10 +180,14 @@ export class GardenPanel {
         const name = config.items[option.item]?.name ?? option.item;
         const item = document.createElement('option');
         item.value = option.item;
-        item.textContent = `${name}（${seeds > 0 ? `种子 ${seeds}` : `灵石 ${price}`}）`;
+        // 突破主药的种子买不到，没有种子时不能选
+        item.textContent = `${name}（${seeds > 0 ? `种子 ${seeds}` : price ? `灵石 ${price}` : '缺种子，打怪掉落'}）`;
+        item.disabled = seeds === 0 && !price;
         select.append(item);
       }
-      select.value = this.choice[index] ?? plot.last ?? select.options[0]?.value ?? '';
+      const usable = [...select.options].filter((option) => !option.disabled).map((option) => option.value);
+      const wanted = this.choice[index] ?? plot.last ?? '';
+      select.value = usable.includes(wanted) ? wanted : (usable[0] ?? '');
       select.addEventListener('change', () => (this.choice[index] = select.value));
       card.append(el('b', '', '空地'), select, this.button('播种', () => garden.plant(index, select.value)));
       return card;

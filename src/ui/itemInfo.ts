@@ -64,6 +64,9 @@ function stackDetail(world: World, itemId: string): HTMLElement[] {
     const quests = questsCollecting(world, item.id);
     if (quests.length) lines.push(line(`任务材料：${quests.join('、')}`));
   }
+  const brews = config.garden.recipes.filter((recipe) => recipe.materials.some((material) => material.item === item.id));
+  if (brews.length) lines.push(line(`炼丹材料：${brews.map((recipe) => config.items[recipe.output]?.name).join('、')}（药园面板 G）`));
+  if (item.seed) lines.push(line(`种下长出${config.items[item.seed]?.name ?? ''}，${item.level ?? 1} 级可种`));
   if (item.scroll) lines.push(line(SCROLL_TEXT[item.scroll]));
   const skill = config.skills[item.skill ?? ''];
   if (item.kind === 'book' && skill) {

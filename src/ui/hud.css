@@ -853,6 +853,89 @@ body,
   color: #a79c84;
 }
 
+.garden-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.garden-tab {
+  padding: 3px 12px;
+  font: inherit;
+  color: #a79c84;
+  cursor: pointer;
+  background: #2a2216;
+  border: 1px solid #4a3c22;
+  border-radius: 4px;
+}
+
+.garden-tab.active {
+  color: #f0cf7a;
+  border-color: #f0cf7a;
+}
+
+.alchemy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: calc(100vh - 220px);
+  overflow-y: auto;
+}
+
+.alchemy-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 8px;
+  align-items: center;
+  padding: 6px;
+  border: 1px solid #4a3c22;
+  border-radius: 4px;
+}
+
+.alchemy-row.locked {
+  opacity: 0.55;
+}
+
+.alchemy-output {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.alchemy-row .item-icon {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+.alchemy-have {
+  color: #a79c84;
+  text-align: right;
+}
+
+.alchemy-materials {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 12px;
+}
+
+.alchemy-chip {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.alchemy-chip.short {
+  color: #ff8a7a;
+}
+
+.alchemy-actions {
+  display: flex;
+  gap: 4px;
+  justify-content: flex-end;
+}
+
 .detail-action:disabled {
   cursor: default;
   opacity: 0.45;
