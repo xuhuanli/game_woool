@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { monsterDrops, validateConfig, type GameConfig } from './config';
 import type { Equipment } from './equipment';
@@ -10,6 +10,7 @@ import { loadConfigFromDisk } from './testConfig';
 import { breakthroughChance, realmName } from './realm';
 import { Rng } from './rng';
 import { itemSources } from './sources';
+import { mapAssets } from '../render/mapAssets';
 import { TICK_SECONDS, World, type GameEvent } from './world';
 
 const config = await loadConfigFromDisk();
@@ -2124,5 +2125,37 @@ describe('第 8 章 大晋', () => {
         expect(Math.hypot(npc.x - boss.x, npc.y - boss.y) - 2, npc.id).toBeGreaterThan(config.monsters[bossId]!.aggroRange);
       }
     }
+  });
+});
+
+describe('素材清单', () => {
+  const index = JSON.parse(readFileSync('public/assets/sprites/index.json', 'utf8')) as Record<string, unknown>;
+
+  it('精灵表索引和烘焙出的文件一致，烘焙名单里的都烘焙过了', async () => {
+    const files = readdirSync('public/assets/sprites')
+      .filter((file) => file.endsWith('.json') && file !== 'index.json')
+      .map((file) => file.slice(0, -'.json'.length));
+    expect(Object.keys(index).sort()).toEqual(files.sort());
+    for (const key of files) {
+      expect(index[key], key).toEqual(JSON.parse(readFileSync(`public/assets/sprites/${key}.json`, 'utf8')));
+    }
+    const { ROSTER } = await import('../../tools/bake/roster');
+    for (const entry of ROSTER) expect(index[entry.key], entry.key).toBeDefined();
+  });
+
+  it('每张地图的素材清单包含它的怪、召唤物和 NPC', () => {
+    for (const map of Object.values(config.maps)) {
+      for (const classId of Object.keys(config.classes)) {
+        const { sprites, props } = mapAssets(config, map.id, classId);
+        expect(sprites.has(classId)).toBe(true);
+        for (const spawn of map.spawns) expect(sprites.has(spawn.monster), `${map.id} ${spawn.monster}`).toBe(true);
+        for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === map.id)) {
+          expect(sprites.has(`npc-${npc.id}`), npc.id).toBe(true);
+        }
+        for (const item of map.decor ?? []) expect(props.has(item.prop)).toBe(true);
+      }
+    }
+    expect(mapAssets(config, 'mulan-border', 'body').sprites.has('sacred-bird')).toBe(true);
+    expect(mapAssets(config, 'starter-field', 'spirit').sprites.size).toBeGreaterThan(1);
   });
 });

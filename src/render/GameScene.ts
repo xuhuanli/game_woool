@@ -29,6 +29,7 @@ import {
   type SpriteManifests,
 } from './placeholders';
 import { paintGround } from './groundPainter';
+import { mapAssets, type MapAssets } from './mapAssets';
 import { addContactShadow, ensureShadowTexture, SHADOW_DEPTH_GAP, SHADOW_SPREAD } from './shadows';
 
 /** 地上物品图标的边长 */
@@ -85,6 +86,14 @@ export class GameScene extends Phaser.Scene {
   private readonly fieldViews = new Map<number, Phaser.GameObjects.Graphics>();
   private npcViews: NpcView[] = [];
   private mapObjects: { destroy(): void }[] = [];
+  /** 已从文件加载的精灵表和景观物件，切图时按新地图增减 */
+  private readonly loadedSprites = new Set<string>();
+  private readonly loadedProps = new Set<string>();
+  /** 当前地图预渲染的地面贴图，离开这张图就释放 */
+  private groundTextures: { mapId: string; keys: string[] } | null = null;
+  private loadingMap = false;
+  /** 加载途中又切了一次图，加载完要按最新的地图再来一遍 */
+  private reenter = false;
   private accumulator = 0;
   private musicName = '';
   private bossMusicLeft = 0;
@@ -112,19 +121,111 @@ export class GameScene extends Phaser.Scene {
     super('game');
   }
 
+  /** 启动时只加载出生地图要用的精灵表和物件，其余的进图时再加载。 */
   preload(): void {
-    for (const [key, manifest] of Object.entries(this.sprites)) {
+    this.queueAssets(this.currentAssets());
+    for (const id of Object.keys(this.world.config.items)) {
+      this.load.svg(`icon-${id}`, iconUrl(id), { width: DROP_ICON_SIZE, height: DROP_ICON_SIZE });
+    }
+    this.showLoadProgress();
+  }
+
+  private currentAssets(): MapAssets {
+    return mapAssets(this.world.config, this.world.mapId, this.world.player.def.id);
+  }
+
+  /** 把还没加载的精灵表和物件放进加载队列，返回新加的精灵表。 */
+  private queueAssets(assets: MapAssets): string[] {
+    const added: string[] = [];
+    for (const key of assets.sprites) {
+      const manifest = this.sprites[key];
+      if (!manifest || this.loadedSprites.has(key)) continue;
       this.load.spritesheet(key, `${import.meta.env.BASE_URL}assets/sprites/${key}.png`, {
         frameWidth: manifest.frameW,
         frameHeight: manifest.frameH,
       });
+      this.loadedSprites.add(key);
+      added.push(key);
     }
-    for (const key of Object.keys(this.props)) {
+    for (const key of assets.props) {
+      if (!this.props[key] || this.loadedProps.has(key)) continue;
       this.load.image(`prop-${key}`, `${import.meta.env.BASE_URL}assets/props/${key}.png`);
+      this.loadedProps.add(key);
     }
-    for (const id of Object.keys(this.world.config.items)) {
-      this.load.svg(`icon-${id}`, iconUrl(id), { width: DROP_ICON_SIZE, height: DROP_ICON_SIZE });
+    return added;
+  }
+
+  /** 释放新地图用不到的精灵表、动画、物件和上一张图的地面贴图。 */
+  private releaseUnused(assets: MapAssets): void {
+    for (const key of [...this.loadedSprites]) {
+      if (assets.sprites.has(key)) continue;
+      for (const name of Object.keys(this.sprites[key]?.clips ?? {})) {
+        for (let row = 0; row < SHEET.rows; row++) this.anims.remove(`${key}-${name}-${row}`);
+      }
+      this.textures.remove(key);
+      this.loadedSprites.delete(key);
     }
+    for (const key of [...this.loadedProps]) {
+      if (assets.props.has(key)) continue;
+      this.textures.remove(`prop-${key}`);
+      this.loadedProps.delete(key);
+    }
+    if (this.groundTextures && this.groundTextures.mapId !== this.world.mapId) {
+      for (const key of this.groundTextures.keys) this.textures.remove(key);
+      this.groundTextures = null;
+    }
+  }
+
+  /** 加载进度：屏幕中间一行字，加载完收起。 */
+  private showLoadProgress(): void {
+    const label = this.add
+      .text(0, 0, '', { fontFamily: FONT, fontSize: '16px', color: '#f0cf7a' })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(UI_DEPTH + 10);
+    const place = () => label.setPosition(this.scale.width / 2, this.scale.height / 2);
+    place();
+    const progress = (value: number) => {
+      place();
+      label.setText(`加载中 ${Math.round(value * 100)}%`);
+    };
+    const failed = (file: Phaser.Loader.File) => console.error(`读取失败：${file.src}`);
+    this.load.on('progress', progress);
+    this.load.on('loaderror', failed);
+    this.load.once('complete', () => {
+      this.load.off('progress', progress);
+      this.load.off('loaderror', failed);
+      label.destroy();
+    });
+  }
+
+  /** 切图：先清掉旧地图，补齐新地图的素材，加载完再建图；加载期间世界暂停。 */
+  private enterMap(): void {
+    if (this.loadingMap) {
+      this.reenter = true;
+      return;
+    }
+    this.clearMap();
+    const assets = this.currentAssets();
+    this.releaseUnused(assets);
+    const added = this.queueAssets(assets);
+    if (!this.load.list.size) {
+      this.buildMap();
+      return;
+    }
+    this.loadingMap = true;
+    this.showLoadProgress();
+    this.load.once('complete', () => {
+      createSpriteAnimations(this, Object.fromEntries(added.map((key) => [key, this.sprites[key]!])));
+      this.loadingMap = false;
+      if (this.reenter) {
+        this.reenter = false;
+        this.enterMap();
+      } else {
+        this.buildMap();
+      }
+    });
+    this.load.start();
   }
 
   /** 地上物品用图标，没有图标时用占位图。 */
@@ -136,7 +237,7 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     ensureShadowTexture(this);
     createPlaceholderArt(this, this.world.config, this.sprites);
-    createSpriteAnimations(this, this.sprites);
+    createSpriteAnimations(this, Object.fromEntries([...this.loadedSprites].map((key) => [key, this.sprites[key]!])));
 
     this.tileCursor = this.add.graphics().setDepth(1);
     this.addUnitView(this.world.player, this.world.player.def.id);
@@ -172,6 +273,11 @@ export class GameScene extends Phaser.Scene {
   }
 
   override update(_time: number, delta: number): void {
+    if (this.loadingMap) {
+      this.accumulator = 0;
+      this.hud.update(this.world);
+      return;
+    }
     this.accumulator += Math.min(delta, MAX_FRAME_MS);
     const stepMs = TICK_SECONDS * 1000;
     while (this.accumulator >= stepMs) {
@@ -215,16 +321,21 @@ export class GameScene extends Phaser.Scene {
     this.audio.playMusic(wanted);
   }
 
-  /** 按当前地图重建地面、NPC、传送点和怪物显示。 */
-  private buildMap(): void {
+  private clearMap(): void {
     for (const object of this.mapObjects) object.destroy();
     this.mapObjects = [];
     this.npcViews = [];
+    this.tallDecor = [];
+    this.solidDecor = [];
     for (const view of [...this.unitViews.values()]) {
       if ((view.unit as Monster).kind === 'monster') this.removeUnitView(view);
     }
     for (const item of [...this.itemViews.keys()]) this.removeItemView(item);
+  }
 
+  /** 按当前地图重建地面、NPC、传送点和怪物显示。 */
+  private buildMap(): void {
+    this.clearMap();
     this.drawGround();
     this.bossMusicLeft = 0;
     this.updateMusic(0);
@@ -274,6 +385,7 @@ export class GameScene extends Phaser.Scene {
       const width = placement.w * PROP_DISPLAY_SCALE * item.scale * 0.6;
       return width < 12 ? 0 : Math.min(150, width);
     });
+    this.groundTextures = { mapId: map.id, keys: [painted.key, painted.shimmerKey] };
     const ground = this.add.image(painted.x, painted.y, painted.key).setOrigin(0).setDepth(0);
     const shimmer = this.add
       .image(painted.x, painted.y, painted.shimmerKey)
@@ -687,7 +799,7 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'mapChanged':
         this.audio.play('portal');
-        this.buildMap();
+        this.enterMap();
         this.hud.log(`来到${this.world.map.name}`);
         break;
       case 'npcOpened':

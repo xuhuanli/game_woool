@@ -4,8 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>修仙传奇</title>
+    <style>
+      /* 启动页在脚本加载前就要显示，所以直接写在这里 */
+      body { margin: 0; background: #17140f; }
+      #boot { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center;
+        justify-content: center; gap: 12px; color: #a79c84; font: 15px "PingFang SC", "Microsoft YaHei", sans-serif; }
+      #boot h1 { margin: 0; font-size: 28px; color: #f0cf7a; letter-spacing: 6px; }
+      #boot p { margin: 0; }
+      #boot.failed p { color: #ff8a7a; }
+      #boot pre { max-width: min(720px, 90vw); max-height: 50vh; overflow: auto; margin: 0; padding: 10px 12px;
+        color: #efe6d0; white-space: pre-wrap; background: #241d12; border: 1px solid #6b5630; border-radius: 6px; }
+      #boot button { padding: 4px 16px; color: #efe6d0; cursor: pointer; background: #3b3020;
+        border: 1px solid #6b5630; border-radius: 4px; font: inherit; }
+    </style>
   </head>
   <body>
+    <div id="boot"><h1>修仙传奇</h1><p>加载中…</p></div>
     <div id="game"></div>
     <div id="hud" hidden>
       <section class="status">

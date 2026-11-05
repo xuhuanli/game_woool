@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { defineConfig } from 'vite';
+import { SPRITE_INDEX, writeSpriteIndex } from '../spriteIndex';
 
 const ASSETS = path.resolve(import.meta.dirname, '../../public/assets');
 
@@ -22,6 +23,7 @@ export default defineConfig({
           request.on('end', async () => {
             await mkdir(output, { recursive: true });
             await writeFile(path.join(output, name), Buffer.concat(chunks));
+            if (name.endsWith('.json') && name !== SPRITE_INDEX && output.endsWith('sprites')) writeSpriteIndex(output);
             response.end('ok');
           });
         });

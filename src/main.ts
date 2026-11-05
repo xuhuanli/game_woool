@@ -3,7 +3,7 @@ import { validateConfig, type GameConfig } from './game/config';
 import { assembleConfig } from './game/configLoader';
 import { World } from './game/world';
 import { GameScene } from './render/GameScene';
-import type { PropManifest, SpriteManifest, SpriteManifests } from './render/placeholders';
+import type { PropManifest, SpriteManifests } from './render/placeholders';
 import { AutoSaver } from './save/autoSaver';
 import { IndexedDbSaveStore } from './save/saveStore';
 import { AutoPanel } from './ui/autoPanel';
@@ -18,136 +18,6 @@ import { SkillPanel } from './ui/skillPanel';
 import { showStartScreen } from './ui/startScreen';
 import './ui/hud.css';
 
-const BAKED_SPRITES = [
-  'body',
-  'spell',
-  'spirit',
-  'ash-rat',
-  'gold-bug',
-  'venom-spider',
-  'thorn-sprite',
-  'flood-serpent',
-  'mountain-ape',
-  'ape-shaman',
-  'iron-puppet',
-  'wolf-rider',
-  'golden-master',
-  'npc-guide-senior',
-  'npc-herb-keeper',
-  'npc-vault-keeper',
-  'npc-gate-steward',
-  'npc-mo-doctor',
-  'npc-li-feiyu',
-  'npc-qixuan-steward',
-  'npc-wan-xiaoshan',
-  'npc-qingyan-elder',
-  'npc-han-yunzhi',
-  'npc-sect-judge',
-  'npc-valley-merchant',
-  'npc-forbidden-guard',
-  'npc-nangong-wan',
-  'npc-li-huayuan',
-  'npc-dong-xuaner',
-  'npc-dong-xuaner-fort',
-  'npc-yan-host',
-  'npc-mine-steward',
-  'npc-front-commander',
-  'npc-li-huayuan-front',
-  'yin-soul',
-  'corpse-puppet',
-  'ghost-disciple',
-  'wang-chan',
-  'demon-cultist',
-  'blood-bat',
-  'blood-guardian',
-  'demon-swordsman',
-  'poison-toad',
-  'demon-sorcerer',
-  'demon-commander',
-  'npc-star-steward',
-  'npc-star-merchant',
-  'npc-star-gate',
-  'npc-sea-hunter',
-  'npc-wu-chou',
-  'npc-wu-chou-mist',
-  'npc-xuangu-hall',
-  'npc-xuangu-core',
-  'sea-squid',
-  'fish-demon',
-  'flying-ray',
-  'sea-king',
-  'mist-ghost',
-  'skull-ghost',
-  'palace-puppet',
-  'treasure-seeker',
-  'jiyin',
-  'heavenly-demon',
-  'shadow-demon',
-  'xuangu',
-  'npc-luoyun-steward',
-  'npc-luoyun-elder',
-  'npc-luoyun-merchant',
-  'npc-luoyun-gate',
-  'npc-nanlong-hou',
-  'npc-nanlong-outer',
-  'npc-nanlong-inner',
-  'npc-lu-weiying',
-  'npc-lu-weiying-gate',
-  'demon-beast',
-  'valley-wraith',
-  'valley-warden',
-  'blood-ape',
-  'curse-spirit',
-  'demon-cultivator',
-  'ancient-shade',
-  'demon-nanlong',
-  'blood-spider',
-  'red-snake',
-  'mo-jiao',
-  'rival-disciple',
-  'feng-yue',
-  'green-snake',
-  'night-bat',
-  'qingwen-daoren',
-  'mulan-rider',
-  'mulan-mage',
-  'sacred-bird',
-  'le-shangshi',
-  'grass-beast',
-  'tuwu-rider',
-  'tuwu-archer',
-  'tuwu-shaman',
-  'totem-golem',
-  'tuwu-acolyte',
-  'hu-xianshi',
-  'tianlan-beast',
-  'npc-cangl-chief',
-  'npc-cangl-merchant',
-  'npc-cangl-guide',
-  'npc-fengyue',
-  'npc-cangl-hunter',
-  'npc-cangl-scout',
-  'npc-tiandao-envoy',
-  'rock-beast',
-  'mountain-ogre',
-  'jin-demon',
-  'yin-mo',
-  'ward-puppet',
-  'feng-ghost',
-  'cave-lizard',
-  'fangjian-elder',
-  'fangjian-younger',
-  'kuzhu-elder',
-  'npc-cao-mengrong',
-  'npc-jinxi-merchant',
-  'npc-jinxi-guide',
-  'npc-ginseng-host',
-  'npc-xiao-laoer',
-  'npc-kuzhu-servant',
-  'npc-jin-herbalist',
-  'npc-feng-remnant',
-];
-
 function loadConfig(): Promise<GameConfig> {
   const readJson = async <T>(path: string): Promise<T> => {
     const response = await fetch(`${import.meta.env.BASE_URL}${path}`);
@@ -160,25 +30,51 @@ function loadConfig(): Promise<GameConfig> {
   );
 }
 
-/** 读取已烘焙的精灵表说明，没有的角色继续用占位图。 */
+/** 读取烘焙时生成的精灵表索引，索引里没有的角色用占位图。 */
 async function loadSpriteManifests(): Promise<SpriteManifests> {
-  const manifests: SpriteManifests = {};
-  for (const key of BAKED_SPRITES) {
-    const response = await fetch(`${import.meta.env.BASE_URL}assets/sprites/${key}.json`);
-    if (response.ok) manifests[key] = (await response.json()) as SpriteManifest;
-  }
-  return manifests;
+  const response = await fetch(`${import.meta.env.BASE_URL}assets/sprites/index.json`);
+  if (!response.ok) throw new Error('无法读取 assets/sprites/index.json，请运行 npm run sprites:index');
+  return (await response.json()) as SpriteManifests;
 }
 
 async function loadPropManifest(): Promise<PropManifest> {
   const response = await fetch(`${import.meta.env.BASE_URL}assets/props/props.json`);
+  if (!response.ok) throw new Error('无法读取 assets/props/props.json');
   return (await response.json()) as PropManifest;
 }
 
-const config = await loadConfig();
-const [sprites, props] = await Promise.all([loadSpriteManifests(), loadPropManifest()]);
-const errors = validateConfig(config);
-if (errors.length > 0) throw new Error(errors.join('\n'));
+/** 启动页上的状态：读配置时显示进度，出错时把原因列出来，不留白屏。 */
+const boot = document.getElementById('boot')!;
+const bootStatus = (text: string) => {
+  boot.querySelector('p')!.textContent = text;
+};
+
+async function loadEverything(): Promise<{ config: GameConfig; sprites: SpriteManifests; props: PropManifest }> {
+  bootStatus('读取配置…');
+  const config = await loadConfig();
+  bootStatus('读取素材清单…');
+  const [sprites, props] = await Promise.all([loadSpriteManifests(), loadPropManifest()]);
+  const errors = validateConfig(config);
+  if (errors.length > 0) throw new Error(`配置表有 ${errors.length} 处错误：\n${errors.join('\n')}`);
+  return { config, sprites, props };
+}
+
+let loaded: Awaited<ReturnType<typeof loadEverything>>;
+try {
+  loaded = await loadEverything();
+} catch (error) {
+  boot.classList.add('failed');
+  bootStatus('游戏没能启动');
+  const detail = document.createElement('pre');
+  detail.textContent = error instanceof Error ? error.message : String(error);
+  const retry = document.createElement('button');
+  retry.textContent = '重新加载';
+  retry.addEventListener('click', () => location.reload());
+  boot.append(detail, retry);
+  throw error;
+}
+boot.remove();
+const { config, sprites, props } = loaded;
 
 const store = new IndexedDbSaveStore();
 const start = await showStartScreen(config, store);
