@@ -282,7 +282,7 @@ export class GameScene extends Phaser.Scene {
     this.input.on('pointerup', () => (this.holding = false));
 
     const keyboard = this.input.keyboard!;
-    const digits = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE'];
+    const digits = ['ONE', 'TWO', 'THREE', 'FOUR', 'FIVE', 'SIX', 'SEVEN', 'EIGHT', 'NINE', 'ZERO'];
     digits.forEach((digit, slot) => {
       keyboard.addCapture(`F${slot + 1}`);
       keyboard.on(`keydown-F${slot + 1}`, () => this.useSlot(slot));

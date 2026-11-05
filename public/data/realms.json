@@ -23,6 +23,16 @@
       "requires": [{ "item": "nascent-pill", "count": 1 }]
     }
   },
-  { "id": "nascent", "name": "元婴", "minLevel": 35, "maxLevel": 55, "stages": "phases",
-    "phaseStarts": [35, 41] }
+  {
+    "id": "nascent", "name": "元婴", "minLevel": 35, "maxLevel": 65, "stages": "phases",
+    "phaseStarts": [35, 41, 61],
+    "breakthrough": {
+      "chance": 0.25,
+      "failBonus": 0.15,
+      "requires": [{ "item": "demon-core-pill", "count": 1 }, { "item": "five-cold-flames", "count": 1 }]
+    }
+  },
+  { "id": "deity", "name": "化神", "minLevel": 66, "maxLevel": 70, "stages": "phases",
+    "phaseStarts": [66],
+    "grants": { "body": "body-yuanci", "spell": "spell-yuanci", "spirit": "spirit-yuanci" } }
 ]

@@ -534,5 +534,228 @@
       "duration": 120
     },
     "replaces": "spirit-puppet"
+  },
+  "body-charge-3": {
+    "id": "body-charge-3",
+    "name": "撼山冲·圆满",
+    "classId": "body",
+    "level": 57,
+    "mpCost": 12,
+    "cooldown": 7,
+    "windup": 0.15,
+    "range": 7,
+    "color": "#ff9f43",
+    "effect": {
+      "type": "charge",
+      "stat": "attack",
+      "multiplier": 3.2,
+      "stun": 2
+    },
+    "replaces": "body-charge-2"
+  },
+  "body-mingwang-3": {
+    "id": "body-mingwang-3",
+    "name": "明王诀·圆满",
+    "classId": "body",
+    "level": 62,
+    "mpCost": 30,
+    "cooldown": 9,
+    "windup": 0.3,
+    "range": 0,
+    "color": "#ffcf5a",
+    "effect": {
+      "type": "damage",
+      "stat": "attack",
+      "multiplier": 3.2,
+      "shape": "around",
+      "size": 3
+    },
+    "replaces": "body-mingwang-2"
+  },
+  "body-brahma-3": {
+    "id": "body-brahma-3",
+    "name": "梵圣真魔功·圆满",
+    "classId": "body",
+    "level": 67,
+    "mpCost": 50,
+    "cooldown": 45,
+    "windup": 0.3,
+    "range": 0,
+    "color": "#ff5a3c",
+    "effect": {
+      "type": "empower",
+      "multiplier": 0.8,
+      "duration": 20
+    },
+    "replaces": "body-brahma-2"
+  },
+  "spell-firewall-3": {
+    "id": "spell-firewall-3",
+    "name": "火墙术·圆满",
+    "classId": "spell",
+    "level": 57,
+    "mpCost": 50,
+    "cooldown": 10,
+    "windup": 0.5,
+    "range": 6,
+    "color": "#ff7a3a",
+    "effect": {
+      "type": "field",
+      "stat": "magic",
+      "multiplier": 0.68,
+      "size": 2,
+      "duration": 8,
+      "interval": 1
+    },
+    "replaces": "spell-firewall-2"
+  },
+  "spell-qingyuan-3": {
+    "id": "spell-qingyuan-3",
+    "name": "青元剑诀·圆满",
+    "classId": "spell",
+    "level": 62,
+    "mpCost": 34,
+    "cooldown": 6,
+    "windup": 0.3,
+    "range": 10,
+    "color": "#7fe0c0",
+    "effect": {
+      "type": "damage",
+      "stat": "magic",
+      "multiplier": 3.4,
+      "shape": "line",
+      "size": 10
+    },
+    "replaces": "spell-qingyuan-2"
+  },
+  "spell-bixie-3": {
+    "id": "spell-bixie-3",
+    "name": "辟邪神雷·圆满",
+    "classId": "spell",
+    "level": 67,
+    "mpCost": 66,
+    "cooldown": 11,
+    "windup": 0.5,
+    "range": 8,
+    "color": "#d0a0ff",
+    "effect": {
+      "type": "damage",
+      "stat": "magic",
+      "multiplier": 3.4,
+      "shape": "circle",
+      "size": 4
+    },
+    "replaces": "spell-bixie-2"
+  },
+  "spirit-miasma-3": {
+    "id": "spirit-miasma-3",
+    "name": "瘴毒术·圆满",
+    "classId": "spirit",
+    "level": 57,
+    "mpCost": 44,
+    "cooldown": 12,
+    "windup": 0.5,
+    "range": 6,
+    "color": "#7ad04a",
+    "effect": {
+      "type": "field",
+      "stat": "dao",
+      "multiplier": 0.43,
+      "size": 2,
+      "duration": 10,
+      "interval": 1
+    },
+    "replaces": "spirit-miasma-2"
+  },
+  "spirit-corrosion-3": {
+    "id": "spirit-corrosion-3",
+    "name": "腐骨毒·圆满",
+    "classId": "spirit",
+    "level": 62,
+    "mpCost": 44,
+    "cooldown": 6,
+    "windup": 0.3,
+    "range": 7,
+    "color": "#b6e04a",
+    "effect": {
+      "type": "dot",
+      "stat": "dao",
+      "multiplier": 2.6,
+      "duration": 10,
+      "interval": 1
+    },
+    "replaces": "spirit-corrosion-2"
+  },
+  "spirit-puppet-3": {
+    "id": "spirit-puppet-3",
+    "name": "傀儡术·圆满",
+    "classId": "spirit",
+    "level": 67,
+    "mpCost": 58,
+    "cooldown": 25,
+    "windup": 0.5,
+    "range": 0,
+    "color": "#a8b0bc",
+    "effect": {
+      "type": "summon",
+      "monster": "iron-puppet",
+      "hpPerLevel": 40,
+      "duration": 150
+    },
+    "replaces": "spirit-puppet-2"
+  },
+  "body-yuanci": {
+    "id": "body-yuanci",
+    "name": "元磁神光",
+    "classId": "body",
+    "level": 66,
+    "mpCost": 60,
+    "cooldown": 14,
+    "windup": 0.5,
+    "range": 8,
+    "color": "#c8c8d0",
+    "effect": {
+      "type": "damage",
+      "stat": "attack",
+      "multiplier": 3.6,
+      "shape": "line",
+      "size": 8
+    }
+  },
+  "spell-yuanci": {
+    "id": "spell-yuanci",
+    "name": "元磁神光",
+    "classId": "spell",
+    "level": 66,
+    "mpCost": 60,
+    "cooldown": 14,
+    "windup": 0.5,
+    "range": 8,
+    "color": "#c8c8d0",
+    "effect": {
+      "type": "damage",
+      "stat": "magic",
+      "multiplier": 3.6,
+      "shape": "line",
+      "size": 8
+    }
+  },
+  "spirit-yuanci": {
+    "id": "spirit-yuanci",
+    "name": "元磁神光",
+    "classId": "spirit",
+    "level": 66,
+    "mpCost": 60,
+    "cooldown": 14,
+    "windup": 0.5,
+    "range": 8,
+    "color": "#c8c8d0",
+    "effect": {
+      "type": "damage",
+      "stat": "dao",
+      "multiplier": 3.6,
+      "shape": "line",
+      "size": 8
+    }
   }
 }

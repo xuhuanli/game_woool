@@ -87,6 +87,8 @@ export interface RealmDef {
   stages: 'layers' | 'phases';
   /** 每个小境界的起始等级，按原著进度对齐；不填就把境界平均分成初、中、后期 */
   phaseStarts?: number[];
+  /** 突破进入这个境界时，各职业领悟的功法（职业 id → 功法 id），不用功法书 */
+  grants?: Record<string, string>;
   /** 进入下一境界的条件，最高境界没有 */
   breakthrough?: {
     chance: number;
@@ -425,8 +427,8 @@ export interface GameConfig {
   dialogues: Record<string, string[]>;
 }
 
-/** 快捷栏 9 格，后两格固定放丹药 */
-export const SKILL_SLOTS = 7;
+/** 快捷栏 10 格：前 8 格放功法（第 8 格留给化神时领悟的元磁神光），后两格放丹药 */
+export const SKILL_SLOTS = 8;
 
 export const CONFIG_FILES = [
   'game',
@@ -540,7 +542,8 @@ export function validateConfig(config: GameConfig): string[] {
   }
   for (const skill of Object.values(config.skills)) {
     const hasBook = Object.values(config.items).some((item) => item.kind === 'book' && item.skill === skill.id);
-    if (skill.level > 1 && !hasBook) errors.push(`功法 ${skill.id} 没有功法书`);
+    const granted = config.realms.some((realm) => realm.grants?.[skill.classId] === skill.id);
+    if (skill.level > 1 && !hasBook && !granted) errors.push(`功法 ${skill.id} 没有功法书`);
   }
   for (const skill of Object.values(config.skills)) {
     if (!skill.replaces) continue;
@@ -605,6 +608,9 @@ export function validateConfig(config: GameConfig): string[] {
   for (const realm of config.realms) {
     for (const { item } of realm.breakthrough?.requires ?? []) {
       if (!config.items[item]) errors.push(`境界 ${realm.id} 的突破材料 ${item} 不存在`);
+    }
+    for (const [classId, skillId] of Object.entries(realm.grants ?? {})) {
+      if (config.skills[skillId]?.classId !== classId) errors.push(`境界 ${realm.id} 领悟的功法 ${skillId} 不存在或不是 ${classId} 的`);
     }
   }
   const maxLevel = config.levels.expToNext.length + 1;

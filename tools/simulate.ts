@@ -13,7 +13,7 @@ import { TICK_SECONDS, World } from '../src/game/world';
 
 const args = process.argv.slice(2);
 const TARGET_LEVEL = Number(args.find((arg) => /^\d+$/.test(arg)) ?? 40);
-const MAX_HOURS = TARGET_LEVEL > 40 ? 100 : 60;
+const MAX_HOURS = TARGET_LEVEL > 55 ? 160 : TARGET_LEVEL > 40 ? 100 : 60;
 /** 种子少了结果会随掉落表的改动整体漂移，缺省 8 个，同时报出最快和最慢 */
 const SEED_COUNT = Number(args.find((arg) => arg.startsWith('--seeds='))?.slice(8) ?? 8);
 /** 闭关估算每隔这么多秒按当前属性重算一次 */
@@ -45,9 +45,9 @@ const FIELDS: [number, string][] = [
   [1, 'starter-field'],
 ];
 const POTIONS_PER_TRIP = 10;
-/** 14 级起改买养元丹，27 级起改买大还丹，低一档的丹药到下一章就不够用了。 */
+/** 14 级起改买养元丹，27 级起大还丹，41 级起回天丹，56 级起玉清丹，低一档的丹药到下一章就不够用了。 */
 const potionFor = (level: number) =>
-  level >= 41 ? 'huge-potion' : level >= 27 ? 'big-potion' : level >= 14 ? 'mid-potion' : 'small-potion';
+  level >= 56 ? 'jade-potion' : level >= 41 ? 'huge-potion' : level >= 27 ? 'big-potion' : level >= 14 ? 'mid-potion' : 'small-potion';
 
 const config = await loadConfigFromDisk();
 
@@ -240,7 +240,7 @@ console.log(
     `用时 ${Math.round((Date.now() - started) / 1000)} 秒。括号里是最快和最慢。\n`,
 );
 /** 表里列出的等级：各章节的分界，挂到 40 级以上时补上新章节的 */
-const MARKS = [13, 26, 30, 34, 37, 40, 43, 45, 48, 50, 53, 55].filter((level) => level <= TARGET_LEVEL);
+const MARKS = [13, 26, 30, 34, 37, 40, 43, 45, 48, 50, 53, 55, 58, 60, 63, 65, 68, 70].filter((level) => level <= TARGET_LEVEL);
 console.log(`| 职业 | ${MARKS.map((level) => `到 ${level} 级`).join(' | ')} | 死亡 | 回城 | 法器 |`);
 console.log(`|${' --- |'.repeat(MARKS.length + 4)}`);
 const byClass = classIds.map((classId) => results.filter((result) => result.classId === classId));

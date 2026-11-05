@@ -92,6 +92,13 @@
       "growSeconds": 21600,
       "yield": 1,
       "level": 34
+    },
+    {
+      "item": "herb-moyuan",
+      "seed": "seed-moyuan",
+      "growSeconds": 25200,
+      "yield": 1,
+      "level": 61
     }
   ],
   "recipes": [
@@ -274,6 +281,57 @@
         },
         {
           "item": "herb-xuanyin",
+          "count": 1
+        }
+      ]
+    },
+    {
+      "id": "brew-jade-potion",
+      "output": "jade-potion",
+      "count": 1,
+      "gold": 120,
+      "level": 56,
+      "materials": [
+        {
+          "item": "herb-jinyuan",
+          "count": 2
+        },
+        {
+          "item": "herb-yangyuan",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "id": "brew-jade-mana",
+      "output": "jade-mana",
+      "count": 1,
+      "gold": 120,
+      "level": 56,
+      "materials": [
+        {
+          "item": "herb-xuanyin",
+          "count": 2
+        },
+        {
+          "item": "herb-juling",
+          "count": 2
+        }
+      ]
+    },
+    {
+      "id": "brew-demon-core-pill",
+      "output": "demon-core-pill",
+      "count": 1,
+      "gold": 5000,
+      "level": 61,
+      "materials": [
+        {
+          "item": "herb-moyuan",
+          "count": 1
+        },
+        {
+          "item": "herb-longwen",
           "count": 1
         }
       ]

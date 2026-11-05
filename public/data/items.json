@@ -135,6 +135,18 @@
     "kind": "material",
     "price": 30000
   },
+  "demon-core-pill": {
+    "id": "demon-core-pill",
+    "name": "魔元丹",
+    "kind": "material",
+    "price": 60000
+  },
+  "five-cold-flames": {
+    "id": "five-cold-flames",
+    "name": "五色寒焰",
+    "kind": "material",
+    "bound": true
+  },
   "ape-fur": {
     "id": "ape-fur",
     "name": "山魈皮",
@@ -989,6 +1001,19 @@
     "seed": "herb-longwen",
     "level": 34
   },
+  "herb-moyuan": {
+    "id": "herb-moyuan",
+    "name": "魔元草",
+    "kind": "material",
+    "price": 6000
+  },
+  "seed-moyuan": {
+    "id": "seed-moyuan",
+    "name": "魔元草种子",
+    "kind": "material",
+    "seed": "herb-moyuan",
+    "level": 61
+  },
   "book-body-charge-2": {
     "id": "book-body-charge-2",
     "name": "《撼山冲·大成》",
@@ -1065,6 +1090,20 @@
     "kind": "potion",
     "mana": 340,
     "price": 300
+  },
+  "jade-potion": {
+    "id": "jade-potion",
+    "name": "玉清丹",
+    "kind": "potion",
+    "heal": 700,
+    "price": 500
+  },
+  "jade-mana": {
+    "id": "jade-mana",
+    "name": "紫府丹",
+    "kind": "potion",
+    "mana": 520,
+    "price": 500
   },
   "sword-44": {
     "id": "sword-44",
@@ -1383,5 +1422,68 @@
     },
     "price": 60000,
     "boss": "xueyan"
+  },
+  "book-body-charge-3": {
+    "id": "book-body-charge-3",
+    "name": "《撼山冲·圆满》",
+    "kind": "book",
+    "skill": "body-charge-3",
+    "price": 11050
+  },
+  "book-body-mingwang-3": {
+    "id": "book-body-mingwang-3",
+    "name": "《明王诀·圆满》",
+    "kind": "book",
+    "skill": "body-mingwang-3",
+    "price": 13050
+  },
+  "book-body-brahma-3": {
+    "id": "book-body-brahma-3",
+    "name": "《梵圣真魔功·圆满》",
+    "kind": "book",
+    "skill": "body-brahma-3",
+    "price": 15250
+  },
+  "book-spell-firewall-3": {
+    "id": "book-spell-firewall-3",
+    "name": "《火墙术·圆满》",
+    "kind": "book",
+    "skill": "spell-firewall-3",
+    "price": 11050
+  },
+  "book-spell-qingyuan-3": {
+    "id": "book-spell-qingyuan-3",
+    "name": "《青元剑诀·圆满》",
+    "kind": "book",
+    "skill": "spell-qingyuan-3",
+    "price": 13050
+  },
+  "book-spell-bixie-3": {
+    "id": "book-spell-bixie-3",
+    "name": "《辟邪神雷·圆满》",
+    "kind": "book",
+    "skill": "spell-bixie-3",
+    "price": 15250
+  },
+  "book-spirit-miasma-3": {
+    "id": "book-spirit-miasma-3",
+    "name": "《瘴毒术·圆满》",
+    "kind": "book",
+    "skill": "spirit-miasma-3",
+    "price": 11050
+  },
+  "book-spirit-corrosion-3": {
+    "id": "book-spirit-corrosion-3",
+    "name": "《腐骨毒·圆满》",
+    "kind": "book",
+    "skill": "spirit-corrosion-3",
+    "price": 13050
+  },
+  "book-spirit-puppet-3": {
+    "id": "book-spirit-puppet-3",
+    "name": "《傀儡术·圆满》",
+    "kind": "book",
+    "skill": "spirit-puppet-3",
+    "price": 15250
   }
 }

@@ -54,7 +54,7 @@ import type {
 export * from './types';
 
 export const TICK_SECONDS = 0.05;
-export const HOTBAR_SIZE = 9;
+export const HOTBAR_SIZE = 10;
 /** 飞行靴：点任务旁的图标直接飞到任务目的地 */
 export const FLYING_BOOTS = 'flying-boots';
 
@@ -863,6 +863,9 @@ export class World {
     const success = this.rng.chance(breakthroughChance(realm, fails));
     if (success) {
       player.realmPassed.push(realm.id);
+      // 进入下一境界时领悟的功法，比如化神时的元磁神光
+      const granted = this.config.realms[this.config.realms.indexOf(realm) + 1]?.grants?.[player.def.id];
+      if (granted) this.inventory.learnSkill(granted);
     } else {
       player.breakthroughFails[realm.id] = fails + 1;
       player.weakUntil = this.time + this.config.game.weakSeconds;

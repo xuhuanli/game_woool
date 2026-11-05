@@ -1000,7 +1000,9 @@ describe('40 级内容', () => {
     for (const classId of Object.keys(config.classes)) {
       const world = new World(config, 'huangfeng-valley', classId, 1);
       levelTo(world, 55);
-      const advanced = Object.values(config.skills).filter((skill) => skill.classId === classId && skill.replaces);
+      const advanced = Object.values(config.skills).filter(
+        (skill) => skill.classId === classId && skill.replaces && skill.level <= 55,
+      );
       expect(advanced, classId).toHaveLength(3);
       for (const skill of advanced) {
         expect(world.player.skills, classId).toContain(skill.id);
@@ -1011,10 +1013,50 @@ describe('40 级内容', () => {
     }
   });
 
-  it('等级到 55 级，40 级以后每级多要的经验不超过 8%', () => {
+  it('三职业到 70 级学全圆满功法，进阶两次都在原位，功法 7 门加元磁神光', () => {
+    for (const classId of Object.keys(config.classes)) {
+      const world = new World(config, 'huangfeng-valley', classId, 1);
+      levelTo(world, 70);
+      const perfected = Object.values(config.skills).filter((skill) => skill.classId === classId && skill.level >= 56 && skill.replaces);
+      expect(perfected, classId).toHaveLength(3);
+      for (const skill of perfected) {
+        expect(world.player.skills, classId).toContain(skill.id);
+        expect(world.player.skills, classId).not.toContain(skill.replaces);
+      }
+      expect(world.player.skills, classId).toHaveLength(7);
+    }
+  });
+
+  it('突破化神要魔元丹和五色寒焰，成功后领悟元磁神光，放进第 8 格', () => {
+    for (const classId of Object.keys(config.classes)) {
+      const world = new World(config, 'huangfeng-valley', classId, 1);
+      levelTo(world, 65);
+      const { player } = world;
+      player.realmPassed = player.realmPassed.filter((id) => id !== 'nascent');
+      player.exp = world.expToNext!;
+      world.attemptBreakthrough();
+      expect(player.realmPassed).not.toContain('nascent');
+      player.bag['demon-core-pill'] = 1;
+      player.bag['five-cold-flames'] = 1;
+      const realm = config.realms.find((candidate) => candidate.id === 'nascent')!;
+      const chance = realm.breakthrough!.chance;
+      realm.breakthrough!.chance = 2;
+      world.attemptBreakthrough();
+      realm.breakthrough!.chance = chance;
+      expect(player.realmPassed).toContain('nascent');
+      const yuanci = `${classId}-yuanci`;
+      expect(player.skills, classId).toContain(yuanci);
+      expect(player.skills, classId).toHaveLength(8);
+      expect(player.hotbar.findIndex((entry) => entry?.id === yuanci), classId).toBeLessThan(8);
+      expect(player.hotbar.filter((entry) => entry?.kind === 'item')).toHaveLength(2);
+      expect(player.level).toBe(66);
+    }
+  });
+
+  it('等级到 70 级，40 级以后每级多要的经验不超过 8%', () => {
     const curve = config.levels.expToNext;
-    expect(curve).toHaveLength(54);
-    for (let level = 40; level < 55; level++) {
+    expect(curve).toHaveLength(69);
+    for (let level = 40; level < 70; level++) {
       expect(curve[level - 1]! / curve[level - 2]!, String(level)).toBeLessThanOrEqual(1.08);
     }
   });
@@ -1664,9 +1706,11 @@ describe('丢弃物品', () => {
     world.setHotbarItem(0, 'mid-potion');
     expect(world.player.hotbar[0]?.kind).not.toBe('item');
     world.setHotbarItem(7, 'mid-potion');
-    expect(world.player.hotbar[7]).toEqual({ kind: 'item', id: 'mid-potion' });
-    world.setHotbarItem(8, 'flying-boots');
-    expect(world.player.hotbar[8]?.id).not.toBe('flying-boots');
+    expect(world.player.hotbar[7]?.kind).not.toBe('item');
+    world.setHotbarItem(8, 'mid-potion');
+    expect(world.player.hotbar[8]).toEqual({ kind: 'item', id: 'mid-potion' });
+    world.setHotbarItem(9, 'flying-boots');
+    expect(world.player.hotbar[9]?.id).not.toBe('flying-boots');
   });
 
   it('绑定物品和 Boss 专属法器丢不掉', () => {
