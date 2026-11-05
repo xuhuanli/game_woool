@@ -237,6 +237,16 @@ function addImage(
   scene.textures.addCanvas(key, canvas);
 }
 
+/** 给一个角色画占位精灵表，正式精灵表没读到时顶上。 */
+export function addPlaceholderSheet(scene: Phaser.Scene, config: GameConfig, key: string): void {
+  const hero = HERO_LOOKS[key];
+  const monster = config.monsters[key];
+  const npc = key.startsWith('npc-') ? config.npcs[key.slice('npc-'.length)] : undefined;
+  if (hero) addSheet(scene, key, paintHero(hero));
+  else if (monster) addSheet(scene, key, paintBeast(monster.look.fur, monster.look.head));
+  else if (npc) addSheet(scene, key, paintHero({ robe: npc.color, trim: '#efe6d0', weapon: '#d9dee6', reach: 0 }));
+}
+
 export function createPlaceholderArt(
   scene: Phaser.Scene,
   config: GameConfig,

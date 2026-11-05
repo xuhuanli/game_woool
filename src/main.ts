@@ -106,7 +106,7 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pagehide', () => void saver.saveNow());
 
-new Phaser.Game({
+const game = new Phaser.Game({
   type: Phaser.AUTO,
   parent: 'game',
   backgroundColor: '#17140f',
@@ -115,5 +115,5 @@ new Phaser.Game({
 });
 
 if (import.meta.env.DEV) {
-  (window as unknown as { __world: World }).__world = world;
+  Object.assign(window, { __world: world, __game: game });
 }

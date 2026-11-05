@@ -22,10 +22,12 @@ import type { Panels } from '../ui/panels';
 import { GameAudio } from './audio';
 import { directionRow, toCell, toScreen } from './iso';
 import {
+  addPlaceholderSheet,
   createPlaceholderArt,
   createSpriteAnimations,
   SHEET,
   type PropManifest,
+  type SpriteManifest,
   type SpriteManifests,
 } from './placeholders';
 import { DropViews } from './dropView';
@@ -79,6 +81,8 @@ export class GameScene extends Phaser.Scene {
   /** 已从文件加载的精灵表和景观物件，切图时按新地图增减 */
   private readonly loadedSprites = new Set<string>();
   private readonly loadedProps = new Set<string>();
+  /** 正式精灵表没读到、暂时用占位图的角色，下次进图重新读 */
+  private readonly fallbackSprites = new Set<string>();
   /** 当前地图预渲染的地面贴图，离开这张图就释放 */
   private groundTextures: { mapId: string; keys: string[] } | null = null;
   private loadingMap = false;
@@ -131,6 +135,7 @@ export class GameScene extends Phaser.Scene {
     for (const key of assets.sprites) {
       const manifest = this.sprites[key];
       if (!manifest || this.loadedSprites.has(key)) continue;
+      if (this.fallbackSprites.delete(key)) this.removeSheet(key);
       this.load.spritesheet(key, `${import.meta.env.BASE_URL}assets/sprites/${key}.png`, {
         frameWidth: manifest.frameW,
         frameHeight: manifest.frameH,
@@ -150,10 +155,7 @@ export class GameScene extends Phaser.Scene {
   private releaseUnused(assets: MapAssets): void {
     for (const key of [...this.loadedSprites]) {
       if (assets.sprites.has(key)) continue;
-      for (const name of Object.keys(this.sprites[key]?.clips ?? {})) {
-        for (let row = 0; row < SHEET.rows; row++) this.anims.remove(`${key}-${name}-${row}`);
-      }
-      this.textures.remove(key);
+      this.removeSheet(key);
       this.loadedSprites.delete(key);
     }
     for (const key of [...this.loadedProps]) {
@@ -165,6 +167,20 @@ export class GameScene extends Phaser.Scene {
       for (const key of this.groundTextures.keys) this.textures.remove(key);
       this.groundTextures = null;
     }
+  }
+
+  /** 去掉一张精灵表和它的动画，正式的和占位的动画名都清掉。 */
+  private removeSheet(key: string): void {
+    const names = new Set(['idle', 'walk', 'attack', ...Object.keys(this.sprites[key]?.clips ?? {})]);
+    for (const name of names) {
+      for (let row = 0; row < SHEET.rows; row++) this.anims.remove(`${key}-${name}-${row}`);
+    }
+    this.textures.remove(key);
+  }
+
+  /** 正式精灵表的说明，用占位图时没有。 */
+  private manifestOf(key: string): SpriteManifest | undefined {
+    return this.fallbackSprites.has(key) ? undefined : this.sprites[key];
   }
 
   /** 加载进度：屏幕中间一行字，加载完收起。 */
@@ -190,6 +206,33 @@ export class GameScene extends Phaser.Scene {
     });
   }
 
+  /** 给读到的精灵表注册动画，没读到的跳过。 */
+  /**
+   * 加载结束后核对贴图：没读到的（断网、404，或者开发服务器返回了网页）不算加载过，
+   * 角色换成占位图、物件不摆，下次进图再读。读到的精灵表注册动画。
+   */
+  private settleLoaded(keys: string[]): void {
+    const missing: string[] = [];
+    for (const key of keys) {
+      if (this.textures.exists(key)) continue;
+      this.loadedSprites.delete(key);
+      this.fallbackSprites.add(key);
+      addPlaceholderSheet(this, this.world.config, key);
+      missing.push(key);
+    }
+    for (const key of [...this.loadedProps]) {
+      if (this.textures.exists(`prop-${key}`)) continue;
+      this.loadedProps.delete(key);
+      missing.push(key);
+    }
+    if (missing.length) {
+      console.error(`没读到的素材：${missing.join('、')}`);
+      this.hud.log('有素材没读到，暂时用占位图', 'bad');
+    }
+    const loaded = keys.filter((key) => this.loadedSprites.has(key));
+    createSpriteAnimations(this, Object.fromEntries(loaded.map((key) => [key, this.sprites[key]!])));
+  }
+
   /** 切图：先清掉旧地图，补齐新地图的素材，加载完再建图；加载期间世界暂停。 */
   private enterMap(): void {
     if (this.loadingMap) {
@@ -207,7 +250,7 @@ export class GameScene extends Phaser.Scene {
     this.loadingMap = true;
     this.showLoadProgress();
     this.load.once('complete', () => {
-      createSpriteAnimations(this, Object.fromEntries(added.map((key) => [key, this.sprites[key]!])));
+      this.settleLoaded(added);
       this.loadingMap = false;
       if (this.reenter) {
         this.reenter = false;
@@ -222,7 +265,7 @@ export class GameScene extends Phaser.Scene {
   create(): void {
     ensureShadowTexture(this);
     createPlaceholderArt(this, this.world.config, this.sprites);
-    createSpriteAnimations(this, Object.fromEntries([...this.loadedSprites].map((key) => [key, this.sprites[key]!])));
+    this.settleLoaded([...this.loadedSprites]);
 
     this.tileCursor = this.add.graphics().setDepth(1);
     this.addUnitView(this.world.player, this.world.player.def.id);
@@ -385,7 +428,7 @@ export class GameScene extends Phaser.Scene {
     this.solidDecor = [];
     for (const item of map.decor ?? []) {
       const placement = this.props[item.prop];
-      if (!placement) continue;
+      if (!placement || !this.loadedProps.has(item.prop)) continue;
       const { x, y } = toScreen(item);
       const image = this.add
         .image(x, y, `prop-${item.prop}`)
@@ -475,7 +518,7 @@ export class GameScene extends Phaser.Scene {
   private addNpc(npc: NpcDef): void {
     const { x, y } = toScreen(npc);
     const key = `npc-${npc.id}`;
-    const manifest = this.sprites[key];
+    const manifest = this.manifestOf(key);
     const sprite = this.add
       .sprite(x, y, key, (manifest?.columns ?? SHEET.columns) * 2)
       .setOrigin(0.5, manifest?.originY ?? SHEET.originY)
@@ -515,7 +558,7 @@ export class GameScene extends Phaser.Scene {
 
   private addUnitView(unit: Unit, texture: string, scale = 1): void {
     const { x, y } = toScreen(unit.pos);
-    const manifest = this.sprites[texture];
+    const manifest = this.manifestOf(texture);
     const sprite = this.add
       .sprite(x, y, texture, 0)
       .setOrigin(0.5, manifest?.originY ?? SHEET.originY)
