@@ -18,11 +18,54 @@ const TILE = {
   void: 10,
 } as const;
 
-const GRASS: Record<number, string> = {
-  [TILE.grassA]: '#55663a',
-  [TILE.grassB]: '#4c5d34',
-  [TILE.grassC]: '#5e7040',
+/** 一套地表配色：底色、柔化层和斑点。地图配置里的 palette 选用哪套。 */
+interface Palette {
+  grass: [string, string, string];
+  grassB: string;
+  grassC: string;
+  grassSpeckle: string[];
+  sand: string;
+  sandSpeckle: string[];
+  dirt: string;
+  dirtSpeckle: string[];
+  stone: string;
+  stoneSpeckle: string[];
+  paved: string;
+  water: [string, string];
+}
+
+const PALETTES: Record<string, Palette> = {
+  grass: {
+    grass: ['#55663a', '#4c5d34', '#5e7040'],
+    grassB: 'rgba(70, 90, 44, 0.75)',
+    grassC: 'rgba(120, 132, 62, 0.6)',
+    grassSpeckle: ['#6d8246', '#46562f', '#7c8f4e'],
+    sand: '#b3a276',
+    sandSpeckle: ['#94855e', '#cdbd92'],
+    dirt: '#806d4b',
+    dirtSpeckle: ['#665639', '#97845c'],
+    stone: '#5f5a50',
+    stoneSpeckle: ['#46423a', '#77726a'],
+    paved: '#6f6a5c',
+    water: ['#2f6e8c', '#25597a'],
+  },
+  // 雪原：草地换成积雪，沙地是冰面，泥路是踩实的雪道
+  snow: {
+    grass: ['#d6dfe4', '#c7d2d9', '#e2e9ec'],
+    grassB: 'rgba(178, 196, 208, 0.7)',
+    grassC: 'rgba(236, 242, 246, 0.7)',
+    grassSpeckle: ['#f4f8fa', '#b4c4ce', '#cfdbe2'],
+    sand: '#b8d4e4',
+    sandSpeckle: ['#98bcd0', '#dcecf4'],
+    dirt: '#9aa8b2',
+    dirtSpeckle: ['#7e8c96', '#b8c4cc'],
+    stone: '#76828c',
+    stoneSpeckle: ['#5a6670', '#96a2aa'],
+    paved: '#8794a0',
+    water: ['#3a7a9c', '#2c6688'],
+  },
 };
+
 const LAYER_SCALE = 0.5;
 
 export interface PaintedGround {
@@ -283,7 +326,8 @@ function paintDecorShadows(
   }
 }
 
-/** 预渲染一张地图的地表和水面波光，贴图按地图缓存。 */export function paintGround(scene: Phaser.Scene, map: MapDef, shadowWidth?: ShadowWidth): PaintedGround {
+/** 预渲染一张地图的地表和水面波光，贴图按地图缓存。 */
+export function paintGround(scene: Phaser.Scene, map: MapDef, shadowWidth?: ShadowWidth): PaintedGround {
   const key = `ground-${map.id}`;
   const shimmerKey = `${key}-shimmer`;
   const painted = { key, shimmerKey, x: -map.height * (TILE_W / 2), y: -TILE_H };
@@ -301,27 +345,33 @@ function paintDecorShadows(
   const rng = new Rng(map.width * 7 + map.height);
   const { canvas, context } = createCanvas(painter.width, painter.height);
 
+  const palette = PALETTES[map.palette ?? 'grass'] ?? PALETTES.grass!;
+  const base: Record<number, string> = {
+    [TILE.grassA]: palette.grass[0],
+    [TILE.grassB]: palette.grass[1],
+    [TILE.grassC]: palette.grass[2],
+  };
   forEachTile(painter, (tile, sx, sy) => {
     // 崖外没有地面，留空露出背景
     if (tile === TILE.void) return;
     diamondPath(context, sx, sy, 1);
-    context.fillStyle = GRASS[tile] ?? GRASS[TILE.grassA]!;
+    context.fillStyle = base[tile] ?? palette.grass[0];
     context.fill();
   });
-  softLayer(context, painter, [TILE.grassB], 'rgba(70, 90, 44, 0.75)', 12, 4);
-  softLayer(context, painter, [TILE.grassC], 'rgba(120, 132, 62, 0.6)', 12, 4);
-  speckle(context, painter, rng, [TILE.grassA, TILE.grassB, TILE.grassC], 4, ['#6d8246', '#46562f', '#7c8f4e'], 9);
+  softLayer(context, painter, [TILE.grassB], palette.grassB, 12, 4);
+  softLayer(context, painter, [TILE.grassC], palette.grassC, 12, 4);
+  speckle(context, painter, rng, [TILE.grassA, TILE.grassB, TILE.grassC], 4, palette.grassSpeckle, 9);
 
-  softLayer(context, painter, [TILE.sand, TILE.water, TILE.bridge], '#b3a276', 6, 4);
-  speckle(context, painter, rng, [TILE.sand], 3, ['#94855e', '#cdbd92'], 6);
-  softLayer(context, painter, [TILE.dirt], '#806d4b', 5, 3);
-  speckle(context, painter, rng, [TILE.dirt], 3, ['#665639', '#97845c'], 7);
-  softLayer(context, painter, [TILE.stone], '#5f5a50', 7, 5);
-  speckle(context, painter, rng, [TILE.stone], 3, ['#46423a', '#77726a'], 12);
-  softLayer(context, painter, [TILE.paved], '#6f6a5c', 3, 3);
+  softLayer(context, painter, [TILE.sand, TILE.water, TILE.bridge], palette.sand, 6, 4);
+  speckle(context, painter, rng, [TILE.sand], 3, palette.sandSpeckle, 6);
+  softLayer(context, painter, [TILE.dirt], palette.dirt, 5, 3);
+  speckle(context, painter, rng, [TILE.dirt], 3, palette.dirtSpeckle, 7);
+  softLayer(context, painter, [TILE.stone], palette.stone, 7, 5);
+  speckle(context, painter, rng, [TILE.stone], 3, palette.stoneSpeckle, 12);
+  softLayer(context, painter, [TILE.paved], palette.paved, 3, 3);
   paintPaved(context, painter, rng);
-  softLayer(context, painter, [TILE.water, TILE.bridge], '#2f6e8c', 4, 2);
-  softLayer(context, painter, [TILE.water, TILE.bridge], '#25597a', 9, -8);
+  softLayer(context, painter, [TILE.water, TILE.bridge], palette.water[0], 4, 2);
+  softLayer(context, painter, [TILE.water, TILE.bridge], palette.water[1], 9, -8);
   paintBridge(context, painter);
   // 崖口内侧压一层暗影，让地面和崖外自然过渡
   softLayer(context, painter, [TILE.void], 'rgba(10, 8, 6, 0.5)', 7, 1);

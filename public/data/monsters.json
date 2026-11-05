@@ -5603,5 +5603,687 @@
         "message": "雪玲祭出镇魔铃：元刹的本源要散了，撑住"
       }
     ]
+  },
+  "snow-fox": {
+    "id": "snow-fox",
+    "name": "雪岭灵狐",
+    "stats": {
+      "maxHp": 1500,
+      "maxMp": 0,
+      "attack": {
+        "min": 37,
+        "max": 46
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 28,
+        "max": 31
+      },
+      "magicDefense": {
+        "min": 16,
+        "max": 19
+      },
+      "accuracy": 64,
+      "evasion": 18,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 6300,
+    "respawnSeconds": 20,
+    "dropTable": "xiaoji-band",
+    "look": {
+      "fur": "#f0f4f8",
+      "head": "#9fc8e8",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "fox-pounce",
+        "name": "雪狐扑击",
+        "cooldown": 9,
+        "windup": 0.7,
+        "color": "#d8ecff",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.2,
+        "charge": true
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "snow-fox-fur",
+        "chance": 0.3
+      }
+    ]
+  },
+  "snow-ogre": {
+    "id": "snow-ogre",
+    "name": "冰原雪魈",
+    "stats": {
+      "maxHp": 2150,
+      "maxMp": 0,
+      "attack": {
+        "min": 36,
+        "max": 44
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 36,
+        "max": 39
+      },
+      "magicDefense": {
+        "min": 22,
+        "max": 25
+      },
+      "accuracy": 62,
+      "evasion": 9,
+      "luck": 0
+    },
+    "moveSpeed": 2.2,
+    "attackInterval": 1.3,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 6600,
+    "respawnSeconds": 20,
+    "dropTable": "xiaoji-band",
+    "look": {
+      "fur": "#e8eef2",
+      "head": "#7aa8c8",
+      "scale": 1.1
+    },
+    "abilities": [
+      {
+        "id": "ogre-quake",
+        "name": "雪崩",
+        "cooldown": 10,
+        "windup": 1.0,
+        "color": "#c8e0f0",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.3
+      }
+    ]
+  },
+  "xiaoji-traitor": {
+    "id": "xiaoji-traitor",
+    "name": "小极宫叛徒",
+    "stats": {
+      "maxHp": 1450,
+      "maxMp": 0,
+      "attack": {
+        "min": 38,
+        "max": 48
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 26,
+        "max": 29
+      },
+      "magicDefense": {
+        "min": 22,
+        "max": 25
+      },
+      "accuracy": 66,
+      "evasion": 17,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 6500,
+    "respawnSeconds": 20,
+    "dropTable": "xiaoji-band",
+    "look": {
+      "fur": "#3a5a7a",
+      "head": "#c8e8ff",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "traitor-ice",
+        "name": "寒冰诀",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#9fd8ff",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.05,
+        "frost": 1
+      }
+    ]
+  },
+  "ice-shark": {
+    "id": "ice-shark",
+    "name": "冰海鲛妖",
+    "stats": {
+      "maxHp": 1400,
+      "maxMp": 0,
+      "attack": {
+        "min": 37,
+        "max": 47
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 25,
+        "max": 28
+      },
+      "magicDefense": {
+        "min": 24,
+        "max": 27
+      },
+      "accuracy": 66,
+      "evasion": 17,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 6700,
+    "respawnSeconds": 20,
+    "dropTable": "xiaoji-band",
+    "look": {
+      "fur": "#4a8ab0",
+      "head": "#d8f0ff",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "shark-spit",
+        "name": "冰涎",
+        "cooldown": 8,
+        "windup": 0.8,
+        "color": "#9fd8ff",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.05,
+        "frost": 1
+      }
+    ]
+  },
+  "ice-toad": {
+    "id": "ice-toad",
+    "name": "冰甲巨蟾",
+    "stats": {
+      "maxHp": 2200,
+      "maxMp": 0,
+      "attack": {
+        "min": 37,
+        "max": 45
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 37,
+        "max": 40
+      },
+      "magicDefense": {
+        "min": 23,
+        "max": 26
+      },
+      "accuracy": 63,
+      "evasion": 9,
+      "luck": 0
+    },
+    "moveSpeed": 2.2,
+    "attackInterval": 1.3,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 6900,
+    "respawnSeconds": 20,
+    "dropTable": "xiaoji-band",
+    "look": {
+      "fur": "#5a8aa0",
+      "head": "#e8f4ff",
+      "scale": 1.1
+    },
+    "abilities": [
+      {
+        "id": "toad-crush",
+        "name": "冰甲压顶",
+        "cooldown": 10,
+        "windup": 1.0,
+        "color": "#c8e0f0",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.3
+      }
+    ]
+  },
+  "frost-spirit": {
+    "id": "frost-spirit",
+    "name": "寒雾妖灵",
+    "stats": {
+      "maxHp": 1450,
+      "maxMp": 0,
+      "attack": {
+        "min": 38,
+        "max": 48
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 24,
+        "max": 27
+      },
+      "magicDefense": {
+        "min": 26,
+        "max": 29
+      },
+      "accuracy": 67,
+      "evasion": 18,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 7000,
+    "respawnSeconds": 20,
+    "dropTable": "xiaoji-band",
+    "look": {
+      "fur": "#a8d0e8",
+      "head": "#ffffff",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "mist-chill",
+        "name": "寒雾",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#d8f0ff",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.05,
+        "poison": {
+          "damage": 14,
+          "duration": 5
+        },
+        "frost": 1
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "xuan-ice",
+        "chance": 0.3
+      }
+    ]
+  },
+  "bai-mengxin": {
+    "id": "bai-mengxin",
+    "name": "白梦馨",
+    "stats": {
+      "maxHp": 6500,
+      "maxMp": 0,
+      "attack": {
+        "min": 48,
+        "max": 60
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 30,
+        "max": 33
+      },
+      "magicDefense": {
+        "min": 34,
+        "max": 37
+      },
+      "accuracy": 68,
+      "evasion": 18,
+      "luck": 0
+    },
+    "moveSpeed": 2.7,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 24000,
+    "respawnSeconds": 120,
+    "dropTable": "xiaoji-band",
+    "look": {
+      "fur": "#e8f0ff",
+      "head": "#9fc8e8",
+      "scale": 1.2
+    },
+    "attackRange": 4,
+    "abilities": [
+      {
+        "id": "bai-mirror",
+        "name": "冰魄镜",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#c8e8ff",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.2,
+        "frost": 2
+      }
+    ]
+  },
+  "ouyang-elder": {
+    "id": "ouyang-elder",
+    "name": "欧阳长老",
+    "stats": {
+      "maxHp": 7500,
+      "maxMp": 0,
+      "attack": {
+        "min": 50,
+        "max": 62
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 34,
+        "max": 37
+      },
+      "magicDefense": {
+        "min": 30,
+        "max": 33
+      },
+      "accuracy": 66,
+      "evasion": 14,
+      "luck": 0
+    },
+    "moveSpeed": 2.5,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 26000,
+    "respawnSeconds": 120,
+    "dropTable": "xiaoji-band",
+    "look": {
+      "fur": "#1a2a4a",
+      "head": "#4a6a8a",
+      "scale": 1.2
+    },
+    "abilities": [
+      {
+        "id": "ouyang-flood",
+        "name": "墨蛟出水",
+        "cooldown": 9,
+        "windup": 0.9,
+        "color": "#3a4a6a",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.3
+      }
+    ]
+  },
+  "hanli-boss": {
+    "id": "hanli-boss",
+    "name": "寒骊上人",
+    "stats": {
+      "maxHp": 28000,
+      "maxMp": 0,
+      "attack": {
+        "min": 54,
+        "max": 68
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 33,
+        "max": 36
+      },
+      "magicDefense": {
+        "min": 34,
+        "max": 37
+      },
+      "accuracy": 67,
+      "evasion": 15,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 600000,
+    "respawnSeconds": 300,
+    "dropTable": "hanli-boss",
+    "look": {
+      "fur": "#e8f4ff",
+      "head": "#9fd8ff",
+      "scale": 1.6
+    },
+    "attackRange": 4,
+    "abilities": [
+      {
+        "id": "hanli-lance",
+        "name": "玄冰枪",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#9fd8ff",
+        "range": 6,
+        "shape": "line",
+        "size": 8,
+        "multiplier": 1.45,
+        "frost": 2
+      },
+      {
+        "id": "hanli-qianlan",
+        "name": "乾蓝冰焰",
+        "cooldown": 11,
+        "windup": 1.1,
+        "color": "#5ab4ff",
+        "range": 2,
+        "shape": "around",
+        "size": 3,
+        "multiplier": 1.5,
+        "frost": 1
+      },
+      {
+        "id": "hanli-cold",
+        "name": "玄玉寒气",
+        "cooldown": 15,
+        "windup": 1.2,
+        "color": "#c8e8ff",
+        "range": 6,
+        "shape": "circle",
+        "size": 2,
+        "multiplier": 0.35,
+        "field": {
+          "duration": 8,
+          "interval": 1
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.5,
+        "attackMultiplier": 1.15,
+        "message": "寒骊上人压下冲关的反噬，乾蓝冰焰暴涨"
+      },
+      {
+        "hpBelow": 0.2,
+        "attackMultiplier": 1.2,
+        "message": "寒骊上人放出玄玉洞千年寒气，要和你同归于尽"
+      }
+    ]
+  },
+  "ice-sea-chief": {
+    "id": "ice-sea-chief",
+    "name": "冰海妖修首领",
+    "stats": {
+      "maxHp": 24000,
+      "maxMp": 0,
+      "attack": {
+        "min": 53,
+        "max": 66
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 34,
+        "max": 37
+      },
+      "magicDefense": {
+        "min": 30,
+        "max": 33
+      },
+      "accuracy": 66,
+      "evasion": 14,
+      "luck": 0
+    },
+    "moveSpeed": 2.5,
+    "attackInterval": 1.3,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 520000,
+    "respawnSeconds": 300,
+    "dropTable": "ice-sea-chief",
+    "look": {
+      "fur": "#5a9ac0",
+      "head": "#e8f8ff",
+      "scale": 1.6
+    },
+    "abilities": [
+      {
+        "id": "chief-tide",
+        "name": "寒潮",
+        "cooldown": 9,
+        "windup": 0.9,
+        "color": "#7ac8ff",
+        "range": 6,
+        "shape": "line",
+        "size": 7,
+        "multiplier": 1.4,
+        "frost": 2
+      },
+      {
+        "id": "chief-slam",
+        "name": "冰山压顶",
+        "cooldown": 10,
+        "windup": 1.0,
+        "color": "#c8e0f0",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.45
+      },
+      {
+        "id": "chief-call",
+        "name": "唤鲛妖",
+        "cooldown": 18,
+        "windup": 0.8,
+        "color": "#4a8ab0",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "ice-shark",
+          "count": 2
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.3,
+        "attackMultiplier": 1.3,
+        "message": "冰海妖修首领长啸，冰海翻涌"
+      }
+    ]
   }
 }

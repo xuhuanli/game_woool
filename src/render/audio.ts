@@ -34,6 +34,7 @@ const MUSIC: Record<string, string> = {
   jin: 'music-jin.ogg',
   kunwu: 'music-kunwu.ogg',
   zhenmo: 'music-zhenmo.ogg',
+  xiaoji: 'music-xiaoji.ogg',
   /** Boss 盯上玩家时播放，不属于任何地图 */
   boss: 'music-boss.ogg',
 };

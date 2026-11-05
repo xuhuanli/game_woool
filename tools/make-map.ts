@@ -96,6 +96,8 @@ interface MapPlan {
   /** 树的密度：factor 随噪声变化，least 是最低密度 */
   forest: { factor: number; least?: number; denseArea?: Circle };
   foliage: number[];
+  /** 雪原：不长绿色的灌木和草丛（染色盖不住绿色），只留石头和枯树 */
+  snow?: boolean;
   /** 树的种类，缺省是常绿树 */
   trees?: string[];
 }
@@ -1427,6 +1429,154 @@ const MAPS: MapPlan[] = [
     foliage: [0x4a0a3a, 0x3a0a2a, 0x6a1a4a],
     trees: ['bare-1', 'bare-2'],
   },
+  // ---- 第 10 章：北夜小极宫（雪原配色见 maps.json 的 palette） ----
+  {
+    id: 'xiaoji-palace',
+    size: 40,
+    seed: 20261135,
+    start: [20, 24],
+    portals: [{ cell: [20, 36], label: '雪连山', toMap: 'xuelian-mountain', to: [14, 14] }],
+    roads: [
+      [[20, 37], [20, 10]],
+      [[20, 20], [36, 20]],
+    ],
+    roadTile: GROUND.paved,
+    roadWidth: [1.6, 0],
+    ponds: [{ x: 5, y: 6, radius: 2 }],
+    clearings: [{ x: 20, y: 36, radius: 3 }],
+    paved: [{ x0: 11, y0: 12, x1: 29, y1: 28 }],
+    buildings: [
+      { prop: 'bld-hall-sect', x: 16, y: 3 },
+      { prop: 'bld-tower-sect', x: 29, y: 3 },
+      { prop: 'bld-house-sect', x: 4, y: 11, flip: true },
+      { prop: 'bld-house-sect', x: 31, y: 12 },
+      { prop: 'bld-pavilion-sect', x: 5, y: 23 },
+      { prop: 'bld-gate-sect', x: 17, y: 31 },
+      ...wallRow('bld-wall-sect', 31, 3, 16),
+      ...wallRow('bld-wall-sect', 31, 24, 37),
+      { prop: 'obj-stall', x: 13, y: 14 },
+      { prop: 'obj-stall', x: 25, y: 23 },
+      { prop: 'obj-cauldron', x: 15, y: 24 },
+      ...lanterns([11, 12], [29, 12], [17, 29], [23, 29], [17, 34], [23, 34]),
+    ],
+    required: [[20, 16], [27, 20], [13, 20], [24, 26]],
+    edge: { base: 2, spread: 2.5, outcrops: 0 },
+    forest: { factor: 0.8, least: 0.04 },
+    foliage: [0xffffff, 0xe8f4ff, 0xd8ecff],
+    trees: ['bare-1', 'bare-2'],
+    snow: true,
+  },
+  {
+    id: 'xuelian-mountain',
+    size: 120,
+    seed: 20261136,
+    start: [14, 14],
+    portals: [{ cell: [8, 8], label: '北夜小极宫', toMap: 'xiaoji-palace', to: [20, 33] }],
+    roads: [
+      [[12, 12], [30, 26], [48, 36], [64, 54], [80, 70], [96, 86], [104, 100]],
+      [[30, 26], [24, 60], [34, 94]],
+      [[64, 54], [96, 34]],
+    ],
+    roadTile: GROUND.dirt,
+    roadWidth: [1, 0.6],
+    ponds: [
+      { x: 70, y: 100, radius: 7 },
+      { x: 100, y: 60, radius: 6 },
+    ],
+    zones: [
+      { monster: 'snow-fox', x: 38, y: 34, radius: 15, count: 13 },
+      { monster: 'snow-fox', x: 96, y: 34, radius: 10, count: 6 },
+      { monster: 'snow-ogre', x: 28, y: 84, radius: 15, count: 13 },
+      { monster: 'xiaoji-traitor', x: 80, y: 74, radius: 15, count: 13 },
+      { monster: 'xiaoji-traitor', x: 56, y: 104, radius: 8, count: 5 },
+    ],
+    monsterGap: 6,
+    clearings: [{ x: 14, y: 14, radius: 8 }],
+    required: [[15, 12]],
+    edge: { base: 3, spread: 6, outcrops: 0.66 },
+    forest: { factor: 0.4 },
+    foliage: [0xffffff, 0xe8f4ff, 0xd8ecff, 0xf0f8ff],
+    trees: ['bare-1', 'bare-2'],
+    snow: true,
+  },
+  {
+    id: 'ice-sea',
+    size: 100,
+    seed: 20261137,
+    start: [12, 12],
+    portals: [{ cell: [8, 8], label: '北夜小极宫', toMap: 'xiaoji-palace', to: [20, 33] }],
+    roads: [
+      [[12, 12], [28, 28], [44, 36], [60, 52], [74, 70], [86, 86]],
+      [[28, 28], [24, 60], [34, 84]],
+      [[60, 52], [84, 30]],
+    ],
+    roadTile: GROUND.sand,
+    roadWidth: [1.1, 0.7],
+    ponds: [
+      { x: 52, y: 22, radius: 8 },
+      { x: 14, y: 44, radius: 8 },
+      { x: 56, y: 76, radius: 9 },
+      { x: 90, y: 56, radius: 7 },
+    ],
+    zones: [
+      { monster: 'ice-shark', x: 30, y: 30, radius: 13, count: 13 },
+      { monster: 'ice-toad', x: 30, y: 72, radius: 13, count: 13 },
+      { monster: 'frost-spirit', x: 74, y: 36, radius: 13, count: 13 },
+      { monster: 'ice-sea-chief', x: 86, y: 86, radius: 0, count: 1 },
+    ],
+    monsterGap: 5,
+    clearings: [
+      { x: 12, y: 12, radius: 7 },
+      { x: 86, y: 86, radius: 9 },
+    ],
+    required: [[15, 12]],
+    edge: { base: 3, spread: 5, outcrops: 0.78 },
+    forest: { factor: 0.2 },
+    foliage: [0xffffff, 0xd8ecff, 0xc8e4f8],
+    trees: ['bare-1', 'bare-2'],
+    snow: true,
+  },
+  {
+    id: 'xuanyu-cave',
+    size: 70,
+    seed: 20261138,
+    start: [12, 12],
+    portals: [{ cell: [8, 8], label: '北夜小极宫', toMap: 'xiaoji-palace', to: [20, 33] }],
+    roads: [
+      [[12, 12], [24, 24], [36, 34], [48, 46], [54, 54]],
+      [[24, 24], [48, 16]],
+      [[36, 34], [18, 50]],
+    ],
+    roadTile: GROUND.paved,
+    roadWidth: [1.3, 0.3],
+    zones: [
+      { monster: 'frost-spirit', x: 40, y: 22, radius: 9, count: 7 },
+      { monster: 'xiaoji-traitor', x: 22, y: 42, radius: 9, count: 7 },
+      { monster: 'bai-mengxin', x: 58, y: 22, radius: 0, count: 1 },
+      { monster: 'ouyang-elder', x: 30, y: 56, radius: 0, count: 1 },
+      { monster: 'hanli-boss', x: 54, y: 54, radius: 0, count: 1 },
+    ],
+    monsterGap: 5,
+    clearings: [
+      { x: 12, y: 12, radius: 7 },
+      { x: 58, y: 22, radius: 3 },
+      { x: 30, y: 56, radius: 3 },
+      { x: 54, y: 54, radius: 9 },
+    ],
+    paved: [{ x0: 46, y0: 46, x1: 62, y1: 62 }],
+    buildings: [
+      { prop: 'obj-lantern-stone', x: 46, y: 46 },
+      { prop: 'obj-lantern-stone', x: 62, y: 46 },
+      { prop: 'obj-lantern-stone', x: 46, y: 62 },
+      { prop: 'obj-cauldron', x: 58, y: 58 },
+    ],
+    required: [[13, 10]],
+    edge: { base: 3, spread: 4, outcrops: 0.7 },
+    forest: { factor: 0.1 },
+    foliage: [0xd8ecff, 0xc8e4f8, 0xffffff],
+    trees: ['bare-1', 'bare-2'],
+    snow: true,
+  },
 
 ];
 
@@ -1736,9 +1886,14 @@ function generate(plan: MapPlan): void {
         add(pick(['rock-1', 'rock-2', 'rock-3', 'rock-4']), x, y, 0.8 + rng.next() * 0.9, pickTint(ROCK_TINT));
         blocked[index(x, y)] = true;
       } else if (roll < density + 0.05) {
-        add(`bush-${rng.int(1, 4)}`, x, y, 0.8 + rng.next() * 0.6, pickTint(plan.foliage));
+        const bush = `bush-${rng.int(1, 4)}`;
+        const scale = 0.8 + rng.next() * 0.6;
+        const tint = pickTint(plan.foliage);
+        if (!plan.snow) add(bush, x, y, scale, tint);
       } else if (roll < density + 0.15) {
-        add(`grass-${rng.int(1, 2)}`, x, y, 0.8 + rng.next() * 0.7);
+        const grass = `grass-${rng.int(1, 2)}`;
+        const scale = 0.8 + rng.next() * 0.7;
+        if (!plan.snow) add(grass, x, y, scale);
       }
     }
   }

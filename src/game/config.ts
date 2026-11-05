@@ -118,6 +118,8 @@ export interface AbilityDef {
   summon?: { monster: string; count: number };
   /** 不直接伤害，在区域里留下持续伤害的地面，multiplier 是每跳的倍率 */
   field?: { duration: number; interval: number };
+  /** 命中玩家时叠几层冰封，叠满会被冻住一会儿 */
+  frost?: number;
 }
 
 export interface PhaseDef {
@@ -284,6 +286,8 @@ export interface MapDef {
   decor?: DecorDef[];
   /** 画面色调和浓度 */
   tone?: { color: string; alpha: number };
+  /** 地表配色，缺省是草地；snow 是雪原 */
+  palette?: 'snow';
   /** 背景音乐，缺省时主城用 town */
   music?: string;
   width: number;

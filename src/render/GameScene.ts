@@ -2,6 +2,7 @@ import Phaser from 'phaser';
 import type { Cell, DecorDef, NpcDef } from '../game/config';
 import { equipmentName } from '../game/equipment';
 import { sameCell } from '../game/grid';
+import { FROST_TO_FREEZE } from '../game/monsterAbilities';
 import { questsForNpc, questStatus } from '../game/quests';
 import {
   TICK_SECONDS,
@@ -752,6 +753,9 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'skillCast':
         this.effects.skill(event.unit, event.skill.color, event.cells);
+        break;
+      case 'frost':
+        this.effects.floatText(event.unit, `冰封 ${event.stacks}/${FROST_TO_FREEZE}`, '#9fd8ff', 14);
         break;
       case 'brewed':
         this.hud.log(`炼成 ${event.name} ×${event.count}`, 'gain');

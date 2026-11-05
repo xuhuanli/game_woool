@@ -19,9 +19,9 @@ export interface Vec {
 }
 
 export interface StatusEffect {
-  kind: 'dot' | 'shield' | 'defense' | 'empower';
+  kind: 'dot' | 'shield' | 'defense' | 'empower' | 'frost';
   left: number;
-  /** dot 为每跳伤害，shield 为减伤比例，defense 为增加的防御，empower 为增伤比例 */
+  /** dot 为每跳伤害，shield 为减伤比例，defense 为增加的防御，empower 为增伤比例，frost 为冰封层数 */
   amount: number;
   interval: number;
   nextTick: number;
@@ -253,6 +253,7 @@ export type GameEvent =
   | { type: 'npcsChanged' }
   | { type: 'monsterAdded'; unit: Monster }
   | { type: 'stunned'; unit: Unit }
+  | { type: 'frost'; unit: Unit; stacks: number }
   | { type: 'bossReady'; name: string; mapName: string }
   | { type: 'revived' }
   | { type: 'teleported' }

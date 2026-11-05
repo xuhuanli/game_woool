@@ -11,6 +11,7 @@ import { breakthroughChance, realmName } from './realm';
 import { Rng } from './rng';
 import { itemSources } from './sources';
 import { mapAssets } from '../render/mapAssets';
+import { FROST_TO_FREEZE } from './monsterAbilities';
 import { HD_ICON_IDS, VECTOR_ICON_IDS } from '../ui/iconManifest';
 import { TICK_SECONDS, World, type GameEvent } from './world';
 
@@ -1068,8 +1069,8 @@ describe('40 级内容', () => {
         .filter((item) => item.slot === slot && !item.boss)
         .sort((a, b) => (a.level ?? 1) - (b.level ?? 1));
       const highest = tiers.at(-1)!;
-      expect(highest.level, slot).toBe(52);
-      for (const level of [14, 27, 35, 44, 52]) {
+      expect(highest.level, slot).toBe(60);
+      for (const level of [14, 27, 35, 44, 52, 60]) {
         expect(tiers.some((item) => item.level === level), `${slot} ${level}`).toBe(true);
       }
       const power = (item: (typeof tiers)[number]) =>
@@ -2337,5 +2338,84 @@ describe('第 9 章 昆吾山', () => {
     const hits = world.drainEvents().filter((event) => event.type === 'damage' && event.unit === player && event.source === boss);
     expect(hits.length).toBeGreaterThanOrEqual(2);
     expect(player.hp).toBeLessThan(hp);
+  });
+});
+
+describe('第 10 章 北夜小极宫', () => {
+  const chain = Object.values(config.quests).filter((quest) => quest.id.startsWith('ch10-'));
+
+  it('主线接在第 9 章后面，任务经验约占 55～60 级的四成，地图是雪原', () => {
+    expect(chain[0]!.prev).toBe('ch9-yuansha');
+    for (const quest of chain) expect(quest.main, quest.id).toBe(true);
+    const levels = config.levels.expToNext.slice(54, 59).reduce((sum, exp) => sum + exp, 0);
+    const quests = chain.reduce((sum, quest) => sum + quest.rewards.exp, 0);
+    expect(quests / levels).toBeGreaterThan(0.3);
+    expect(quests / levels).toBeLessThan(0.5);
+    for (const id of ['xiaoji-palace', 'xuelian-mountain', 'ice-sea', 'xuanyu-cave']) {
+      expect(config.maps[id]!.palette, id).toBe('snow');
+    }
+    expect(config.npcs['nanjiang-guide']!.travel!.find((option) => option.map === 'xiaoji-palace')!.requires).toBe('ch9-yuansha');
+  });
+
+  it('按顺序做完第 10 章主线，寒骊上人翻脸后从小极宫消失', () => {
+    const world = new World(config, 'xiaoji-palace', 'body', 1);
+    const { player } = world;
+    player.level = 59;
+    player.quests.completed.push(...Object.keys(config.quests).filter((id) => !id.startsWith('ch10-')));
+    expect(world.npcs.some((npc) => npc.id === 'hanli-host')).toBe(true);
+    for (const quest of chain) {
+      expect(questStatus(quest, player.quests, player.level, player.bag), quest.id).toBe('available');
+      world.acceptQuest(quest.id);
+      const progress = player.quests.active.find((active) => active.id === quest.id)!;
+      progress.counts = quest.objectives.map((objective) => objective.count);
+      world.turnInQuest(quest.id);
+      expect(player.quests.completed, quest.id).toContain(quest.id);
+    }
+    expect(world.mapId).toBe('xiaoji-palace');
+    expect(world.npcs.some((npc) => npc.id === 'hanli-host')).toBe(false);
+  });
+
+  it('寒骊上人首杀必掉五色寒焰和乾蓝鼎，Boss 离 NPC 足够远', () => {
+    const table = config.drops['hanli-boss']!;
+    expect(table.find((entry) => entry.item === 'five-cold-flames')?.firstKill).toBe(true);
+    expect(table.find((entry) => entry.item === 'boss-qianlan-cauldron')?.firstKill).toBe(true);
+    for (const [mapId, bossId] of [
+      ['xuanyu-cave', 'hanli-boss'],
+      ['xuanyu-cave', 'bai-mengxin'],
+      ['xuanyu-cave', 'ouyang-elder'],
+      ['ice-sea', 'ice-sea-chief'],
+    ] as const) {
+      const boss = config.maps[mapId]!.spawns.find((spawn) => spawn.monster === bossId)!;
+      for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === mapId)) {
+        expect(Math.hypot(npc.x - boss.x, npc.y - boss.y) - 2, npc.id).toBeGreaterThan(config.monsters[bossId]!.aggroRange);
+      }
+    }
+  });
+
+  it('冰系技能叠冰封，叠满被冻住一会儿，冻住时不能出手', () => {
+    const world = new World(config, 'ice-sea', 'body', 1);
+    const { player } = world;
+    player.stats = { ...player.stats, maxHp: 1e6, evasion: 0 };
+    player.hp = 1e6;
+    const shark = world.monsters.find((monster) => monster.def.id === 'ice-shark')!;
+    shark.stats = { ...shark.stats, accuracy: 1e9 };
+    player.cell = { x: shark.cell.x + 2, y: shark.cell.y };
+    player.pos = { ...player.cell };
+    const frosts: number[] = [];
+    let frozen = false;
+    run(world, 60, () => {
+      for (const event of world.drainEvents()) {
+        if (event.type === 'frost' && event.unit === player) frosts.push(event.stacks);
+        if (event.type === 'stunned' && event.unit === player) frozen = true;
+      }
+      return frozen;
+    });
+    expect(frosts.length).toBeGreaterThan(0);
+    expect(frozen).toBe(true);
+    expect(player.stunLeft).toBeGreaterThan(0);
+    // 冻住时层数清零，同一刻别的怪再命中会重新从头叠
+    expect(player.effects.find((effect) => effect.kind === 'frost')?.amount ?? 0).toBeLessThan(FROST_TO_FREEZE);
+    world.castSkill(player.skills[0]!);
+    expect(player.windupLeft).toBe(0);
   });
 });

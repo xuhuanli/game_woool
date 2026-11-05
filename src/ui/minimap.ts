@@ -61,6 +61,8 @@ export class Minimap {
 
     const context = this.terrain.getContext('2d')!;
     context.clearRect(0, 0, WIDTH, HEIGHT);
+    // 雪原的空地画成雪色
+    const grass = world.map.palette === 'snow' ? '#c8d4da' : '#4f6038';
     for (let y = 0; y < grid.height; y++) {
       for (let x = 0; x < grid.width; x++) {
         const { px, py } = this.project({ x, y });
@@ -68,7 +70,7 @@ export class Minimap {
         if (tile === VOID_TILE) continue;
         const walkable = grid.isWalkable({ x, y });
         const open = walkable || tile === WATER_TILE;
-        context.fillStyle = open ? (TERRAIN_COLORS[tile] ?? '#4f6038') : '#2b2a26';
+        context.fillStyle = open ? (TERRAIN_COLORS[tile] ?? grass) : '#2b2a26';
         context.beginPath();
         context.moveTo(px, py - this.scale / 2);
         context.lineTo(px + this.scale, py);

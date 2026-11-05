@@ -939,23 +939,21 @@
       "book-body-brahma-2",
       "book-spell-bixie-2",
       "book-spirit-puppet-2",
+      "book-body-charge-3",
+      "book-spell-firewall-3",
+      "book-spirit-miasma-3",
+      "book-body-mingwang-3",
+      "book-spell-qingyuan-3",
+      "book-spirit-corrosion-3",
+      "book-body-brahma-3",
+      "book-spell-bixie-3",
+      "book-spirit-puppet-3",
       "seed-huichun",
       "seed-ningqi",
       "seed-yangyuan",
       "seed-juling",
       "seed-jinyuan",
-      "seed-xuanyin",
-      "jade-potion",
-      "jade-mana",
-      "book-body-charge-3",
-      "book-body-mingwang-3",
-      "book-body-brahma-3",
-      "book-spell-firewall-3",
-      "book-spell-qingyuan-3",
-      "book-spell-bixie-3",
-      "book-spirit-miasma-3",
-      "book-spirit-corrosion-3",
-      "book-spirit-puppet-3"
+      "seed-xuanyin"
     ]
   },
   "nanjiang-guide": {
@@ -996,6 +994,14 @@
         "x": 20,
         "y": 24,
         "cost": 1500
+      },
+      {
+        "name": "北夜小极宫",
+        "map": "xiaoji-palace",
+        "x": 20,
+        "y": 24,
+        "cost": 1800,
+        "requires": "ch9-yuansha"
       }
     ]
   },
@@ -1034,7 +1040,8 @@
     "x": 15,
     "y": 12,
     "color": "#f0f0ff",
-    "greeting": "xueling-greeting"
+    "greeting": "xueling-greeting",
+    "hiddenAfter": "ch9-shades"
   },
   "xueling-2": {
     "id": "xueling-2",
@@ -1044,7 +1051,8 @@
     "y": 10,
     "color": "#f0f0ff",
     "greeting": "xueling-greeting",
-    "requires": "ch9-shades"
+    "requires": "ch9-shades",
+    "hiddenAfter": "ch9-skeletons"
   },
   "xueling-3": {
     "id": "xueling-3",
@@ -1054,7 +1062,8 @@
     "y": 10,
     "color": "#f0f0ff",
     "greeting": "xueling-greeting",
-    "requires": "ch9-skeletons"
+    "requires": "ch9-skeletons",
+    "hiddenAfter": "ch9-xueyan"
   },
   "xueling-9": {
     "id": "xueling-9",
@@ -1065,5 +1074,129 @@
     "color": "#f0f0ff",
     "greeting": "xueling-greeting",
     "requires": "ch9-xueyan"
+  },
+  "xiaoji-steward": {
+    "id": "xiaoji-steward",
+    "name": "小极宫执事",
+    "map": "xiaoji-palace",
+    "x": 20,
+    "y": 16,
+    "color": "#c8e0f0",
+    "greeting": "xiaoji-steward-greeting"
+  },
+  "xiaoji-merchant": {
+    "id": "xiaoji-merchant",
+    "name": "小极宫掌柜",
+    "map": "xiaoji-palace",
+    "x": 27,
+    "y": 20,
+    "color": "#c9a24a",
+    "greeting": "xiaoji-merchant-greeting",
+    "storage": true,
+    "shop": [
+      "huge-potion",
+      "huge-mana",
+      "jade-potion",
+      "jade-mana",
+      "refine-stone",
+      "recall-scroll",
+      "random-scroll",
+      "book-body-brahma-2",
+      "book-spell-bixie-2",
+      "book-spirit-puppet-2",
+      "book-body-charge-3",
+      "book-spell-firewall-3",
+      "book-spirit-miasma-3",
+      "book-body-mingwang-3",
+      "book-spell-qingyuan-3",
+      "book-spirit-corrosion-3",
+      "book-body-brahma-3",
+      "book-spell-bixie-3",
+      "book-spirit-puppet-3",
+      "seed-huichun",
+      "seed-ningqi",
+      "seed-yangyuan",
+      "seed-juling",
+      "seed-jinyuan",
+      "seed-xuanyin"
+    ]
+  },
+  "xiaoji-guide": {
+    "id": "xiaoji-guide",
+    "name": "小极宫传送阵执事",
+    "map": "xiaoji-palace",
+    "x": 13,
+    "y": 20,
+    "color": "#9fd0ff",
+    "greeting": "xiaoji-guide-greeting",
+    "travel": [
+      {
+        "name": "雪连山",
+        "map": "xuelian-mountain",
+        "x": 14,
+        "y": 14,
+        "cost": 1600
+      },
+      {
+        "name": "冰海",
+        "map": "ice-sea",
+        "x": 12,
+        "y": 12,
+        "cost": 1800,
+        "requires": "ch10-hanli"
+      },
+      {
+        "name": "玄玉洞",
+        "map": "xuanyu-cave",
+        "x": 12,
+        "y": 12,
+        "cost": 2000,
+        "requires": "ch10-spirits"
+      },
+      {
+        "name": "南疆坊市",
+        "map": "nanjiang-market",
+        "x": 20,
+        "y": 24,
+        "cost": 1800
+      }
+    ]
+  },
+  "hanli-host": {
+    "id": "hanli-host",
+    "name": "寒骊上人",
+    "map": "xiaoji-palace",
+    "x": 24,
+    "y": 26,
+    "color": "#e8f4ff",
+    "greeting": "hanli-host-greeting",
+    "hiddenAfter": "ch10-hanli-boss"
+  },
+  "xuelian-hunter": {
+    "id": "xuelian-hunter",
+    "name": "雪岭猎户",
+    "map": "xuelian-mountain",
+    "x": 15,
+    "y": 12,
+    "color": "#a8865a",
+    "greeting": "xuelian-hunter-greeting"
+  },
+  "jiumo": {
+    "id": "jiumo",
+    "name": "鸠摩大师",
+    "map": "ice-sea",
+    "x": 15,
+    "y": 12,
+    "color": "#d8b46a",
+    "greeting": "jiumo-greeting"
+  },
+  "jiumo-cave": {
+    "id": "jiumo-cave",
+    "name": "鸠摩大师",
+    "map": "xuanyu-cave",
+    "x": 13,
+    "y": 10,
+    "color": "#d8b46a",
+    "greeting": "jiumo-greeting"
   }
 }

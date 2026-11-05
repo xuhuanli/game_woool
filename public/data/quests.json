@@ -3766,5 +3766,441 @@
     "offer": "side-ch9-ore-offer",
     "finish": "side-ch9-ore-finish",
     "prev": "ch9-seal"
+  },
+  "ch10-north": {
+    "id": "ch10-north",
+    "name": "北上",
+    "giver": "fu-cheng",
+    "level": 55,
+    "summary": "南宫婉中了封魂咒，要玄冰丹才解得开。去北夜小极宫求丹。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "xiaoji-steward",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 61500,
+      "gold": 5000,
+      "items": [
+        {
+          "item": "jade-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch10-north-offer",
+    "finish": "ch10-north-finish",
+    "prev": "ch9-yuansha",
+    "main": true
+  },
+  "ch10-mountain": {
+    "id": "ch10-mountain",
+    "name": "雪连山",
+    "giver": "xiaoji-steward",
+    "level": 55,
+    "summary": "玄冰丹要雪连山的灵材，去山里找雪岭猎户。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "xuelian-hunter",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 61500,
+      "gold": 5000,
+      "items": [],
+      "teleport": {
+        "map": "xuelian-mountain",
+        "x": 14,
+        "y": 14
+      }
+    },
+    "offer": "ch10-mountain-offer",
+    "finish": "ch10-mountain-finish",
+    "prev": "ch10-north",
+    "main": true
+  },
+  "ch10-foxes": {
+    "id": "ch10-foxes",
+    "name": "雪岭灵狐",
+    "giver": "xuelian-hunter",
+    "level": 55,
+    "summary": "击败 12 只雪岭灵狐。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "snow-fox",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 247000,
+      "gold": 9000,
+      "items": [
+        {
+          "item": "jade-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch10-foxes-offer",
+    "finish": "ch10-foxes-finish",
+    "prev": "ch10-mountain",
+    "main": true
+  },
+  "ch10-ogres": {
+    "id": "ch10-ogres",
+    "name": "冰原雪魈",
+    "giver": "xuelian-hunter",
+    "level": 56,
+    "summary": "击败 12 只冰原雪魈。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "snow-ogre",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 259000,
+      "gold": 9200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch10-ogres-offer",
+    "finish": "ch10-ogres-finish",
+    "prev": "ch10-foxes",
+    "main": true
+  },
+  "ch10-traitors": {
+    "id": "ch10-traitors",
+    "name": "小极宫叛徒",
+    "giver": "xuelian-hunter",
+    "level": 56,
+    "summary": "击败 12 名躲进雪连山的小极宫叛徒。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "xiaoji-traitor",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 265500,
+      "gold": 9400,
+      "items": [
+        {
+          "item": "jade-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch10-traitors-offer",
+    "finish": "ch10-traitors-finish",
+    "prev": "ch10-ogres",
+    "main": true
+  },
+  "ch10-hanli": {
+    "id": "ch10-hanli",
+    "name": "寒骊之邀",
+    "giver": "xuelian-hunter",
+    "level": 57,
+    "summary": "回小极宫，寒骊上人点名要见你。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "hanli-host",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 61500,
+      "gold": 5000,
+      "items": []
+    },
+    "offer": "ch10-hanli-offer",
+    "finish": "ch10-hanli-finish",
+    "prev": "ch10-traitors",
+    "main": true
+  },
+  "ch10-icesea": {
+    "id": "ch10-icesea",
+    "name": "冰海",
+    "giver": "hanli-host",
+    "level": 57,
+    "summary": "寒骊上人要冲击化神，请你去冰海采玄冰助他护法。冰海那边鸠摩大师接应。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "jiumo",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 61500,
+      "gold": 5000,
+      "items": []
+    },
+    "offer": "ch10-icesea-offer",
+    "finish": "ch10-icesea-finish",
+    "prev": "ch10-hanli",
+    "main": true
+  },
+  "ch10-sharks": {
+    "id": "ch10-sharks",
+    "name": "冰海鲛妖",
+    "giver": "jiumo",
+    "level": 57,
+    "summary": "击败 12 只冰海鲛妖。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "ice-shark",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 271500,
+      "gold": 9600,
+      "items": [
+        {
+          "item": "jade-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch10-sharks-offer",
+    "finish": "ch10-sharks-finish",
+    "prev": "ch10-icesea",
+    "main": true
+  },
+  "ch10-toads": {
+    "id": "ch10-toads",
+    "name": "冰甲巨蟾",
+    "giver": "jiumo",
+    "level": 58,
+    "summary": "击败 12 只冰甲巨蟾。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "ice-toad",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 277500,
+      "gold": 9800,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch10-toads-offer",
+    "finish": "ch10-toads-finish",
+    "prev": "ch10-sharks",
+    "main": true
+  },
+  "ch10-spirits": {
+    "id": "ch10-spirits",
+    "name": "寒雾妖灵",
+    "giver": "jiumo",
+    "level": 58,
+    "summary": "击败 12 道寒雾妖灵，取玄冰。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "frost-spirit",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 284000,
+      "gold": 10000,
+      "items": [
+        {
+          "item": "jade-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch10-spirits-offer",
+    "finish": "ch10-spirits-finish",
+    "prev": "ch10-toads",
+    "main": true
+  },
+  "ch10-cave": {
+    "id": "ch10-cave",
+    "name": "玄玉洞护法",
+    "giver": "jiumo",
+    "level": 58,
+    "summary": "带着玄冰去玄玉洞，为寒骊上人冲关护法。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "jiumo-cave",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 61500,
+      "gold": 5000,
+      "items": []
+    },
+    "offer": "ch10-cave-offer",
+    "finish": "ch10-cave-finish",
+    "prev": "ch10-spirits",
+    "main": true
+  },
+  "ch10-betrayal": {
+    "id": "ch10-betrayal",
+    "name": "翻脸",
+    "giver": "jiumo-cave",
+    "level": 59,
+    "summary": "寒骊冲关失败，认出了你身上的虚天鼎。先击退白梦馨和欧阳长老。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "bai-mengxin",
+        "count": 1
+      },
+      {
+        "type": "kill",
+        "target": "ouyang-elder",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 222000,
+      "gold": 12000,
+      "items": []
+    },
+    "offer": "ch10-betrayal-offer",
+    "finish": "ch10-betrayal-finish",
+    "prev": "ch10-cave",
+    "main": true
+  },
+  "ch10-hanli-boss": {
+    "id": "ch10-hanli-boss",
+    "name": "寒骊上人",
+    "giver": "jiumo-cave",
+    "level": 59,
+    "summary": "击败觊觎虚天鼎的寒骊上人。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "hanli-boss",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 395000,
+      "gold": 30000,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "ch10-hanli-boss-offer",
+    "finish": "ch10-hanli-boss-finish",
+    "prev": "ch10-betrayal",
+    "main": true
+  },
+  "ch10-chief": {
+    "id": "ch10-chief",
+    "name": "冰海来袭",
+    "giver": "jiumo-cave",
+    "level": 59,
+    "summary": "冰凤带着冰海妖修攻打小极宫，去冰海击败妖修首领。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "ice-sea-chief",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 370000,
+      "gold": 28000,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 2
+        }
+      ],
+      "teleport": {
+        "map": "xiaoji-palace",
+        "x": 20,
+        "y": 24
+      }
+    },
+    "offer": "ch10-chief-offer",
+    "finish": "ch10-chief-finish",
+    "prev": "ch10-hanli-boss",
+    "main": true
+  },
+  "side-ch10-fur": {
+    "id": "side-ch10-fur",
+    "name": "灵狐雪皮",
+    "giver": "xiaoji-merchant",
+    "level": 55,
+    "summary": "收集 6 张灵狐雪皮交给小极宫掌柜。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "snow-fox-fur",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 140000,
+      "gold": 7000,
+      "items": [
+        {
+          "item": "jade-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-ch10-fur-offer",
+    "finish": "side-ch10-fur-finish",
+    "prev": "ch10-mountain"
+  },
+  "side-ch10-ice": {
+    "id": "side-ch10-ice",
+    "name": "玄冰晶",
+    "giver": "jiumo",
+    "level": 58,
+    "summary": "收集 6 块玄冰晶交给鸠摩大师。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "xuan-ice",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 150000,
+      "gold": 7500,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 4
+        }
+      ]
+    },
+    "offer": "side-ch10-ice-offer",
+    "finish": "side-ch10-ice-finish",
+    "prev": "ch10-icesea"
   }
 }

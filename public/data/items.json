@@ -1485,5 +1485,115 @@
     "kind": "book",
     "skill": "spirit-puppet-3",
     "price": 15250
+  },
+  "sword-60": {
+    "id": "sword-60",
+    "name": "寒焰剑",
+    "kind": "equip",
+    "slot": "weapon",
+    "level": 60,
+    "bonus": {
+      "primary": 70
+    },
+    "price": 80000
+  },
+  "robe-60": {
+    "id": "robe-60",
+    "name": "寒玉法袍",
+    "kind": "equip",
+    "slot": "armor",
+    "level": 60,
+    "bonus": {
+      "defense": 33,
+      "maxHp": 560
+    },
+    "price": 40000
+  },
+  "crown-60": {
+    "id": "crown-60",
+    "name": "玄冰冠",
+    "kind": "equip",
+    "slot": "helmet",
+    "level": 60,
+    "bonus": {
+      "defense": 18,
+      "magicDefense": 18
+    },
+    "price": 40000
+  },
+  "pendant-60": {
+    "id": "pendant-60",
+    "name": "寒焰佩",
+    "kind": "equip",
+    "slot": "necklace",
+    "level": 60,
+    "bonus": {
+      "maxMp": 400,
+      "magicDefense": 16
+    },
+    "price": 40000
+  },
+  "bracelet-60": {
+    "id": "bracelet-60",
+    "name": "冰魄镯",
+    "kind": "equip",
+    "slot": "bracelet",
+    "level": 60,
+    "bonus": {
+      "defense": 17,
+      "evasion": 10
+    },
+    "price": 40000
+  },
+  "ring-60": {
+    "id": "ring-60",
+    "name": "寒焰戒",
+    "kind": "equip",
+    "slot": "ring",
+    "level": 60,
+    "bonus": {
+      "primary": 20
+    },
+    "price": 40000
+  },
+  "boss-qianlan-cauldron": {
+    "id": "boss-qianlan-cauldron",
+    "name": "乾蓝鼎",
+    "kind": "equip",
+    "slot": "necklace",
+    "level": 58,
+    "bonus": {
+      "maxMp": 440,
+      "magicDefense": 18,
+      "primary": 6
+    },
+    "price": 60000,
+    "boss": "hanli-boss"
+  },
+  "boss-icesea-crown": {
+    "id": "boss-icesea-crown",
+    "name": "冰魄冠",
+    "kind": "equip",
+    "slot": "helmet",
+    "level": 58,
+    "bonus": {
+      "defense": 20,
+      "magicDefense": 20,
+      "maxHp": 200
+    },
+    "price": 60000,
+    "boss": "ice-sea-chief"
+  },
+  "snow-fox-fur": {
+    "id": "snow-fox-fur",
+    "name": "灵狐雪皮",
+    "kind": "material",
+    "price": 300
+  },
+  "xuan-ice": {
+    "id": "xuan-ice",
+    "name": "玄冰晶",
+    "kind": "material",
+    "price": 320
   }
 }

@@ -4,6 +4,11 @@ import type { GroundFields } from './fields';
 import { cellDistance, direction, sameCell, type Grid } from './grid';
 import type { GameEvent, Monster, Player, Summon, Unit } from './types';
 
+/** 冰封叠到几层冻住、冻多久，每层留多久 */
+export const FROST_TO_FREEZE = 5;
+const FREEZE_SECONDS = 1.2;
+const FROST_SECONDS = 10;
+
 /** 怪物技能结算要用到的世界接口。 */
 export interface AbilityHost {
   readonly config: GameConfig;
@@ -75,6 +80,7 @@ export class MonsterAbilities {
     for (const unit of [host.player, ...host.summons]) {
       if (unit.hp <= 0 || !cells.some((cell) => sameCell(cell, unit.cell))) continue;
       host.hit(caster, unit, { stat: 'attack', multiplier: ability.multiplier });
+      if (ability.frost && unit === host.player && unit.hp > 0) this.addFrost(unit, caster, ability.frost);
       if (ability.poison && unit.hp > 0) {
         unit.effects = unit.effects.filter((e) => e.kind !== 'dot' || e.source !== caster);
         unit.effects.push({
@@ -87,6 +93,23 @@ export class MonsterAbilities {
         });
       }
     }
+  }
+
+  /** 冰封叠层：叠满冻住一会儿，层数清零；每次叠层都刷新持续时间。 */
+  private addFrost(unit: Unit, caster: Unit, stacks: number): void {
+    const current = unit.effects.find((effect) => effect.kind === 'frost');
+    const total = (current?.amount ?? 0) + stacks;
+    unit.effects = unit.effects.filter((effect) => effect.kind !== 'frost');
+    if (total >= FROST_TO_FREEZE) {
+      unit.stunLeft = Math.max(unit.stunLeft, FREEZE_SECONDS);
+      unit.windupLeft = 0;
+      unit.pending = null;
+      this.host.emit({ type: 'stunned', unit });
+      this.host.emit({ type: 'message', text: '寒气入体，被冻住了' });
+      return;
+    }
+    unit.effects.push({ kind: 'frost', left: FROST_SECONDS, amount: total, interval: 0, nextTick: 0, source: caster });
+    this.host.emit({ type: 'frost', unit, stacks: total });
   }
 
   private summonMinions(caster: Unit, monsterId: string, count: number): void {

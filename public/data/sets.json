@@ -43,5 +43,14 @@
       { "count": 4, "bonus": { "primary": 17 } },
       { "count": 6, "bonus": { "primary": 24, "luck": 2 } }
     ]
+  },
+  "hanyan": {
+    "id": "hanyan", "name": "寒焰套",
+    "pieces": ["sword-60", "robe-60", "crown-60", "pendant-60", "bracelet-60", "ring-60"],
+    "bonuses": [
+      { "count": 2, "bonus": { "maxHp": 380 } },
+      { "count": 4, "bonus": { "primary": 20 } },
+      { "count": 6, "bonus": { "primary": 28, "luck": 2 } }
+    ]
   }
 }

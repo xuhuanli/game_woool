@@ -717,7 +717,7 @@ export class World {
   castSkill(skillId: string, target: Monster | null = null): void {
     const player = this.player;
     const skill = this.config.skills[skillId];
-    if (!skill || !player.hp || !player.skills.includes(skillId)) return;
+    if (!skill || !player.hp || !player.skills.includes(skillId) || player.stunLeft > 0) return;
     if ((player.skillCooldowns[skillId] ?? 0) > 0) return;
     if (player.mp < skill.mpCost) {
       this.emit({ type: 'message', text: '灵力不足' });
@@ -938,6 +938,11 @@ export class World {
     this.tickEffects(player, dt);
     for (const [skillId, left] of Object.entries(player.skillCooldowns)) {
       player.skillCooldowns[skillId] = Math.max(0, left - dt);
+    }
+    // 被冰封冻住时不能走、不能出手，回血和中毒照常
+    if (player.stunLeft > 0) {
+      player.stunLeft = Math.max(0, player.stunLeft - dt);
+      return;
     }
     if (!player.hp || this.tickAttackTimers(player, dt)) return;
     if (player.queuedSkill) {

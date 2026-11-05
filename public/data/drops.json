@@ -2222,5 +2222,208 @@
       "chance": 0.08,
       "firstKill": true
     }
+  ],
+  "xiaoji-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 220,
+      "max": 300
+    },
+    {
+      "item": "jade-potion",
+      "chance": 0.12
+    },
+    {
+      "item": "jade-mana",
+      "chance": 0.1
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.032
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.019
+    },
+    {
+      "item": "sword-52",
+      "chance": 0.00134
+    },
+    {
+      "item": "robe-52",
+      "chance": 0.002
+    },
+    {
+      "item": "crown-52",
+      "chance": 0.002
+    },
+    {
+      "item": "pendant-52",
+      "chance": 0.002
+    },
+    {
+      "item": "bracelet-52",
+      "chance": 0.002
+    },
+    {
+      "item": "ring-52",
+      "chance": 0.002
+    },
+    {
+      "item": "sword-60",
+      "chance": 0.00201
+    },
+    {
+      "item": "robe-60",
+      "chance": 0.003
+    },
+    {
+      "item": "crown-60",
+      "chance": 0.003
+    },
+    {
+      "item": "pendant-60",
+      "chance": 0.003
+    },
+    {
+      "item": "bracelet-60",
+      "chance": 0.003
+    },
+    {
+      "item": "ring-60",
+      "chance": 0.003
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    }
+  ],
+  "hanli-boss": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 30000,
+      "max": 38000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 4,
+      "max": 5
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-60",
+      "chance": 0.3
+    },
+    {
+      "item": "robe-60",
+      "chance": 0.3
+    },
+    {
+      "item": "crown-60",
+      "chance": 0.3
+    },
+    {
+      "item": "pendant-60",
+      "chance": 0.3
+    },
+    {
+      "item": "bracelet-60",
+      "chance": 0.3
+    },
+    {
+      "item": "ring-60",
+      "chance": 0.3
+    },
+    {
+      "item": "five-cold-flames",
+      "chance": 0.5,
+      "firstKill": true
+    },
+    {
+      "item": "boss-qianlan-cauldron",
+      "chance": 0.08,
+      "firstKill": true
+    }
+  ],
+  "ice-sea-chief": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 26000,
+      "max": 34000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 4,
+      "max": 5
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-60",
+      "chance": 0.3
+    },
+    {
+      "item": "robe-60",
+      "chance": 0.3
+    },
+    {
+      "item": "crown-60",
+      "chance": 0.3
+    },
+    {
+      "item": "pendant-60",
+      "chance": 0.3
+    },
+    {
+      "item": "bracelet-60",
+      "chance": 0.3
+    },
+    {
+      "item": "ring-60",
+      "chance": 0.3
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.12
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.12
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.12
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.12
+    },
+    {
+      "item": "boss-icesea-crown",
+      "chance": 0.08,
+      "firstKill": true
+    }
   ]
 }
