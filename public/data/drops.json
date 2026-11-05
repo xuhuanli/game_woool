@@ -2116,27 +2116,90 @@
     },
     {
       "item": "sword-52",
-      "chance": 0.35
+      "chance": 0.3
     },
     {
       "item": "robe-52",
-      "chance": 0.35
+      "chance": 0.3
     },
     {
       "item": "crown-52",
-      "chance": 0.35
+      "chance": 0.3
     },
     {
       "item": "pendant-52",
-      "chance": 0.35
+      "chance": 0.3
     },
     {
       "item": "bracelet-52",
-      "chance": 0.35
+      "chance": 0.3
     },
     {
       "item": "ring-52",
-      "chance": 0.35
+      "chance": 0.3
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.12
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.12
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.12
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.12
+    },
+    {
+      "item": "boss-xueyan-robe",
+      "chance": 0.08,
+      "firstKill": true
+    }
+  ],
+  "yuansha-avatar": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 32000,
+      "max": 40000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 5
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-52",
+      "chance": 0.4
+    },
+    {
+      "item": "robe-52",
+      "chance": 0.4
+    },
+    {
+      "item": "crown-52",
+      "chance": 0.4
+    },
+    {
+      "item": "pendant-52",
+      "chance": 0.4
+    },
+    {
+      "item": "bracelet-52",
+      "chance": 0.4
+    },
+    {
+      "item": "ring-52",
+      "chance": 0.4
     },
     {
       "item": "stun-ring",

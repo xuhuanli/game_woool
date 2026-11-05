@@ -3317,7 +3317,7 @@
       }
     ],
     "rewards": {
-      "exp": 41500,
+      "exp": 36500,
       "gold": 4000,
       "items": [
         {
@@ -3345,7 +3345,7 @@
       }
     ],
     "rewards": {
-      "exp": 41500,
+      "exp": 36500,
       "gold": 4000,
       "items": []
     },
@@ -3368,7 +3368,7 @@
       }
     ],
     "rewards": {
-      "exp": 155000,
+      "exp": 137000,
       "gold": 7000,
       "items": [
         {
@@ -3396,7 +3396,7 @@
       }
     ],
     "rewards": {
-      "exp": 160000,
+      "exp": 141500,
       "gold": 7200,
       "items": [
         {
@@ -3424,7 +3424,7 @@
       }
     ],
     "rewards": {
-      "exp": 124000,
+      "exp": 109500,
       "gold": 7000,
       "items": [
         {
@@ -3452,7 +3452,7 @@
       }
     ],
     "rewards": {
-      "exp": 227000,
+      "exp": 201000,
       "gold": 16000,
       "items": []
     },
@@ -3475,7 +3475,7 @@
       }
     ],
     "rewards": {
-      "exp": 41500,
+      "exp": 36500,
       "gold": 4000,
       "items": [],
       "teleport": {
@@ -3503,7 +3503,7 @@
       }
     ],
     "rewards": {
-      "exp": 165000,
+      "exp": 146500,
       "gold": 7400,
       "items": [
         {
@@ -3531,7 +3531,7 @@
       }
     ],
     "rewards": {
-      "exp": 170500,
+      "exp": 151000,
       "gold": 7600,
       "items": [
         {
@@ -3559,7 +3559,7 @@
       }
     ],
     "rewards": {
-      "exp": 247500,
+      "exp": 219500,
       "gold": 18000,
       "items": []
     },
@@ -3582,7 +3582,7 @@
       }
     ],
     "rewards": {
-      "exp": 41500,
+      "exp": 36500,
       "gold": 4000,
       "items": [
         {
@@ -3601,7 +3601,7 @@
     "name": "塔中魔影",
     "giver": "xueling",
     "level": 53,
-    "summary": "击败 12 道塔中魔影。",
+    "summary": "击败一层的 12 道塔中魔影。",
     "objectives": [
       {
         "type": "kill",
@@ -3610,7 +3610,7 @@
       }
     ],
     "rewards": {
-      "exp": 175500,
+      "exp": 155500,
       "gold": 7800,
       "items": [
         {
@@ -3627,9 +3627,9 @@
   "ch9-skeletons": {
     "id": "ch9-skeletons",
     "name": "守塔骷髅",
-    "giver": "xueling",
+    "giver": "xueling-2",
     "level": 54,
-    "summary": "击败 12 具守塔骷髅。",
+    "summary": "击败二层的 12 具守塔骷髅。",
     "objectives": [
       {
         "type": "kill",
@@ -3638,7 +3638,7 @@
       }
     ],
     "rewards": {
-      "exp": 180500,
+      "exp": 160000,
       "gold": 8000,
       "items": [
         {
@@ -3655,9 +3655,9 @@
   "ch9-xueyan": {
     "id": "ch9-xueyan",
     "name": "血焰",
-    "giver": "xueling",
+    "giver": "xueling-3",
     "level": 54,
-    "summary": "在镇魔塔顶层击败古魔分魂血焰。",
+    "summary": "在镇魔塔三层击败古魔分魂血焰。",
     "objectives": [
       {
         "type": "kill",
@@ -3666,8 +3666,36 @@
       }
     ],
     "rewards": {
-      "exp": 309500,
-      "gold": 30000,
+      "exp": 237500,
+      "gold": 25000,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 2
+        }
+      ]
+    },
+    "offer": "ch9-xueyan-offer",
+    "finish": "ch9-xueyan-finish",
+    "prev": "ch9-skeletons",
+    "main": true
+  },
+  "ch9-yuansha": {
+    "id": "ch9-yuansha",
+    "name": "元刹分身",
+    "giver": "xueling-9",
+    "level": 54,
+    "summary": "上镇魔塔第九层，和雪玲一起灭掉挣出封印的元刹分身。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "yuansha-avatar",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 274500,
+      "gold": 35000,
       "items": [
         {
           "item": "skill-tome",
@@ -3680,9 +3708,9 @@
         "y": 24
       }
     },
-    "offer": "ch9-xueyan-offer",
-    "finish": "ch9-xueyan-finish",
-    "prev": "ch9-skeletons",
+    "offer": "ch9-yuansha-offer",
+    "finish": "ch9-yuansha-finish",
+    "prev": "ch9-xueyan",
     "main": true
   },
   "side-ch9-venom": {

@@ -972,4 +972,15 @@ export const ROSTER: Entry[] = [
   npc('bai-yaoyi', '#e8c8e0', '#8a5a7a'),
   npc('gui-ling', '#3a7a9a', '#7ad8f0'),
   npc('xueling', '#f0f0ff', '#8aa8d8'),
+  npc('xueling-2', '#f0f0ff', '#8aa8d8'),
+  npc('xueling-3', '#f0f0ff', '#8aa8d8'),
+  npc('xueling-9', '#f0f0ff', '#8aa8d8'),
+  {
+    key: 'yuansha-avatar',
+    model: `${ULTIMATE}/Big/Demon.glb`,
+    frame: 192,
+    clips: bigClips('Weapon'),
+    size: 2.9,
+    materials: { Demon_Main: '#2a0a3a', Black: '#0a0a12' },
+  },
 ];

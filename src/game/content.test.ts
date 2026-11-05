@@ -1081,6 +1081,11 @@ describe('图标', () => {
     expect(missing).toEqual([]);
   });
 
+  it('每个物品都有透明底的矢量图标，掉在地上不会是一块方片', () => {
+    const missing = Object.keys(config.items).filter((id) => !VECTOR_ICON_IDS.has(id));
+    expect(missing).toEqual([]);
+  });
+
   it('高清图标清单里的图都有对应文件', () => {
     const missing = [...HD_ICON_IDS].filter((id) => !existsSync(`public/assets/icons/hd/${id}.jpg`));
     expect(missing).toEqual([]);
@@ -2200,14 +2205,14 @@ describe('素材清单', () => {
 describe('第 9 章 昆吾山', () => {
   const chain = Object.values(config.quests).filter((quest) => quest.id.startsWith('ch9-'));
 
-  it('主线接在第 8 章后面，任务经验约占 50～55 级的四成，打完血焰回南疆', () => {
+  it('主线接在第 8 章后面，任务经验约占 50～55 级的四成，灭掉元刹分身回南疆', () => {
     expect(chain[0]!.prev).toBe('ch8-duel');
     for (const quest of chain) expect(quest.main, quest.id).toBe(true);
     const levels = config.levels.expToNext.slice(49, 54).reduce((sum, exp) => sum + exp, 0);
     const quests = chain.reduce((sum, quest) => sum + quest.rewards.exp, 0);
     expect(quests / levels).toBeGreaterThan(0.3);
     expect(quests / levels).toBeLessThan(0.5);
-    expect(chain.at(-1)!.objectives[0]).toEqual({ type: 'kill', target: 'xueyan', count: 1 });
+    expect(chain.at(-1)!.objectives[0]).toEqual({ type: 'kill', target: 'yuansha-avatar', count: 1 });
     expect(chain.at(-1)!.rewards.teleport?.map).toBe('nanjiang-market');
     expect(config.maps['kunwu-mountain']!.portals!.find((portal) => portal.toMap === 'zhenmo-tower')!.requires).toBe('ch9-qian');
     expect(config.npcs['jinxi-guide']!.travel!.find((option) => option.map === 'nanjiang-market')!.requires).toBe('ch8-duel');
@@ -2233,7 +2238,8 @@ describe('第 9 章 昆吾山', () => {
     for (const [mapId, bossId] of [
       ['yinyang-cave', 'silverwing-yaksha'],
       ['kunwu-mountain', 'qian-laomo'],
-      ['zhenmo-tower', 'xueyan'],
+      ['zhenmo-tower-3', 'xueyan'],
+      ['zhenmo-tower-9', 'yuansha-avatar'],
     ] as const) {
       const boss = config.maps[mapId]!.spawns.find((spawn) => spawn.monster === bossId)!;
       for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === mapId)) {
@@ -2246,8 +2252,26 @@ describe('第 9 章 昆吾山', () => {
     }
   });
 
+  it('镇魔塔一层层往上打：每层的楼梯跟着上一层的任务开放，雪玲在每层等着', () => {
+    const floors = ['zhenmo-tower', 'zhenmo-tower-2', 'zhenmo-tower-3', 'zhenmo-tower-9'];
+    const gates = ['ch9-shades', 'ch9-skeletons', 'ch9-xueyan'];
+    floors.slice(0, -1).forEach((floor, index) => {
+      const up = config.maps[floor]!.portals!.find((portal) => portal.toMap === floors[index + 1]);
+      expect(up?.requires, floor).toBe(gates[index]);
+    });
+    expect(config.maps['zhenmo-tower']!.spawns.every((spawn) => spawn.monster === 'tower-shade')).toBe(true);
+    expect(config.maps['zhenmo-tower-2']!.spawns.every((spawn) => spawn.monster === 'tower-skeleton')).toBe(true);
+    expect(config.maps['zhenmo-tower-9']!.spawns.map((spawn) => spawn.monster)).toEqual(['yuansha-avatar']);
+    for (const quest of ['ch9-skeletons', 'ch9-xueyan', 'ch9-yuansha']) {
+      const giver = config.npcs[config.quests[quest]!.giver]!;
+      expect(giver.name, quest).toBe('雪玲');
+    }
+    expect(config.npcs['xueling-9']!.map).toBe('zhenmo-tower-9');
+    expect(config.items['boss-baling-ruler']!.boss).toBe('yuansha-avatar');
+  });
+
   it('血焰的血海留在地上，持续伤害站在里面的人', () => {
-    const world = new World(config, 'zhenmo-tower', 'body', 1);
+    const world = new World(config, 'zhenmo-tower-3', 'body', 1);
     const { player } = world;
     const boss = world.monsters.find((monster) => monster.def.id === 'xueyan')!;
     player.cell = { x: boss.cell.x - 3, y: boss.cell.y };

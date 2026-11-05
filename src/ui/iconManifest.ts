@@ -99,6 +99,7 @@ export const VECTOR_ICON_IDS = new Set([
   'boss-warden-bracelet',
   'boss-wufeng-feather',
   'boss-xuangu-ring',
+  'boss-xueyan-robe',
   'boss-yaksha-wing',
   'boss-yinluo-banner',
   'bracelet-14',

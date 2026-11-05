@@ -22,6 +22,7 @@ const ESTIMATE_SECONDS = 60;
 const FIELD_MIN_HOURS = 0.5;
 /** 按等级选挂机地图，和各章节的等级段一致 */
 const FIELDS: [number, string][] = [
+  [54, 'zhenmo-tower-2'],
   [53, 'zhenmo-tower'],
   [52, 'kunwu-mountain'],
   [50, 'yinyang-cave'],

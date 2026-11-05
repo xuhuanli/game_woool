@@ -5491,5 +5491,117 @@
         "message": "血焰燃尽本源，要和你同归于尽"
       }
     ]
+  },
+  "yuansha-avatar": {
+    "id": "yuansha-avatar",
+    "name": "元刹分身",
+    "stats": {
+      "maxHp": 32000,
+      "maxMp": 0,
+      "attack": {
+        "min": 52,
+        "max": 66
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 32,
+        "max": 35
+      },
+      "magicDefense": {
+        "min": 31,
+        "max": 34
+      },
+      "accuracy": 66,
+      "evasion": 16,
+      "luck": 0
+    },
+    "moveSpeed": 2.5,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 650000,
+    "respawnSeconds": 300,
+    "dropTable": "yuansha-avatar",
+    "look": {
+      "fur": "#2a0a3a",
+      "head": "#c83aff",
+      "scale": 1.7
+    },
+    "abilities": [
+      {
+        "id": "yuansha-cleave",
+        "name": "元刹魔斩",
+        "cooldown": 9,
+        "windup": 1.0,
+        "color": "#c83aff",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.5
+      },
+      {
+        "id": "yuansha-ray",
+        "name": "元刹魔光",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#8a3ac8",
+        "range": 6,
+        "shape": "line",
+        "size": 8,
+        "multiplier": 1.45
+      },
+      {
+        "id": "yuansha-array",
+        "name": "血魔大阵",
+        "cooldown": 15,
+        "windup": 1.3,
+        "color": "#5a0a3a",
+        "range": 6,
+        "shape": "circle",
+        "size": 2,
+        "multiplier": 0.4,
+        "field": {
+          "duration": 10,
+          "interval": 1
+        }
+      },
+      {
+        "id": "yuansha-call",
+        "name": "召魔影",
+        "cooldown": 20,
+        "windup": 0.8,
+        "color": "#8a3ac8",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "tower-shade",
+          "count": 2
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.66,
+        "attackMultiplier": 1.15,
+        "message": "元刹分身吸尽塔中魔气，身形暴涨"
+      },
+      {
+        "hpBelow": 0.33,
+        "attackMultiplier": 1.2,
+        "message": "雪玲祭出镇魔铃：元刹的本源要散了，撑住"
+      }
+    ]
   }
 }

@@ -1024,5 +1024,35 @@
     "y": 12,
     "color": "#f0f0ff",
     "greeting": "xueling-greeting"
+  },
+  "xueling-2": {
+    "id": "xueling-2",
+    "name": "雪玲",
+    "map": "zhenmo-tower-2",
+    "x": 13,
+    "y": 10,
+    "color": "#f0f0ff",
+    "greeting": "xueling-greeting",
+    "requires": "ch9-shades"
+  },
+  "xueling-3": {
+    "id": "xueling-3",
+    "name": "雪玲",
+    "map": "zhenmo-tower-3",
+    "x": 13,
+    "y": 10,
+    "color": "#f0f0ff",
+    "greeting": "xueling-greeting",
+    "requires": "ch9-skeletons"
+  },
+  "xueling-9": {
+    "id": "xueling-9",
+    "name": "雪玲",
+    "map": "zhenmo-tower-9",
+    "x": 13,
+    "y": 10,
+    "color": "#f0f0ff",
+    "greeting": "xueling-greeting",
+    "requires": "ch9-xueyan"
   }
 }

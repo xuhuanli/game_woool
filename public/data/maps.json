@@ -451,7 +451,7 @@
   },
   "zhenmo-tower": {
     "id": "zhenmo-tower",
-    "name": "镇魔塔",
+    "name": "镇魔塔·一层",
     "tiled": "zhenmo-tower.tmj",
     "respawn": {
       "map": "nanjiang-market",
@@ -461,6 +461,51 @@
     "tone": {
       "color": "#8a2a3a",
       "alpha": 0.24
+    },
+    "music": "zhenmo"
+  },
+  "zhenmo-tower-2": {
+    "id": "zhenmo-tower-2",
+    "name": "镇魔塔·二层",
+    "tiled": "zhenmo-tower-2.tmj",
+    "respawn": {
+      "map": "nanjiang-market",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#7a2a4a",
+      "alpha": 0.28
+    },
+    "music": "zhenmo"
+  },
+  "zhenmo-tower-3": {
+    "id": "zhenmo-tower-3",
+    "name": "镇魔塔·三层",
+    "tiled": "zhenmo-tower-3.tmj",
+    "respawn": {
+      "map": "nanjiang-market",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#8a1a2a",
+      "alpha": 0.32
+    },
+    "music": "zhenmo"
+  },
+  "zhenmo-tower-9": {
+    "id": "zhenmo-tower-9",
+    "name": "镇魔塔·第九层",
+    "tiled": "zhenmo-tower-9.tmj",
+    "respawn": {
+      "map": "nanjiang-market",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#4a0a3a",
+      "alpha": 0.4
     },
     "music": "zhenmo"
   }

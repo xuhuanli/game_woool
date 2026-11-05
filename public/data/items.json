@@ -1356,7 +1356,7 @@
       "luck": 2
     },
     "price": 80000,
-    "boss": "xueyan"
+    "boss": "yuansha-avatar"
   },
   "scorpion-venom": {
     "id": "scorpion-venom",
@@ -1369,5 +1369,19 @@
     "name": "昆吾灵铁",
     "kind": "material",
     "price": 270
+  },
+  "boss-xueyan-robe": {
+    "id": "boss-xueyan-robe",
+    "name": "血焰魔袍",
+    "kind": "equip",
+    "slot": "armor",
+    "level": 54,
+    "bonus": {
+      "defense": 30,
+      "maxHp": 520,
+      "primary": 5
+    },
+    "price": 60000,
+    "boss": "xueyan"
   }
 }

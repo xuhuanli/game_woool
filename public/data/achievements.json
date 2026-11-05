@@ -110,10 +110,10 @@
   "boss-all": {
     "id": "boss-all",
     "name": "群雄尽伏",
-    "description": "击败全部 22 种 Boss",
+    "description": "击败全部 23 种 Boss",
     "condition": {
       "type": "bossTypes",
-      "count": 22
+      "count": 23
     },
     "reward": {
       "gold": 30000,
@@ -265,7 +265,7 @@
     "description": "图鉴收集全部法器",
     "condition": {
       "type": "codexItems",
-      "count": 63
+      "count": 64
     },
     "reward": {
       "gold": 30000,
@@ -439,6 +439,24 @@
     },
     "reward": {
       "gold": 50000,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 3
+        }
+      ]
+    }
+  },
+  "slay-yuansha": {
+    "id": "slay-yuansha",
+    "name": "镇魔",
+    "description": "在镇魔塔第九层灭掉元刹分身",
+    "condition": {
+      "type": "killMonster",
+      "target": "yuansha-avatar"
+    },
+    "reward": {
+      "gold": 40000,
       "items": [
         {
           "item": "skill-tome",
