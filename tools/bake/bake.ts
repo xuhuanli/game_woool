@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { BODY_LOOK, buildCultivator, poseAttack, poseIdle, poseWalk } from './cultivator';
+import { WEBP_QUALITY } from './roster';
 
 const FRAME = 192;
 const SUPERSAMPLE = 3;
@@ -63,7 +64,7 @@ for (const clip of CLIPS) {
   }
 }
 
-const png = await new Promise<Blob>((resolve) => sheet.toBlob((blob) => resolve(blob!), 'image/png'));
+const webp = await new Promise<Blob>((resolve) => sheet.toBlob((blob) => resolve(blob!), 'image/webp', WEBP_QUALITY));
 const manifest = {
   frameW: FRAME,
   frameH: FRAME,
@@ -72,6 +73,6 @@ const manifest = {
   displayScale: 0.5,
   clips,
 };
-await fetch('/save?name=body.png', { method: 'POST', body: png });
+await fetch('/save?name=body.webp', { method: 'POST', body: webp });
 await fetch('/save?name=body.json', { method: 'POST', body: JSON.stringify(manifest, null, 2) });
-status.textContent = `完成：${sheet.width}×${sheet.height}，${Math.round(png.size / 1024)} KB`;
+status.textContent = `完成：${sheet.width}×${sheet.height}，${Math.round(webp.size / 1024)} KB`;

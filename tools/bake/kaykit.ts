@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { FBXLoader } from 'three/addons/loaders/FBXLoader.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { addStudioLighting } from './lighting';
-import { ROSTER, type ClipSpec, type Entry, type Recolor } from './roster';
+import { ROSTER, WEBP_QUALITY, type ClipSpec, type Entry, type Recolor } from './roster';
 
 const WORLD_HEIGHT = 3;
 const SUPERSAMPLE = 3;
@@ -222,7 +222,7 @@ async function bake(entry: Entry): Promise<void> {
     }
   }
 
-  const png = await new Promise<Blob>((resolve) => sheet.toBlob((blob) => resolve(blob!), 'image/png'));
+  const webp = await new Promise<Blob>((resolve) => sheet.toBlob((blob) => resolve(blob!), 'image/webp', WEBP_QUALITY));
   const manifest = {
     frameW: frame,
     frameH: frame,
@@ -231,7 +231,7 @@ async function bake(entry: Entry): Promise<void> {
     displayScale: DISPLAY_FRAME / frame,
     clips,
   };
-  await fetch(`/save?name=${entry.key}.png`, { method: 'POST', body: png });
+  await fetch(`/save?name=${entry.key}.webp`, { method: 'POST', body: webp });
   await fetch(`/save?name=${entry.key}.json`, { method: 'POST', body: JSON.stringify(manifest, null, 2) });
 }
 

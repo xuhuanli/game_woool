@@ -2138,6 +2138,7 @@ describe('素材清单', () => {
     expect(Object.keys(index).sort()).toEqual(files.sort());
     for (const key of files) {
       expect(index[key], key).toEqual(JSON.parse(readFileSync(`public/assets/sprites/${key}.json`, 'utf8')));
+      expect(existsSync(`public/assets/sprites/${key}.webp`), `${key}.webp`).toBe(true);
     }
     const { ROSTER } = await import('../../tools/bake/roster');
     for (const entry of ROSTER) expect(index[entry.key], entry.key).toBeDefined();

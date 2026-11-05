@@ -136,7 +136,7 @@ export class GameScene extends Phaser.Scene {
       const manifest = this.sprites[key];
       if (!manifest || this.loadedSprites.has(key)) continue;
       if (this.fallbackSprites.delete(key)) this.removeSheet(key);
-      this.load.spritesheet(key, `${import.meta.env.BASE_URL}assets/sprites/${key}.png`, {
+      this.load.spritesheet(key, `${import.meta.env.BASE_URL}assets/sprites/${key}.webp`, {
         frameWidth: manifest.frameW,
         frameHeight: manifest.frameH,
       });

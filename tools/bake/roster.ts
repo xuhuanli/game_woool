@@ -1,5 +1,8 @@
 /** 烘焙名单：每个角色用哪个模型、怎么改色、输出哪些动作。 */
 
+/** 精灵表存成有损 WebP 的质量，比 PNG 小得多，96 像素显示时看不出差别 */
+export const WEBP_QUALITY = 0.9;
+
 const ADVENTURERS = '/kaykit/adventurers/addons/kaykit_character_pack_adventures';
 const SKELETONS = '/kaykit/skeletons/addons/kaykit_character_pack_skeletons';
 const ENEMIES = '/quaternius/easy-enemies/Easy Animated Enemy Pack - Jan 2019/FBX';
