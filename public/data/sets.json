@@ -34,5 +34,14 @@
       { "count": 4, "bonus": { "primary": 14 } },
       { "count": 6, "bonus": { "primary": 20, "luck": 2 } }
     ]
+  },
+  "kunwu": {
+    "id": "kunwu", "name": "昆吾套",
+    "pieces": ["sword-52", "robe-52", "crown-52", "pendant-52", "bracelet-52", "ring-52"],
+    "bonuses": [
+      { "count": 2, "bonus": { "maxHp": 320 } },
+      { "count": 4, "bonus": { "primary": 17 } },
+      { "count": 6, "bonus": { "primary": 24, "luck": 2 } }
+    ]
   }
 }

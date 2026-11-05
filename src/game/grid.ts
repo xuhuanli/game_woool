@@ -1,5 +1,10 @@
 import type { Cell, MapDef } from './config';
 
+/** 从 from 指向 to 的单位方向，八个方向之一。 */
+export function direction(from: Cell, to: Cell): { x: number; y: number } {
+  return { x: Math.sign(to.x - from.x), y: Math.sign(to.y - from.y) };
+}
+
 export function sameCell(a: Cell, b: Cell): boolean {
   return a.x === b.x && a.y === b.y;
 }

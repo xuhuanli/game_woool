@@ -110,7 +110,7 @@ export class NpcPanel {
     npc.travel?.forEach((option, index) => {
       const need = option.level ? `，需要等级 ${option.level}` : '';
       const label = `传送到${option.name}（${option.cost} 灵石${need}）`;
-      body.append(this.option(label, () => this.world.travel(npc, index)));
+      body.append(this.option(label, () => this.world.shop.travel(npc, index)));
     });
   }
 
@@ -158,7 +158,7 @@ export class NpcPanel {
       if (skill && (skill.classId !== player.def.id || this.world.inventory.knowsSkill(skill.id))) continue;
       // 种子到等级才卖
       if (item.seed && (item.level ?? 1) > player.level) continue;
-      const option = this.option(`${item.name}（${item.price} 灵石）`, () => world.buy(npc, itemId));
+      const option = this.option(`${item.name}（${item.price} 灵石）`, () => world.shop.buy(npc, itemId));
       option.prepend(iconImage(itemId));
       body.append(option);
     }
@@ -167,11 +167,11 @@ export class NpcPanel {
     const { grades } = config.affixes;
     for (const grade of grades.slice(0, 2)) {
       const label = `一键卖出 ${grade.name}及以下法器`;
-      body.append(this.option(label, () => world.sellAllUpToGrade(npc, grade.id)));
+      body.append(this.option(label, () => world.shop.sellAllUpToGrade(npc, grade.id)));
     }
     for (const equipment of player.equipBag) {
-      const label = `${equipmentName(equipment, config)}（${world.sellPrice(equipment)} 灵石）`;
-      const button = this.option(label, () => world.sellEquipment(npc, equipment.uid));
+      const label = `${equipmentName(equipment, config)}（${world.shop.sellPrice(equipment)} 灵石）`;
+      const button = this.option(label, () => world.shop.sellEquipment(npc, equipment.uid));
       button.style.color = equipmentColor(equipment, config);
       body.append(button);
     }
@@ -180,7 +180,7 @@ export class NpcPanel {
       if (!item?.price) continue;
       const price = Math.floor(item.price * config.affixes.sellRatio);
       const label = `${item.name}×${count}（${price} 灵石）`;
-      body.append(this.option(label, () => world.sellItem(npc, itemId)));
+      body.append(this.option(label, () => world.shop.sellItem(npc, itemId)));
     }
     body.append(this.option('返回', () => (this.view = { kind: 'home' })));
   }
@@ -198,9 +198,9 @@ export class NpcPanel {
     };
     const capacity = config.affixes.storageCapacity;
     list(`仓库 ${player.storage.length}/${capacity}（点击取出）`, player.storage, (uid) =>
-      world.withdraw(npc, uid),
+      world.shop.withdraw(npc, uid),
     );
-    list('背包（点击存入）', player.equipBag, (uid) => world.deposit(npc, uid));
+    list('背包（点击存入）', player.equipBag, (uid) => world.shop.deposit(npc, uid));
     body.append(this.option('返回', () => (this.view = { kind: 'home' })));
   }
 

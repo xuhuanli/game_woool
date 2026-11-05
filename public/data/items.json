@@ -1220,5 +1220,128 @@
     "name": "魔修令牌",
     "kind": "material",
     "price": 230
+  },
+  "sword-52": {
+    "id": "sword-52",
+    "name": "昆吾剑",
+    "kind": "equip",
+    "slot": "weapon",
+    "level": 52,
+    "bonus": {
+      "primary": 60
+    },
+    "price": 60000
+  },
+  "robe-52": {
+    "id": "robe-52",
+    "name": "镇魔法袍",
+    "kind": "equip",
+    "slot": "armor",
+    "level": 52,
+    "bonus": {
+      "defense": 28,
+      "maxHp": 480
+    },
+    "price": 30000
+  },
+  "crown-52": {
+    "id": "crown-52",
+    "name": "天晶冠",
+    "kind": "equip",
+    "slot": "helmet",
+    "level": 52,
+    "bonus": {
+      "defense": 15,
+      "magicDefense": 15
+    },
+    "price": 30000
+  },
+  "pendant-52": {
+    "id": "pendant-52",
+    "name": "太阴佩",
+    "kind": "equip",
+    "slot": "necklace",
+    "level": 52,
+    "bonus": {
+      "maxMp": 340,
+      "magicDefense": 13
+    },
+    "price": 30000
+  },
+  "bracelet-52": {
+    "id": "bracelet-52",
+    "name": "铸灵镯",
+    "kind": "equip",
+    "slot": "bracelet",
+    "level": 52,
+    "bonus": {
+      "defense": 14,
+      "evasion": 8
+    },
+    "price": 30000
+  },
+  "ring-52": {
+    "id": "ring-52",
+    "name": "昆吾戒",
+    "kind": "equip",
+    "slot": "ring",
+    "level": 52,
+    "bonus": {
+      "primary": 17
+    },
+    "price": 30000
+  },
+  "boss-yaksha-wing": {
+    "id": "boss-yaksha-wing",
+    "name": "夜叉银翼",
+    "kind": "equip",
+    "slot": "bracelet",
+    "level": 50,
+    "bonus": {
+      "defense": 15,
+      "evasion": 9,
+      "primary": 4
+    },
+    "price": 40000,
+    "boss": "silverwing-yaksha"
+  },
+  "boss-yinluo-banner": {
+    "id": "boss-yinluo-banner",
+    "name": "阴罗幡",
+    "kind": "equip",
+    "slot": "necklace",
+    "level": 52,
+    "bonus": {
+      "maxMp": 380,
+      "magicDefense": 15,
+      "primary": 5
+    },
+    "price": 45000,
+    "boss": "qian-laomo"
+  },
+  "boss-baling-ruler": {
+    "id": "boss-baling-ruler",
+    "name": "八灵尺",
+    "kind": "equip",
+    "slot": "weapon",
+    "level": 54,
+    "bonus": {
+      "primary": 72,
+      "luck": 2
+    },
+    "price": 80000,
+    "boss": "xueyan"
+  },
+  "scorpion-venom": {
+    "id": "scorpion-venom",
+    "name": "毒蜂尾针",
+    "kind": "material",
+    "price": 260
+  },
+  "kunwu-ore": {
+    "id": "kunwu-ore",
+    "name": "昆吾灵铁",
+    "kind": "material",
+    "price": 270
   }
 }

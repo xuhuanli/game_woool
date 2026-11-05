@@ -3302,5 +3302,441 @@
     "offer": "side-ch8-xiao-offer",
     "finish": "side-ch8-xiao-finish",
     "prev": "ch8-ginseng"
+  },
+  "ch9-south": {
+    "id": "ch9-south",
+    "name": "南疆",
+    "giver": "cao-mengrong",
+    "level": 50,
+    "summary": "富成邀你去南疆捕阴芝马，到南疆坊市见他。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "fu-cheng",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 41500,
+      "gold": 4000,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch9-south-offer",
+    "finish": "ch9-south-finish",
+    "prev": "ch8-duel",
+    "main": true
+  },
+  "ch9-valley": {
+    "id": "ch9-valley",
+    "name": "万毒谷",
+    "giver": "fu-cheng",
+    "level": 50,
+    "summary": "去万毒谷的阴阳窟找白瑶怡。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "bai-yaoyi",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 41500,
+      "gold": 4000,
+      "items": []
+    },
+    "offer": "ch9-valley-offer",
+    "finish": "ch9-valley-finish",
+    "prev": "ch9-south",
+    "main": true
+  },
+  "ch9-scorpions": {
+    "id": "ch9-scorpions",
+    "name": "万毒谷毒蜂",
+    "giver": "bai-yaoyi",
+    "level": 50,
+    "summary": "击败 12 只守在窟口的毒蜂。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "venom-scorpion",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 155000,
+      "gold": 7000,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch9-scorpions-offer",
+    "finish": "ch9-scorpions-finish",
+    "prev": "ch9-valley",
+    "main": true
+  },
+  "ch9-wraiths": {
+    "id": "ch9-wraiths",
+    "name": "阴阳窟阴魂",
+    "giver": "bai-yaoyi",
+    "level": 51,
+    "summary": "驱散 12 道阴魂，好让阴芝马现身。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "yin-wraith",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 160000,
+      "gold": 7200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch9-wraiths-offer",
+    "finish": "ch9-wraiths-finish",
+    "prev": "ch9-scorpions",
+    "main": true
+  },
+  "ch9-horse": {
+    "id": "ch9-horse",
+    "name": "阴芝马",
+    "giver": "bai-yaoyi",
+    "level": 51,
+    "summary": "捕获 3 匹阴芝马。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "yinzhi-horse",
+        "count": 3
+      }
+    ],
+    "rewards": {
+      "exp": 124000,
+      "gold": 7000,
+      "items": [
+        {
+          "item": "huge-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch9-horse-offer",
+    "finish": "ch9-horse-finish",
+    "prev": "ch9-wraiths",
+    "main": true
+  },
+  "ch9-yaksha": {
+    "id": "ch9-yaksha",
+    "name": "银翅夜叉",
+    "giver": "bai-yaoyi",
+    "level": 51,
+    "summary": "击败被阴芝马引来的十级妖兽银翅夜叉。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "silverwing-yaksha",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 227000,
+      "gold": 16000,
+      "items": []
+    },
+    "offer": "ch9-yaksha-offer",
+    "finish": "ch9-yaksha-finish",
+    "prev": "ch9-horse",
+    "main": true
+  },
+  "ch9-seal": {
+    "id": "ch9-seal",
+    "name": "昆吾封印",
+    "giver": "bai-yaoyi",
+    "level": 52,
+    "summary": "回南疆坊市见叶家来的修士。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "ye-envoy",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 41500,
+      "gold": 4000,
+      "items": [],
+      "teleport": {
+        "map": "kunwu-mountain",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch9-seal-offer",
+    "finish": "ch9-seal-finish",
+    "prev": "ch9-yaksha",
+    "main": true
+  },
+  "ch9-golems": {
+    "id": "ch9-golems",
+    "name": "守山傀儡",
+    "giver": "gui-ling",
+    "level": 52,
+    "summary": "击毁 12 尊守山傀儡。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "kunwu-golem",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 165000,
+      "gold": 7400,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch9-golems-offer",
+    "finish": "ch9-golems-finish",
+    "prev": "ch9-seal",
+    "main": true
+  },
+  "ch9-demons": {
+    "id": "ch9-demons",
+    "name": "魔化修士",
+    "giver": "gui-ling",
+    "level": 52,
+    "summary": "击败 12 名被魔气侵染的修士。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "kunwu-demon",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 170500,
+      "gold": 7600,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch9-demons-offer",
+    "finish": "ch9-demons-finish",
+    "prev": "ch9-golems",
+    "main": true
+  },
+  "ch9-qian": {
+    "id": "ch9-qian",
+    "name": "乾老魔",
+    "giver": "gui-ling",
+    "level": 53,
+    "summary": "击败阴罗宗大长老乾老魔。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "qian-laomo",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 247500,
+      "gold": 18000,
+      "items": []
+    },
+    "offer": "ch9-qian-offer",
+    "finish": "ch9-qian-finish",
+    "prev": "ch9-demons",
+    "main": true
+  },
+  "ch9-tower": {
+    "id": "ch9-tower",
+    "name": "镇魔塔",
+    "giver": "gui-ling",
+    "level": 53,
+    "summary": "进镇魔塔，找先一步进去的雪玲。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "xueling",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 41500,
+      "gold": 4000,
+      "items": [
+        {
+          "item": "huge-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch9-tower-offer",
+    "finish": "ch9-tower-finish",
+    "prev": "ch9-qian",
+    "main": true
+  },
+  "ch9-shades": {
+    "id": "ch9-shades",
+    "name": "塔中魔影",
+    "giver": "xueling",
+    "level": 53,
+    "summary": "击败 12 道塔中魔影。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "tower-shade",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 175500,
+      "gold": 7800,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch9-shades-offer",
+    "finish": "ch9-shades-finish",
+    "prev": "ch9-tower",
+    "main": true
+  },
+  "ch9-skeletons": {
+    "id": "ch9-skeletons",
+    "name": "守塔骷髅",
+    "giver": "xueling",
+    "level": 54,
+    "summary": "击败 12 具守塔骷髅。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "tower-skeleton",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 180500,
+      "gold": 8000,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 4
+        }
+      ]
+    },
+    "offer": "ch9-skeletons-offer",
+    "finish": "ch9-skeletons-finish",
+    "prev": "ch9-shades",
+    "main": true
+  },
+  "ch9-xueyan": {
+    "id": "ch9-xueyan",
+    "name": "血焰",
+    "giver": "xueling",
+    "level": 54,
+    "summary": "在镇魔塔顶层击败古魔分魂血焰。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "xueyan",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 309500,
+      "gold": 30000,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 3
+        }
+      ],
+      "teleport": {
+        "map": "nanjiang-market",
+        "x": 20,
+        "y": 24
+      }
+    },
+    "offer": "ch9-xueyan-offer",
+    "finish": "ch9-xueyan-finish",
+    "prev": "ch9-skeletons",
+    "main": true
+  },
+  "side-ch9-venom": {
+    "id": "side-ch9-venom",
+    "name": "毒蜂尾针",
+    "giver": "nanjiang-merchant",
+    "level": 50,
+    "summary": "收集 6 枚毒蜂尾针交给南疆坊市掌柜。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "scorpion-venom",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 110000,
+      "gold": 6000,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-ch9-venom-offer",
+    "finish": "side-ch9-venom-finish",
+    "prev": "ch9-valley"
+  },
+  "side-ch9-ore": {
+    "id": "side-ch9-ore",
+    "name": "昆吾灵铁",
+    "giver": "gui-ling",
+    "level": 52,
+    "summary": "收集 6 块昆吾灵铁交给圭灵。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "kunwu-ore",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 115000,
+      "gold": 6200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 4
+        }
+      ]
+    },
+    "offer": "side-ch9-ore-offer",
+    "finish": "side-ch9-ore-finish",
+    "prev": "ch9-seal"
   }
 }

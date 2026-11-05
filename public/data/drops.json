@@ -1910,5 +1910,254 @@
       "chance": 0.08,
       "firstKill": true
     }
+  ],
+  "kunwu-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 180,
+      "max": 250
+    },
+    {
+      "item": "huge-potion",
+      "chance": 0.12
+    },
+    {
+      "item": "huge-mana",
+      "chance": 0.1
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.03
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.018
+    },
+    {
+      "item": "sword-44",
+      "chance": 0.00134
+    },
+    {
+      "item": "robe-44",
+      "chance": 0.002
+    },
+    {
+      "item": "crown-44",
+      "chance": 0.002
+    },
+    {
+      "item": "pendant-44",
+      "chance": 0.002
+    },
+    {
+      "item": "bracelet-44",
+      "chance": 0.002
+    },
+    {
+      "item": "ring-44",
+      "chance": 0.002
+    },
+    {
+      "item": "sword-52",
+      "chance": 0.00201
+    },
+    {
+      "item": "robe-52",
+      "chance": 0.003
+    },
+    {
+      "item": "crown-52",
+      "chance": 0.003
+    },
+    {
+      "item": "pendant-52",
+      "chance": 0.003
+    },
+    {
+      "item": "bracelet-52",
+      "chance": 0.003
+    },
+    {
+      "item": "ring-52",
+      "chance": 0.003
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    }
+  ],
+  "silverwing-yaksha": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 14000,
+      "max": 18000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 5
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-52",
+      "chance": 0.15
+    },
+    {
+      "item": "robe-52",
+      "chance": 0.15
+    },
+    {
+      "item": "crown-52",
+      "chance": 0.15
+    },
+    {
+      "item": "pendant-52",
+      "chance": 0.15
+    },
+    {
+      "item": "bracelet-52",
+      "chance": 0.15
+    },
+    {
+      "item": "ring-52",
+      "chance": 0.15
+    },
+    {
+      "item": "boss-yaksha-wing",
+      "chance": 0.08,
+      "firstKill": true
+    }
+  ],
+  "qian-laomo": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 16000,
+      "max": 20000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 5
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-52",
+      "chance": 0.2
+    },
+    {
+      "item": "robe-52",
+      "chance": 0.2
+    },
+    {
+      "item": "crown-52",
+      "chance": 0.2
+    },
+    {
+      "item": "pendant-52",
+      "chance": 0.2
+    },
+    {
+      "item": "bracelet-52",
+      "chance": 0.2
+    },
+    {
+      "item": "ring-52",
+      "chance": 0.2
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.12
+    },
+    {
+      "item": "boss-yinluo-banner",
+      "chance": 0.08,
+      "firstKill": true
+    }
+  ],
+  "xueyan": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 25000,
+      "max": 32000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 5
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-52",
+      "chance": 0.35
+    },
+    {
+      "item": "robe-52",
+      "chance": 0.35
+    },
+    {
+      "item": "crown-52",
+      "chance": 0.35
+    },
+    {
+      "item": "pendant-52",
+      "chance": 0.35
+    },
+    {
+      "item": "bracelet-52",
+      "chance": 0.35
+    },
+    {
+      "item": "ring-52",
+      "chance": 0.35
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "boss-baling-ruler",
+      "chance": 0.08,
+      "firstKill": true
+    }
   ]
 }

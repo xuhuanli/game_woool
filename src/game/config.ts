@@ -114,6 +114,8 @@ export interface AbilityDef {
   charge?: boolean;
   /** 召唤小怪，不造成伤害 */
   summon?: { monster: string; count: number };
+  /** 不直接伤害，在区域里留下持续伤害的地面，multiplier 是每跳的倍率 */
+  field?: { duration: number; interval: number };
 }
 
 export interface PhaseDef {

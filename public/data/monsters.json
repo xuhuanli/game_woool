@@ -4743,5 +4743,705 @@
         "message": "苦竹老人剑气一收：再接老夫一招"
       }
     ]
+  },
+  "venom-scorpion": {
+    "id": "venom-scorpion",
+    "name": "万毒谷毒蜂",
+    "stats": {
+      "maxHp": 1380,
+      "maxMp": 0,
+      "attack": {
+        "min": 38,
+        "max": 48
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 27,
+        "max": 30
+      },
+      "magicDefense": {
+        "min": 17,
+        "max": 20
+      },
+      "accuracy": 60,
+      "evasion": 13,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 4500,
+    "respawnSeconds": 20,
+    "dropTable": "kunwu-band",
+    "look": {
+      "fur": "#5a3a6a",
+      "head": "#8ad84a",
+      "scale": 1
+    },
+    "abilities": [
+      {
+        "id": "scorpion-sting",
+        "name": "毒针",
+        "cooldown": 8,
+        "windup": 0.7,
+        "color": "#8ad84a",
+        "range": 2,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.2,
+        "poison": {
+          "damage": 12,
+          "duration": 5
+        }
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "scorpion-venom",
+        "chance": 0.3
+      }
+    ]
+  },
+  "yin-wraith": {
+    "id": "yin-wraith",
+    "name": "阴阳窟阴魂",
+    "stats": {
+      "maxHp": 1220,
+      "maxMp": 0,
+      "attack": {
+        "min": 39,
+        "max": 49
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 22,
+        "max": 25
+      },
+      "magicDefense": {
+        "min": 25,
+        "max": 28
+      },
+      "accuracy": 63,
+      "evasion": 16,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 4600,
+    "respawnSeconds": 20,
+    "dropTable": "kunwu-band",
+    "look": {
+      "fur": "#2a2a4a",
+      "head": "#b48cff",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "wraith-chill",
+        "name": "阴寒",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#b48cff",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.1,
+        "poison": {
+          "damage": 13,
+          "duration": 5
+        }
+      }
+    ]
+  },
+  "yinzhi-horse": {
+    "id": "yinzhi-horse",
+    "name": "阴芝马",
+    "stats": {
+      "maxHp": 900,
+      "maxMp": 0,
+      "attack": {
+        "min": 20,
+        "max": 26
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 20,
+        "max": 23
+      },
+      "magicDefense": {
+        "min": 20,
+        "max": 23
+      },
+      "accuracy": 55,
+      "evasion": 22,
+      "luck": 0
+    },
+    "moveSpeed": 3.4,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 3000,
+    "respawnSeconds": 60,
+    "dropTable": "kunwu-band",
+    "look": {
+      "fur": "#d8e8f0",
+      "head": "#8ad8c8",
+      "scale": 0.9
+    }
+  },
+  "kunwu-golem": {
+    "id": "kunwu-golem",
+    "name": "守山傀儡",
+    "stats": {
+      "maxHp": 1870,
+      "maxMp": 0,
+      "attack": {
+        "min": 37,
+        "max": 46
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 33,
+        "max": 36
+      },
+      "magicDefense": {
+        "min": 25,
+        "max": 28
+      },
+      "accuracy": 59,
+      "evasion": 9,
+      "luck": 0
+    },
+    "moveSpeed": 2.2,
+    "attackInterval": 1.3,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 4800,
+    "respawnSeconds": 20,
+    "dropTable": "kunwu-band",
+    "look": {
+      "fur": "#8a7a5a",
+      "head": "#e6b84a",
+      "scale": 1.1
+    },
+    "abilities": [
+      {
+        "id": "golem-slam",
+        "name": "镇山",
+        "cooldown": 10,
+        "windup": 1.0,
+        "color": "#e6b84a",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.3
+      }
+    ],
+    "extraDrops": [
+      {
+        "item": "kunwu-ore",
+        "chance": 0.3
+      }
+    ]
+  },
+  "kunwu-demon": {
+    "id": "kunwu-demon",
+    "name": "魔化修士",
+    "stats": {
+      "maxHp": 1250,
+      "maxMp": 0,
+      "attack": {
+        "min": 40,
+        "max": 50
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 24,
+        "max": 27
+      },
+      "magicDefense": {
+        "min": 22,
+        "max": 25
+      },
+      "accuracy": 63,
+      "evasion": 16,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 4700,
+    "respawnSeconds": 20,
+    "dropTable": "kunwu-band",
+    "look": {
+      "fur": "#3a0a0a",
+      "head": "#c83a3a",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "kunwu-blade",
+        "name": "魔煞刃",
+        "cooldown": 7,
+        "windup": 0.8,
+        "color": "#c83a3a",
+        "range": 6,
+        "shape": "circle",
+        "size": 1,
+        "multiplier": 1.1
+      }
+    ]
+  },
+  "tower-shade": {
+    "id": "tower-shade",
+    "name": "塔中魔影",
+    "stats": {
+      "maxHp": 1300,
+      "maxMp": 0,
+      "attack": {
+        "min": 35,
+        "max": 43
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 23,
+        "max": 26
+      },
+      "magicDefense": {
+        "min": 23,
+        "max": 26
+      },
+      "accuracy": 64,
+      "evasion": 17,
+      "luck": 0
+    },
+    "moveSpeed": 2.9,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 4900,
+    "respawnSeconds": 20,
+    "dropTable": "kunwu-band",
+    "look": {
+      "fur": "#1a0a2a",
+      "head": "#8a3ac8",
+      "scale": 1
+    },
+    "attackRange": 5,
+    "abilities": [
+      {
+        "id": "shade-lance",
+        "name": "魔影刺",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#8a3ac8",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.0
+      }
+    ]
+  },
+  "tower-skeleton": {
+    "id": "tower-skeleton",
+    "name": "守塔骷髅",
+    "stats": {
+      "maxHp": 1600,
+      "maxMp": 0,
+      "attack": {
+        "min": 34,
+        "max": 42
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 31,
+        "max": 34
+      },
+      "magicDefense": {
+        "min": 20,
+        "max": 23
+      },
+      "accuracy": 61,
+      "evasion": 11,
+      "luck": 0
+    },
+    "moveSpeed": 2.6,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 10,
+    "wanderRadius": 3,
+    "exp": 5000,
+    "respawnSeconds": 20,
+    "dropTable": "kunwu-band",
+    "look": {
+      "fur": "#d8d0c0",
+      "head": "#8a3ac8",
+      "scale": 1.05
+    },
+    "abilities": [
+      {
+        "id": "skeleton-charge",
+        "name": "骨刃冲锋",
+        "cooldown": 9,
+        "windup": 0.7,
+        "color": "#d8d0c0",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.25,
+        "charge": true
+      }
+    ]
+  },
+  "silverwing-yaksha": {
+    "id": "silverwing-yaksha",
+    "name": "银翅夜叉",
+    "stats": {
+      "maxHp": 15000,
+      "maxMp": 0,
+      "attack": {
+        "min": 48,
+        "max": 60
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 28,
+        "max": 31
+      },
+      "magicDefense": {
+        "min": 27,
+        "max": 30
+      },
+      "accuracy": 63,
+      "evasion": 16,
+      "luck": 0
+    },
+    "moveSpeed": 2.8,
+    "attackInterval": 1.1,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 300000,
+    "respawnSeconds": 300,
+    "dropTable": "silverwing-yaksha",
+    "look": {
+      "fur": "#c8d0d8",
+      "head": "#5a6a7a",
+      "scale": 1.45
+    },
+    "abilities": [
+      {
+        "id": "wing-slash",
+        "name": "银翅斩",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#d8e0e8",
+        "range": 6,
+        "shape": "line",
+        "size": 6,
+        "multiplier": 1.4
+      },
+      {
+        "id": "yaksha-dive",
+        "name": "俯冲",
+        "cooldown": 9,
+        "windup": 0.7,
+        "color": "#c8d0d8",
+        "range": 6,
+        "shape": "target",
+        "size": 0,
+        "multiplier": 1.35,
+        "charge": true
+      },
+      {
+        "id": "wing-storm",
+        "name": "银翅风暴",
+        "cooldown": 12,
+        "windup": 1.1,
+        "color": "#e8f0f8",
+        "range": 2,
+        "shape": "around",
+        "size": 3,
+        "multiplier": 1.35
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.3,
+        "attackMultiplier": 1.3,
+        "message": "银翅夜叉双翅一振，妖气暴涨"
+      }
+    ]
+  },
+  "qian-laomo": {
+    "id": "qian-laomo",
+    "name": "乾老魔",
+    "stats": {
+      "maxHp": 17000,
+      "maxMp": 0,
+      "attack": {
+        "min": 48,
+        "max": 61
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 27,
+        "max": 30
+      },
+      "magicDefense": {
+        "min": 30,
+        "max": 33
+      },
+      "accuracy": 64,
+      "evasion": 15,
+      "luck": 0
+    },
+    "moveSpeed": 2.4,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 340000,
+    "respawnSeconds": 300,
+    "dropTable": "qian-laomo",
+    "look": {
+      "fur": "#1a1a1a",
+      "head": "#c83a3a",
+      "scale": 1.4
+    },
+    "attackRange": 4,
+    "abilities": [
+      {
+        "id": "yinluo-flame",
+        "name": "阴罗魔火",
+        "cooldown": 10,
+        "windup": 1.0,
+        "color": "#8a3ac8",
+        "range": 6,
+        "shape": "circle",
+        "size": 2,
+        "multiplier": 1.35,
+        "poison": {
+          "damage": 18,
+          "duration": 6
+        }
+      },
+      {
+        "id": "soul-bolt",
+        "name": "摄魂魔光",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#c83a3a",
+        "range": 6,
+        "shape": "line",
+        "size": 7,
+        "multiplier": 1.4
+      },
+      {
+        "id": "qian-call",
+        "name": "唤魔修",
+        "cooldown": 18,
+        "windup": 0.8,
+        "color": "#c83a3a",
+        "range": 6,
+        "shape": "around",
+        "size": 0,
+        "multiplier": 0,
+        "summon": {
+          "monster": "kunwu-demon",
+          "count": 1
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.3,
+        "attackMultiplier": 1.3,
+        "message": "乾老魔祭出阴罗幡，魔气翻涌"
+      }
+    ]
+  },
+  "xueyan": {
+    "id": "xueyan",
+    "name": "血焰",
+    "stats": {
+      "maxHp": 24000,
+      "maxMp": 0,
+      "attack": {
+        "min": 50,
+        "max": 63
+      },
+      "magic": {
+        "min": 0,
+        "max": 0
+      },
+      "dao": {
+        "min": 0,
+        "max": 0
+      },
+      "defense": {
+        "min": 30,
+        "max": 33
+      },
+      "magicDefense": {
+        "min": 30,
+        "max": 33
+      },
+      "accuracy": 65,
+      "evasion": 15,
+      "luck": 0
+    },
+    "moveSpeed": 2.5,
+    "attackInterval": 1.2,
+    "attackWindup": 0.35,
+    "aggroRange": 6,
+    "leashRange": 14,
+    "wanderRadius": 1,
+    "exp": 500000,
+    "respawnSeconds": 300,
+    "dropTable": "xueyan",
+    "look": {
+      "fur": "#5a0a0a",
+      "head": "#ff4a3a",
+      "scale": 1.6
+    },
+    "abilities": [
+      {
+        "id": "blood-blade",
+        "name": "血刃",
+        "cooldown": 9,
+        "windup": 1.0,
+        "color": "#ff4a3a",
+        "range": 2,
+        "shape": "around",
+        "size": 2,
+        "multiplier": 1.45
+      },
+      {
+        "id": "blood-lance",
+        "name": "血矛",
+        "cooldown": 8,
+        "windup": 0.9,
+        "color": "#c81a1a",
+        "range": 6,
+        "shape": "line",
+        "size": 7,
+        "multiplier": 1.4
+      },
+      {
+        "id": "blood-sea",
+        "name": "血海",
+        "cooldown": 14,
+        "windup": 1.2,
+        "color": "#8a0a0a",
+        "range": 6,
+        "shape": "circle",
+        "size": 2,
+        "multiplier": 0.35,
+        "field": {
+          "duration": 8,
+          "interval": 1
+        }
+      }
+    ],
+    "boss": true,
+    "phases": [
+      {
+        "hpBelow": 0.6,
+        "attackMultiplier": 1.15,
+        "message": "血焰吞下残存的精血，血光大盛"
+      },
+      {
+        "hpBelow": 0.25,
+        "attackMultiplier": 1.2,
+        "message": "血焰燃尽本源，要和你同归于尽"
+      }
+    ]
   }
 }

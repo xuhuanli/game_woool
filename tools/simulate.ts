@@ -22,6 +22,9 @@ const ESTIMATE_SECONDS = 60;
 const FIELD_MIN_HOURS = 0.5;
 /** 按等级选挂机地图，和各章节的等级段一致 */
 const FIELDS: [number, string][] = [
+  [53, 'zhenmo-tower'],
+  [52, 'kunwu-mountain'],
+  [50, 'yinyang-cave'],
   [48, 'fengjia-cave'],
   [45, 'fangjian-mountain'],
   [43, 'tuwu-camp'],
@@ -105,7 +108,7 @@ function resupply(world: World): void {
   while (player.equipBag.length > 0) {
     const equipment = player.equipBag.at(-1)!;
     player.equipBag.pop();
-    player.gold += world.sellPrice(equipment);
+    player.gold += world.shop.sellPrice(equipment);
   }
 }
 

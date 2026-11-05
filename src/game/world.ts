@@ -3,7 +3,6 @@ import { AutoPlay, defaultAutoSettings } from './autoPlay';
 import { emptyGarden, Garden } from './garden';
 import { rollAttack, type AttackOptions } from './combat';
 import type {
-  AbilityDef,
   Cell,
   CombatStats,
   DamageStat,
@@ -17,7 +16,10 @@ import type {
 } from './config';
 import { isBound, monsterDrops, SKILL_SLOTS } from './config';
 import { equipmentName, EQUIP_SLOTS, rollEquipment, type Equipment } from './equipment';
-import { cellDistance, Grid, sameCell } from './grid';
+import { cellDistance, direction, Grid, sameCell } from './grid';
+import { GroundFields } from './fields';
+import { MonsterAbilities } from './monsterAbilities';
+import { NpcServices } from './shop';
 import { Inventory } from './inventory';
 import {
   estimateIncome,
@@ -47,7 +49,6 @@ import type {
   RouteTarget,
   Summon,
   Unit,
-  Vec,
 } from './types';
 
 export * from './types';
@@ -86,7 +87,10 @@ export class World {
   readonly monsters: Monster[] = [];
   readonly summons: Summon[] = [];
   /** 当前地图上的火墙、毒瘴等持续地面 */
-  fields: Field[] = [];
+  readonly groundFields = new GroundFields();
+  private readonly abilities: MonsterAbilities;
+  /** 仓库、买卖、传送 */
+  readonly shop: NpcServices;
   readonly items: GroundItem[] = [];
   /** Boss 下次刷新的游戏内时间，切图后继续计时 */
   bossReadyAt: Record<string, number> = {};
@@ -166,9 +170,54 @@ export class World {
     );
     this.garden = new Garden(config, this.player, this.inventory, clock, (event) => this.emit(event));
     this.autoPlay = new AutoPlay(this);
+    const world = this;
+    this.shop = new NpcServices({
+      config,
+      get player() {
+        return world.player;
+      },
+      inventory: this.inventory,
+      rng: this.rng,
+      isNear: (npc) => this.isNear(npc),
+      questDone: (questId) => this.questDone(questId),
+      nextUid: () => this.nextId++,
+      changeMap: (mapId, cell) => this.changeMap(mapId, cell),
+      emit: (event) => this.emit(event),
+    });
+    this.abilities = new MonsterAbilities({
+      config,
+      get grid() {
+        return world.grid;
+      },
+      get player() {
+        return world.player;
+      },
+      get summons() {
+        return world.summons;
+      },
+      get monsters() {
+        return world.monsters;
+      },
+      fields: this.groundFields,
+      isFree: (cell, unit) => this.isFree(cell, unit),
+      isStepping: (unit) => this.isStepping(unit),
+      hit: (attacker, target, options) => this.resolveHit(attacker, target, options),
+      spawnMinion: (def, cell) => {
+        const minion = this.createMonster(def, cell, `minion:${this.nextId}`);
+        minion.temporary = true;
+        this.monsters.push(minion);
+        this.emit({ type: 'monsterAdded', unit: minion });
+      },
+      emit: (event) => this.emit(event),
+    });
     this.learnSkills();
     this.loadMap(mapId);
     this.drainEvents();
+  }
+
+  /** 地上正在生效的地面伤害，渲染和挂机用 */
+  get fields(): Field[] {
+    return this.groundFields.list;
   }
 
   get map(): MapDef {
@@ -238,7 +287,7 @@ export class World {
     const player = this.player;
     player.order = null;
     player.path = [];
-    this.fields = [];
+    this.groundFields.clear();
     this.autoPlay.hunt = null;
     this.loadMap(mapId);
     const arrival = this.grid.nearest(cell, (c) => this.isFree(c, player)) ?? cell;
@@ -556,7 +605,7 @@ export class World {
     }
     this.travelWalkedTo = null;
     const mapId = this.mapId;
-    this.travel(npc, index);
+    this.shop.travel(npc, index);
     if (this.mapId === mapId) player.route = null;
   }
 
@@ -632,7 +681,7 @@ export class World {
       if (!item) continue;
       const rolled = rollEquipment(item, ordinary, this.rng, this.nextId++);
       if (this.inventory.bagIsFull()) {
-        soldGold += this.sellPrice(rolled);
+        soldGold += this.shop.sellPrice(rolled);
         soldCount += 1;
       } else {
         this.player.equipBag.push(rolled);
@@ -733,108 +782,8 @@ export class World {
     if (goal) this.planPath(player, goal, false);
   }
 
-  deposit(npc: NpcDef, uid: number): void {
-    const { player } = this;
-    const equipment = player.equipBag.find((candidate) => candidate.uid === uid);
-    if (!equipment || !npc.storage || !this.isNear(npc)) return;
-    if (player.storage.length >= this.config.affixes.storageCapacity) {
-      this.emit({ type: 'message', text: '仓库已满' });
-      return;
-    }
-    player.equipBag.splice(player.equipBag.indexOf(equipment), 1);
-    player.storage.push(equipment);
-  }
-
-  withdraw(npc: NpcDef, uid: number): void {
-    const { player } = this;
-    const equipment = player.storage.find((candidate) => candidate.uid === uid);
-    if (!equipment || !npc.storage || !this.isNear(npc)) return;
-    if (this.inventory.bagIsFull()) {
-      this.emit({ type: 'message', text: '背包已满' });
-      return;
-    }
-    player.storage.splice(player.storage.indexOf(equipment), 1);
-    player.equipBag.push(equipment);
-  }
-
-  /** 批量卖出背包里不高于某个品阶的法器。 */
-  sellAllUpToGrade(npc: NpcDef, gradeId: string): void {
-    const { grades } = this.config.affixes;
-    const limit = grades.findIndex((grade) => grade.id === gradeId);
-    if (!npc.shop || !this.isNear(npc)) return;
-    const selling = this.player.equipBag.filter(
-      (equipment) => grades.findIndex((grade) => grade.id === equipment.grade) <= limit,
-    );
-    for (const equipment of selling) this.sellEquipment(npc, equipment.uid);
-  }
-
   private isNear(npc: NpcDef): boolean {
     return npc.map === this.mapId && cellDistance(this.player.cell, npc) <= INTERACT_RANGE;
-  }
-
-  buy(npc: NpcDef, itemId: string): void {
-    const player = this.player;
-    const item = this.config.items[itemId];
-    if (!item?.price || !npc.shop?.includes(itemId) || !this.isNear(npc)) return;
-    if (player.gold < item.price) {
-      this.emit({ type: 'message', text: '灵石不足' });
-      return;
-    }
-    if (item.kind === 'equip') {
-      const lowest = { ...this.config.affixes, grades: this.config.affixes.grades.slice(0, 1) };
-      if (!this.inventory.takeEquipment(rollEquipment(item, lowest, this.rng, this.nextId++))) return;
-    } else {
-      this.inventory.addToBag(itemId, 1);
-    }
-    player.gold -= item.price;
-    this.emit({ type: 'goldChanged', amount: -item.price });
-  }
-
-  sellPrice(equipment: Equipment): number {
-    const { affixes, items } = this.config;
-    const grade = affixes.grades.find((candidate) => candidate.id === equipment.grade);
-    const price = items[equipment.itemId]?.price ?? 0;
-    return Math.floor(price * affixes.sellRatio * (grade?.sellMultiplier ?? 1));
-  }
-
-  sellEquipment(npc: NpcDef, uid: number): void {
-    const player = this.player;
-    const equipment = player.equipBag.find((candidate) => candidate.uid === uid);
-    if (!equipment || !npc.shop || !this.isNear(npc)) return;
-    player.equipBag.splice(player.equipBag.indexOf(equipment), 1);
-    const price = this.sellPrice(equipment);
-    player.gold += price;
-    this.emit({ type: 'goldChanged', amount: price });
-  }
-
-  sellItem(npc: NpcDef, itemId: string): void {
-    const player = this.player;
-    const price = this.config.items[itemId]?.price;
-    if (!price || !player.bag[itemId] || !npc.shop || !this.isNear(npc)) return;
-    this.inventory.removeFromBag(itemId);
-    const earned = Math.floor(price * this.config.affixes.sellRatio);
-    player.gold += earned;
-    this.emit({ type: 'goldChanged', amount: earned });
-  }
-
-  travel(npc: NpcDef, index: number): void {
-    const option = npc.travel?.[index];
-    const player = this.player;
-    if (!option || !this.isNear(npc)) return;
-    if (option.requires && !this.questDone(option.requires)) {
-      this.emit({ type: 'message', text: '这条路还没有打通' });
-      return;
-    }
-    if ((option.level ?? 1) > player.level) {
-      this.emit({ type: 'message', text: `需要等级 ${option.level}` });
-      return;
-    }
-    if (player.gold < option.cost) {
-      this.emit({ type: 'message', text: '灵石不足' });
-      return;
-    }
-    player.gold -= option.cost;
-    this.changeMap(option.map, option);
   }
 
   acceptQuest(questId: string): void {
@@ -936,7 +885,10 @@ export class World {
     this.tickPlayer(dt);
     for (const monster of this.monsters) this.tickMonster(monster, dt);
     for (const summon of [...this.summons]) this.tickSummon(summon, dt);
-    this.tickFields(dt);
+    this.groundFields.tick(dt, {
+      targets: (hostile) => (hostile ? [this.player, ...this.summons] : this.monsters),
+      hit: (attacker, target, options) => this.resolveHit(attacker, target, options),
+    });
     this.expireItems();
     this.achievementLeft -= dt;
     if (this.achievementLeft <= 0) {
@@ -1083,7 +1035,7 @@ export class World {
     }
 
     if (monster.mode === 'chase' && monster.target) {
-      if (!this.tryAbility(monster, monster.target)) this.pursueAndAttack(monster, monster.target, dt);
+      if (!this.abilities.tryAbility(monster, monster.target)) this.pursueAndAttack(monster, monster.target, dt);
     } else if (monster.mode === 'return') {
       if (monster.path.length === 0 && !this.isStepping(monster)) {
         monster.mode = 'idle';
@@ -1180,7 +1132,7 @@ export class World {
 
     const pending = unit.pending;
     unit.pending = null;
-    if (pending?.ability) this.resolveAbility(unit, pending.ability, pending.cells ?? []);
+    if (pending?.ability) this.abilities.resolve(unit, pending.ability, pending.cells ?? []);
     else if (pending?.skill) this.applySkill(unit, pending.skill, pending.target);
     else if (pending?.target?.hp) this.resolveHit(unit, pending.target);
     return false;
@@ -1210,99 +1162,12 @@ export class World {
     });
   }
 
-  /** 有技能可用时开始前摇，并在地面预警。 */
-  private tryAbility(monster: Monster, target: Unit): boolean {
-    if (this.isStepping(monster)) return false;
-    const distance = cellDistance(monster.cell, target.cell);
-    const ability = monster.def.abilities?.find(
-      (candidate) =>
-        distance <= candidate.range && (monster.abilityCooldowns[candidate.id] ?? 0) <= 0,
-    );
-    if (!ability) return false;
-    const cells = abilityArea(ability, monster.cell, target.cell);
-    monster.abilityCooldowns[ability.id] = ability.cooldown;
-    monster.windupLeft = ability.windup;
-    monster.pending = { target, skill: null, ability, cells };
-    monster.facing = direction(monster.cell, target.cell);
-    monster.path = [];
-    this.emit({ type: 'attackStart', unit: monster, target: null, color: null });
-    this.emit({
-      type: 'telegraph',
-      name: ability.name,
-      cells,
-      seconds: ability.windup,
-      color: ability.color,
-    });
-    return true;
-  }
-
-  private resolveAbility(caster: Unit, ability: AbilityDef, cells: Cell[]): void {
-    if (ability.summon) {
-      this.summonMinions(caster, ability.summon.monster, ability.summon.count);
-      return;
-    }
-    if (ability.charge) {
-      const target = cells[0];
-      const landing = target && this.grid.nearest(target, (c) => this.isFree(c, caster));
-      if (landing) {
-        caster.cell = { ...landing };
-        caster.pos = { ...landing };
-        caster.path = [];
-      }
-    }
-    for (const unit of [this.player, ...this.summons]) {
-      if (unit.hp <= 0 || !cells.some((cell) => sameCell(cell, unit.cell))) continue;
-      this.resolveHit(caster, unit, { stat: 'attack', multiplier: ability.multiplier });
-      if (ability.poison && unit.hp > 0) {
-        unit.effects = unit.effects.filter((e) => e.kind !== 'dot' || e.source !== caster);
-        unit.effects.push({
-          kind: 'dot',
-          left: ability.poison.duration,
-          amount: ability.poison.damage,
-          interval: 1,
-          nextTick: 1,
-          source: caster,
-        });
-      }
-    }
-  }
-
-  private summonMinions(caster: Unit, monsterId: string, count: number): void {
-    const def = this.config.monsters[monsterId];
-    if (!def) return;
-    const alive = this.monsters.filter((monster) => monster.temporary && monster.hp > 0).length;
-    for (let i = alive; i < count; i++) {
-      const cell = this.grid.nearest(caster.cell, (c) => this.isFree(c, caster));
-      if (!cell) return;
-      const minion = this.createMonster(def, cell, `minion:${this.nextId}`);
-      minion.temporary = true;
-      this.monsters.push(minion);
-      this.emit({ type: 'monsterAdded', unit: minion });
-    }
-  }
-
   private resetMonster(monster: Monster): void {
     monster.stats = monster.def.stats;
     monster.hp = monster.stats.maxHp;
     monster.effects = [];
     monster.phase = 0;
     monster.abilityCooldowns = {};
-  }
-
-  /** 生命降到阈值时进入下一阶段，攻击力提高。 */
-  private checkPhase(monster: Monster): void {
-    const next = monster.def.phases?.[monster.phase];
-    if (!next || monster.hp / monster.stats.maxHp >= next.hpBelow) return;
-    monster.phase += 1;
-    const { attack } = monster.stats;
-    monster.stats = {
-      ...monster.stats,
-      attack: {
-        min: Math.round(attack.min * next.attackMultiplier),
-        max: Math.round(attack.max * next.attackMultiplier),
-      },
-    };
-    this.emit({ type: 'message', text: next.message });
   }
 
   private startCast(unit: Player, skill: SkillDef, target: Unit | null): void {
@@ -1394,37 +1259,18 @@ export class World {
         break;
       }
       case 'field':
-        if (cells.length === 0) break;
-        this.fields.push({
-          id: this.nextId++,
-          skill,
+        this.groundFields.add({
           caster,
           cells,
-          left: effect.duration,
-          nextTick: 0,
+          duration: effect.duration,
+          interval: effect.interval,
+          stat: effect.stat,
           multiplier: effect.multiplier * this.inventory.skillPower(skill.id),
+          color: skill.color,
+          hostile: false,
         });
         break;
     }
-  }
-
-  /** 地面每跳伤害站在上面的怪，第一跳在放下时立即生效。 */
-  private tickFields(dt: number): void {
-    if (this.fields.length === 0) return;
-    for (const field of this.fields) {
-      const { effect } = field.skill;
-      if (effect.type !== 'field') continue;
-      field.left -= dt;
-      field.nextTick -= dt;
-      if (field.nextTick > 0) continue;
-      field.nextTick += effect.interval;
-      for (const monster of this.monsters) {
-        if (monster.hp > 0 && field.cells.some((cell) => sameCell(cell, monster.cell))) {
-          this.resolveHit(field.caster, monster, { stat: effect.stat, multiplier: field.multiplier });
-        }
-      }
-    }
-    this.fields = this.fields.filter((field) => field.left > 0);
   }
 
   private addEffect(unit: Unit, kind: 'shield' | 'defense' | 'empower', amount: number, duration: number): void {
@@ -1529,7 +1375,7 @@ export class World {
     this.aggro(target, source);
     if (target.hp > 0) {
       const monster = this.monsters.find((candidate) => candidate === target);
-      if (monster) this.checkPhase(monster);
+      if (monster) this.abilities.checkPhase(monster);
       return;
     }
 
@@ -1936,25 +1782,4 @@ export class World {
   private emit(event: GameEvent): void {
     this.events.push(event);
   }
-}
-
-function abilityArea(ability: AbilityDef, origin: Cell, target: Cell): Cell[] {
-  const { shape, size } = ability;
-  if (shape === 'line') {
-    const dir = direction(origin, target);
-    return Array.from({ length: size }, (_, i) => ({
-      x: origin.x + dir.x * (i + 1),
-      y: origin.y + dir.y * (i + 1),
-    }));
-  }
-  const center = shape === 'around' ? origin : target;
-  const cells: Cell[] = [];
-  for (let y = center.y - size; y <= center.y + size; y++) {
-    for (let x = center.x - size; x <= center.x + size; x++) cells.push({ x, y });
-  }
-  return cells;
-}
-
-function direction(from: Cell, to: Cell): Vec {
-  return { x: Math.sign(to.x - from.x), y: Math.sign(to.y - from.y) };
 }

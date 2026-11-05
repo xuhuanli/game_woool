@@ -115,12 +115,12 @@ describe('切图', () => {
     const world = town();
     standBy(world, 'gate-steward');
     world.player.gold = 5;
-    world.travel(npc('gate-steward'), 0);
+    world.shop.travel(npc('gate-steward'), 0);
     expect(world.mapId).toBe('huangfeng-valley');
     world.player.gold = 100;
-    world.travel(npc('gate-steward'), 1);
+    world.shop.travel(npc('gate-steward'), 1);
     expect(world.mapId).toBe('huangfeng-valley');
-    world.travel(npc('gate-steward'), 0);
+    world.shop.travel(npc('gate-steward'), 0);
     expect(world.mapId).toBe('starter-field');
     expect(world.player.gold).toBe(90);
   });
@@ -182,41 +182,41 @@ describe('商店', () => {
   it('买丹药扣灵石，灵石不够时拒绝', () => {
     const world = shop();
     world.player.gold = 25;
-    world.buy(npc('herb-keeper'), 'small-potion');
+    world.shop.buy(npc('herb-keeper'), 'small-potion');
     expect(world.player.bag['small-potion']).toBe(1);
     expect(world.player.gold).toBe(5);
-    world.buy(npc('herb-keeper'), 'small-potion');
+    world.shop.buy(npc('herb-keeper'), 'small-potion');
     expect(world.player.bag['small-potion']).toBe(1);
   });
 
   it('不能买不在货架上的物品，离开后不能交易', () => {
     const world = shop();
     world.player.gold = 9999;
-    world.buy(npc('herb-keeper'), 'blue-sword');
+    world.shop.buy(npc('herb-keeper'), 'blue-sword');
     expect(world.player.equipBag).toHaveLength(0);
     world.moveTo({ x: 20, y: 20 });
     run(world, 15, () => world.player.order === null);
-    world.buy(npc('herb-keeper'), 'small-potion');
+    world.shop.buy(npc('herb-keeper'), 'small-potion');
     expect(world.player.bag['small-potion']).toBeUndefined();
   });
 
   it('商店法器是下品，售价随品阶提高', () => {
     const world = shop();
     world.player.gold = 100;
-    world.buy(npc('herb-keeper'), 'cloth-robe');
+    world.shop.buy(npc('herb-keeper'), 'cloth-robe');
     const robe = world.player.equipment.armor!;
     expect(robe.grade).toBe('low');
     expect(robe.affixes).toEqual([]);
-    expect(world.sellPrice(robe)).toBe(18);
-    expect(world.sellPrice({ ...robe, grade: 'top' })).toBe(180);
+    expect(world.shop.sellPrice(robe)).toBe(18);
+    expect(world.shop.sellPrice({ ...robe, grade: 'top' })).toBe(180);
   });
 
   it('卖法器和材料', () => {
     const world = shop();
     world.player.equipBag.push({ uid: 900, itemId: 'cloth-robe', grade: 'high', affixes: [], luck: 0 });
     world.player.bag['ape-fur'] = 2;
-    world.sellEquipment(npc('herb-keeper'), 900);
-    world.sellItem(npc('herb-keeper'), 'ape-fur');
+    world.shop.sellEquipment(npc('herb-keeper'), 900);
+    world.shop.sellItem(npc('herb-keeper'), 'ape-fur');
     expect(world.player.equipBag).toEqual([]);
     expect(world.player.bag['ape-fur']).toBe(1);
     expect(world.player.gold).toBe(72 + 4);
@@ -1025,8 +1025,8 @@ describe('40 级内容', () => {
         .filter((item) => item.slot === slot && !item.boss)
         .sort((a, b) => (a.level ?? 1) - (b.level ?? 1));
       const highest = tiers.at(-1)!;
-      expect(highest.level, slot).toBe(44);
-      for (const level of [14, 27, 35, 44]) {
+      expect(highest.level, slot).toBe(52);
+      for (const level of [14, 27, 35, 44, 52]) {
         expect(tiers.some((item) => item.level === level), `${slot} ${level}`).toBe(true);
       }
       const power = (item: (typeof tiers)[number]) =>
@@ -1429,15 +1429,15 @@ describe('符、仓库、批量卖出', () => {
     standBy(world, 'vault-keeper');
     const keeper = npc('vault-keeper');
     world.player.equipBag.push({ uid: 900, itemId: 'cloth-robe', grade: 'top', affixes: [], luck: 0 });
-    world.deposit(keeper, 900);
+    world.shop.deposit(keeper, 900);
     expect(world.player.equipBag).toEqual([]);
     expect(world.player.storage).toHaveLength(1);
     expect(World.fromSave(config, world.toSave(1), 2).player.storage[0]?.uid).toBe(900);
-    world.withdraw(keeper, 900);
+    world.shop.withdraw(keeper, 900);
     expect(world.player.equipBag).toHaveLength(1);
     world.moveTo({ x: 20, y: 20 });
     run(world, 15, () => world.player.order === null);
-    world.deposit(keeper, 900);
+    world.shop.deposit(keeper, 900);
     expect(world.player.storage).toEqual([]);
   });
 
@@ -1446,7 +1446,7 @@ describe('符、仓库、批量卖出', () => {
     standBy(world, 'herb-keeper');
     const item = (uid: number, grade: string) => ({ uid, itemId: 'cloth-robe', grade, affixes: [], luck: 0 });
     world.player.equipBag.push(item(1, 'low'), item(2, 'mid'), item(3, 'high'), item(4, 'top'));
-    world.sellAllUpToGrade(npc('herb-keeper'), 'mid');
+    world.shop.sellAllUpToGrade(npc('herb-keeper'), 'mid');
     expect(world.player.equipBag.map((equipment) => equipment.uid)).toEqual([3, 4]);
     expect(world.player.gold).toBe(18 + 36);
   });
@@ -2157,5 +2157,80 @@ describe('素材清单', () => {
     }
     expect(mapAssets(config, 'mulan-border', 'body').sprites.has('sacred-bird')).toBe(true);
     expect(mapAssets(config, 'starter-field', 'spirit').sprites.size).toBeGreaterThan(1);
+  });
+});
+
+describe('第 9 章 昆吾山', () => {
+  const chain = Object.values(config.quests).filter((quest) => quest.id.startsWith('ch9-'));
+
+  it('主线接在第 8 章后面，任务经验约占 50～55 级的四成，打完血焰回南疆', () => {
+    expect(chain[0]!.prev).toBe('ch8-duel');
+    for (const quest of chain) expect(quest.main, quest.id).toBe(true);
+    const levels = config.levels.expToNext.slice(49, 54).reduce((sum, exp) => sum + exp, 0);
+    const quests = chain.reduce((sum, quest) => sum + quest.rewards.exp, 0);
+    expect(quests / levels).toBeGreaterThan(0.3);
+    expect(quests / levels).toBeLessThan(0.5);
+    expect(chain.at(-1)!.objectives[0]).toEqual({ type: 'kill', target: 'xueyan', count: 1 });
+    expect(chain.at(-1)!.rewards.teleport?.map).toBe('nanjiang-market');
+    expect(config.maps['kunwu-mountain']!.portals!.find((portal) => portal.toMap === 'zhenmo-tower')!.requires).toBe('ch9-qian');
+    expect(config.npcs['jinxi-guide']!.travel!.find((option) => option.map === 'nanjiang-market')!.requires).toBe('ch8-duel');
+  });
+
+  it('按顺序做完第 9 章主线', () => {
+    const world = new World(config, 'nanjiang-market', 'body', 1);
+    const { player } = world;
+    player.level = 54;
+    player.quests.completed.push(...Object.keys(config.quests).filter((id) => !id.startsWith('ch9-')));
+    for (const quest of chain) {
+      expect(questStatus(quest, player.quests, player.level, player.bag), quest.id).toBe('available');
+      world.acceptQuest(quest.id);
+      const progress = player.quests.active.find((active) => active.id === quest.id)!;
+      progress.counts = quest.objectives.map((objective) => objective.count);
+      world.turnInQuest(quest.id);
+      expect(player.quests.completed, quest.id).toContain(quest.id);
+    }
+    expect(world.mapId).toBe('nanjiang-market');
+  });
+
+  it('Boss 离 NPC 足够远，52 级昆吾套能掉', () => {
+    for (const [mapId, bossId] of [
+      ['yinyang-cave', 'silverwing-yaksha'],
+      ['kunwu-mountain', 'qian-laomo'],
+      ['zhenmo-tower', 'xueyan'],
+    ] as const) {
+      const boss = config.maps[mapId]!.spawns.find((spawn) => spawn.monster === bossId)!;
+      for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === mapId)) {
+        expect(Math.hypot(npc.x - boss.x, npc.y - boss.y) - 2, npc.id).toBeGreaterThan(config.monsters[bossId]!.aggroRange);
+      }
+    }
+    const world = new World(config, 'kunwu-mountain', 'body', 1);
+    for (const piece of config.sets['kunwu']!.pieces) {
+      expect(itemSources(config, world.player, piece).length, piece).toBeGreaterThan(0);
+    }
+  });
+
+  it('血焰的血海留在地上，持续伤害站在里面的人', () => {
+    const world = new World(config, 'zhenmo-tower', 'body', 1);
+    const { player } = world;
+    const boss = world.monsters.find((monster) => monster.def.id === 'xueyan')!;
+    player.cell = { x: boss.cell.x - 3, y: boss.cell.y };
+    player.pos = { ...player.cell };
+    player.stats = { ...player.stats, maxHp: 1e6, accuracy: 0 };
+    player.hp = 1e6;
+    for (const ability of boss.def.abilities!) {
+      if (ability.id !== 'blood-sea') boss.abilityCooldowns[ability.id] = 999;
+    }
+    run(world, 10, () => world.fields.some((field) => field.hostile));
+    const field = world.fields.find((candidate) => candidate.hostile)!;
+    expect(field.caster).toBe(boss);
+    boss.stunLeft = 99;
+    player.cell = { ...field.cells[Math.floor(field.cells.length / 2)]! };
+    player.pos = { ...player.cell };
+    const hp = player.hp;
+    world.drainEvents();
+    run(world, 4.1);
+    const hits = world.drainEvents().filter((event) => event.type === 'damage' && event.unit === player && event.source === boss);
+    expect(hits.length).toBeGreaterThanOrEqual(2);
+    expect(player.hp).toBeLessThan(hp);
   });
 });

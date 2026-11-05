@@ -22,6 +22,7 @@ const theme = (inner: string, outer: string, glyph: string, border = outer): The
 
 /** 法器按境界分色，越高越亮 */
 const TIERS: [number, Theme][] = [
+  [52, theme('#9a7a2a', '#2e2008', '#fff4d8', '#ffd87a')],
   [35, theme('#6a3a9a', '#2a1440', '#f0d8ff', '#c89aff')],
   [27, theme('#2a5a9a', '#101e40', '#d8ecff', '#7ab4ff')],
   [14, theme('#2a7a4a', '#0e2a1a', '#e0ffe8', '#6ad08a')],
@@ -101,6 +102,17 @@ const GLYPHS: Record<string, string> = {
   'boss-wufeng-feather': 'feathered-wing',
   'beast-fang': 'saber-tooth',
   'demon-token': 'rune-stone',
+  'sword-52': 'broadsword',
+  'robe-52': 'cape-armor',
+  'crown-52': 'imperial-crown',
+  'pendant-52': 'moon-orbit',
+  'bracelet-52': 'metal-hand',
+  'ring-52': 'engagement-ring',
+  'boss-yaksha-wing': 'evil-wings',
+  'boss-yinluo-banner': 'tattered-banner',
+  'boss-baling-ruler': 'rod-of-asclepius',
+  'scorpion-venom': 'wasp-sting',
+  'kunwu-ore': 'ore',
   'herb-huichun': 'herbs-bundle',
   'herb-ningqi': 'lotus-flower',
   'herb-yangyuan': 'tree-roots',

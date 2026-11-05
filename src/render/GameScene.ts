@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
-import type { Cell, DecorDef, NpcDef, SkillDef } from '../game/config';
-import { equipmentColor, equipmentName } from '../game/equipment';
-import { cellDistance, sameCell } from '../game/grid';
+import type { Cell, DecorDef, NpcDef } from '../game/config';
+import { equipmentName } from '../game/equipment';
+import { sameCell } from '../game/grid';
 import { questsForNpc, questStatus } from '../game/quests';
 import {
   TICK_SECONDS,
@@ -20,7 +20,7 @@ import { iconUrl } from '../ui/icons';
 import type { NpcPanel } from '../ui/npcPanel';
 import type { Panels } from '../ui/panels';
 import { GameAudio } from './audio';
-import { directionRow, TILE_H, TILE_W, toCell, toScreen } from './iso';
+import { directionRow, toCell, toScreen } from './iso';
 import {
   createPlaceholderArt,
   createSpriteAnimations,
@@ -28,18 +28,18 @@ import {
   type PropManifest,
   type SpriteManifests,
 } from './placeholders';
+import { DropViews } from './dropView';
+import { diamond, Effects, FONT, UI_DEPTH } from './effects';
 import { paintGround } from './groundPainter';
 import { mapAssets, type MapAssets } from './mapAssets';
 import { addContactShadow, ensureShadowTexture, SHADOW_DEPTH_GAP, SHADOW_SPREAD } from './shadows';
 
 /** 地上物品图标的边长 */
 const DROP_ICON_SIZE = 28;
-const FONT = '"PingFang SC", "Microsoft YaHei", sans-serif';
 const HOLD_REPATH_MS = 200;
 const MAX_FRAME_MS = 250;
 /** 脱离 Boss 战后多久换回地图音乐 */
 const BOSS_MUSIC_LINGER_MS = 4000;
-const UI_DEPTH = 1_000_000;
 const TARGET_RADIUS = 34;
 const TARGET_CENTER_OFFSET = 20;
 const HOVER_TINT = 0xffc0a0;
@@ -52,10 +52,7 @@ const PLAYER_HEIGHT = 60;
 const SOLID_NEAR_CELLS = 3;
 const DIRT_COLOR = 0x7a6a4a;
 const GOLD_MERGE_MS = 1000;
-const PILLAR_HEIGHT = 150;
 /** 上品及以上有光柱 */
-const PILLAR_GRADE = 2;
-const FLY_MS = 260;
 
 interface UnitView {
   unit: Unit;
@@ -73,17 +70,10 @@ interface NpcView {
   marker: Phaser.GameObjects.Text;
 }
 
-interface ItemView {
-  sprite: Phaser.GameObjects.Image;
-  label: Phaser.GameObjects.Text;
-  /** 高品阶法器的光柱 */
-  pillar: Phaser.GameObjects.Graphics | null;
-}
-
 export class GameScene extends Phaser.Scene {
   private readonly unitViews = new Map<Unit, UnitView>();
-  private readonly itemViews = new Map<GroundItem, ItemView>();
-  private readonly fieldViews = new Map<number, Phaser.GameObjects.Graphics>();
+  private readonly drops: DropViews;
+  private readonly effects = new Effects(this);
   private npcViews: NpcView[] = [];
   private mapObjects: { destroy(): void }[] = [];
   /** 已从文件加载的精灵表和景观物件，切图时按新地图增减 */
@@ -119,6 +109,7 @@ export class GameScene extends Phaser.Scene {
     private readonly props: PropManifest,
   ) {
     super('game');
+    this.drops = new DropViews(this, world.config);
   }
 
   /** 启动时只加载出生地图要用的精灵表和物件，其余的进图时再加载。 */
@@ -228,12 +219,6 @@ export class GameScene extends Phaser.Scene {
     this.load.start();
   }
 
-  /** 地上物品用图标，没有图标时用占位图。 */
-  private dropTexture(item: GroundItem): string {
-    const icon = `icon-${item.def.id}`;
-    return this.textures.exists(icon) ? icon : `item-${item.def.kind}`;
-  }
-
   create(): void {
     ensureShadowTexture(this);
     createPlaceholderArt(this, this.world.config, this.sprites);
@@ -294,7 +279,7 @@ export class GameScene extends Phaser.Scene {
 
     const alpha = this.accumulator / stepMs;
     for (const view of this.unitViews.values()) this.syncUnit(view, alpha);
-    this.syncFields();
+    this.effects.syncFields(this.world.fields);
     this.updateMusic(delta);
 
     this.updatePointer(delta);
@@ -330,7 +315,7 @@ export class GameScene extends Phaser.Scene {
     for (const view of [...this.unitViews.values()]) {
       if ((view.unit as Monster).kind === 'monster') this.removeUnitView(view);
     }
-    for (const item of [...this.itemViews.keys()]) this.removeItemView(item);
+    this.drops.clear();
   }
 
   /** 按当前地图重建地面、NPC、传送点和怪物显示。 */
@@ -346,7 +331,7 @@ export class GameScene extends Phaser.Scene {
       if (!monster.hp) this.unitViews.get(monster)!.sprite.setAlpha(0);
     }
     for (const view of this.unitViews.values()) view.previous = { ...view.unit.pos };
-    for (const item of this.world.items) this.showDrop(item, false);
+    for (const item of this.world.items) this.drops.show(item);
   }
 
   private drawGround(): void {
@@ -691,14 +676,14 @@ export class GameScene extends Phaser.Scene {
     switch (event.type) {
       case 'attackStart':
         this.playAttack(event.unit);
-        if (event.target) this.showProjectile(event.unit, event.target, event.color);
+        if (event.target) this.effects.projectile(event.unit, event.target, event.color);
         if (event.color) this.audio.play('cast');
         break;
       case 'monsterAdded':
         this.addUnitView(event.unit, event.unit.def.id, event.unit.def.look.scale);
         break;
       case 'stunned':
-        this.floatText(event.unit, '定身', '#9fd0ff', 16);
+        this.effects.floatText(event.unit, '定身', '#9fd0ff', 16);
         break;
       case 'bossReady':
         this.hud.log(`${event.name}已在${event.mapName}现身！`, 'bad');
@@ -706,7 +691,7 @@ export class GameScene extends Phaser.Scene {
         break;
       case 'revived':
         this.hud.log('涅槃戒发动，原地复活', 'gain');
-        this.floatText(this.world.player, '涅槃', '#ffd84a', 26);
+        this.effects.floatText(this.world.player, '涅槃', '#ffd84a', 26);
         this.audio.play('levelUp');
         this.cameras.main.flash(300, 255, 220, 160);
         break;
@@ -719,14 +704,14 @@ export class GameScene extends Phaser.Scene {
         this.audio.play('levelUp');
         break;
       case 'skillCast':
-        this.showSkill(event.unit, event.skill, event.cells);
+        this.effects.skill(event.unit, event.skill.color, event.cells);
         break;
       case 'gardenReady':
         this.hud.log(`药园有 ${event.count} 株灵药成熟，按 G 收获`, 'gain');
         break;
       case 'achievement':
         this.hud.log(`达成成就：${event.achievement.name}`, 'gain');
-        this.floatText(this.world.player, event.achievement.name, '#ffd84a', 20);
+        this.effects.floatText(this.world.player, event.achievement.name, '#ffd84a', 20);
         this.audio.play('achievement');
         break;
       case 'skillLearned':
@@ -739,7 +724,7 @@ export class GameScene extends Phaser.Scene {
         this.showDamage(event.unit, event.amount, event.maxRoll);
         break;
       case 'miss':
-        this.floatText(event.unit, '闪避', '#c8c8c8', 14);
+        this.effects.floatText(event.unit, '闪避', '#c8c8c8', 14);
         break;
       case 'death':
         this.playDeath(event.unit);
@@ -748,21 +733,21 @@ export class GameScene extends Phaser.Scene {
         this.playRespawn(event.unit);
         break;
       case 'itemDropped':
-        this.showDrop(event.item);
+        this.announceDrop(event.item);
         break;
       case 'itemRemoved':
-        this.removeItemView(event.item);
+        this.drops.remove(event.item);
         break;
       case 'pickedUp': {
         const { def, amount } = event.item;
-        if (event.magnet) this.flyToPlayer(event.item);
+        if (event.magnet) this.drops.flyTo(event.item, this.unitViews.get(this.world.player)!.sprite);
         this.audio.play(def.kind === 'gold' ? 'gold' : 'pickup');
         if (def.kind === 'gold') {
           this.addGold(amount);
         } else {
-          const name = this.itemLabel(event.item);
+          const name = this.drops.label(event.item);
           this.hud.log(`拾取 ${name}`, 'gain');
-          this.floatText(this.world.player, `+${name}`, '#f0cf7a', 15);
+          this.effects.floatText(this.world.player, `+${name}`, '#f0cf7a', 15);
         }
         break;
       }
@@ -775,10 +760,10 @@ export class GameScene extends Phaser.Scene {
         break;
       }
       case 'heal':
-        this.floatText(this.world.player, `+${event.amount}`, '#7be07b', 18);
+        this.effects.floatText(this.world.player, `+${event.amount}`, '#7be07b', 18);
         break;
       case 'mana':
-        this.floatText(this.world.player, `+${event.amount}`, '#7bb8ff', 18);
+        this.effects.floatText(this.world.player, `+${event.amount}`, '#7bb8ff', 18);
         break;
       case 'breakthrough':
         this.showBreakthrough(event.realm, event.success);
@@ -787,7 +772,7 @@ export class GameScene extends Phaser.Scene {
         this.hud.log(`${event.name} 掉在了原地，限时可捡回`, 'bad');
         break;
       case 'telegraph':
-        this.showTelegraph(event.cells, event.seconds, event.color);
+        this.effects.telegraph(event.cells, event.seconds, event.color);
         this.audio.play('warning');
         this.hud.log(event.name, 'bad');
         break;
@@ -846,7 +831,7 @@ export class GameScene extends Phaser.Scene {
     const view = this.unitViews.get(unit);
     if (!view) return;
     const isPlayer = unit === this.world.player;
-    this.floatText(unit, String(amount), isPlayer ? '#ff6a5a' : maxRoll ? '#ffd84a' : '#ffffff', maxRoll ? 24 : 18);
+    this.effects.floatText(unit, String(amount), isPlayer ? '#ff6a5a' : maxRoll ? '#ffd84a' : '#ffffff', maxRoll ? 24 : 18);
     this.audio.play(isPlayer ? 'hurt' : maxRoll ? 'crit' : 'hit');
 
     view.sprite.setTintFill(0xffffff);
@@ -887,71 +872,6 @@ export class GameScene extends Phaser.Scene {
     this.unitViews.delete(view.unit);
   }
 
-  private showProjectile(unit: Unit, target: Unit, color: string | null): void {
-    if (cellDistance(unit.cell, target.cell) <= 1) return;
-    const from = toScreen(unit.pos);
-    const to = toScreen(target.pos);
-    const tint = Phaser.Display.Color.HexStringToColor(color ?? '#ffe9b0').color;
-    const orb = this.add.circle(from.x, from.y - 34, 6, tint).setDepth(UI_DEPTH - 3);
-    this.tweens.add({
-      targets: orb,
-      x: to.x,
-      y: to.y - 20,
-      duration: unit.windupLeft * 1000,
-      onComplete: () => orb.destroy(),
-    });
-  }
-
-  /** 火墙、毒瘴等地面：放下时画出，持续期间闪动，结束时淡出。 */
-  private syncFields(): void {
-    const live = new Set(this.world.fields.map((field) => field.id));
-    for (const [id, view] of this.fieldViews) {
-      if (live.has(id)) continue;
-      this.fieldViews.delete(id);
-      this.tweens.add({ targets: view, alpha: 0, duration: 300, onComplete: () => view.destroy() });
-    }
-    const pulse = 0.35 + Math.sin(this.time.now / 160) * 0.1;
-    for (const field of this.world.fields) {
-      let view = this.fieldViews.get(field.id);
-      if (!view) {
-        const tint = Phaser.Display.Color.HexStringToColor(field.skill.color).color;
-        view = this.add.graphics().setDepth(2);
-        for (const cell of field.cells) {
-          const { x, y } = toScreen(cell);
-          view.fillStyle(tint, 1).fillPoints(diamond(x, y), true);
-        }
-        this.fieldViews.set(field.id, view);
-      }
-      view.setAlpha(pulse);
-    }
-  }
-
-  private showSkill(unit: Unit, skill: SkillDef, cells: Cell[]): void {
-    const tint = Phaser.Display.Color.HexStringToColor(skill.color).color;
-    for (const cell of cells) {
-      const { x, y } = toScreen(cell);
-      const flash = this.add.graphics().setDepth(2).setAlpha(0.8);
-      flash.fillStyle(tint, 1).fillPoints(diamond(x, y), true);
-      this.tweens.add({
-        targets: flash,
-        alpha: 0,
-        duration: 350,
-        onComplete: () => flash.destroy(),
-      });
-    }
-    if (cells.length === 0) {
-      const { x, y } = toScreen(unit.pos);
-      const ring = this.add.circle(x, y - 24, 14).setStrokeStyle(3, tint).setDepth(UI_DEPTH - 3);
-      this.tweens.add({
-        targets: ring,
-        scale: 3,
-        alpha: 0,
-        duration: 450,
-        onComplete: () => ring.destroy(),
-      });
-    }
-  }
-
   private playRespawn(unit: Unit): void {
     const view = this.unitViews.get(unit);
     if (!view) return;
@@ -961,63 +881,17 @@ export class GameScene extends Phaser.Scene {
     this.tweens.add({ targets: view.sprite, alpha: 1, duration: 400 });
   }
 
-  private showDrop(item: GroundItem, announce = true): void {
-    const { x, y } = toScreen(item.cell);
-    const sprite = this.add
-      .image(x, y - 26, this.dropTexture(item))
-      .setOrigin(0.5, 0.75)
-      .setDepth(y - 1);
-    const label = this.add
-      .text(x, y - 22, this.itemLabel(item), {
-        fontFamily: FONT,
-        fontSize: '12px',
-        color: item.equipment ? equipmentColor(item.equipment, this.world.config) : '#efe6d0',
-        stroke: '#000000',
-        strokeThickness: 3,
-      })
-      .setOrigin(0.5, 1)
-      .setDepth(UI_DEPTH - 2);
-    this.tweens.add({ targets: sprite, y, duration: 320, ease: 'Bounce.easeOut' });
-    const rank = this.gradeRank(item);
-    const pillar = rank >= PILLAR_GRADE ? this.addPillar(x, y, item) : null;
-    this.itemViews.set(item, { sprite, label, pillar });
-    if (!announce || !item.equipment) return;
-    this.hud.log(`掉落了 ${this.itemLabel(item)}！`, 'gain');
-    if (rank >= PILLAR_GRADE) this.audio.play('rare');
+  /** 新掉落：显示在地上，法器报一条日志，高品阶有音效，最高品阶闪屏。 */
+  private announceDrop(item: GroundItem): void {
+    this.drops.show(item);
+    if (!item.equipment) return;
+    const rank = this.drops.gradeRank(item);
+    this.hud.log(`掉落了 ${this.drops.label(item)}！`, 'gain');
+    if (rank >= DropViews.PILLAR_GRADE) this.audio.play('rare');
     if (rank === this.world.config.affixes.grades.length - 1) {
       this.cameras.main.flash(250, 255, 200, 120);
       this.cameras.main.shake(180, 0.004);
     }
-  }
-
-  private gradeRank(item: GroundItem): number {
-    const { grades } = this.world.config.affixes;
-    return grades.findIndex((grade) => grade.id === item.equipment?.grade);
-  }
-
-  /** 高品阶法器落地时的光柱，隔着半屏也能看到。 */
-  private addPillar(x: number, y: number, item: GroundItem): Phaser.GameObjects.Graphics {
-    const color = Phaser.Display.Color.HexStringToColor(
-      equipmentColor(item.equipment!, this.world.config),
-    ).color;
-    const pillar = this.add.graphics().setDepth(y - 2);
-    pillar.fillGradientStyle(color, color, color, color, 0, 0, 0.7, 0.7);
-    pillar.fillRect(x - 9, y - PILLAR_HEIGHT, 18, PILLAR_HEIGHT);
-    this.tweens.add({ targets: pillar, alpha: 0.45, duration: 700, yoyo: true, repeat: -1 });
-    return pillar;
-  }
-
-  private itemLabel(item: GroundItem): string {
-    return item.equipment ? equipmentName(item.equipment, this.world.config) : item.def.name;
-  }
-
-  private removeItemView(item: GroundItem): void {
-    const view = this.itemViews.get(item);
-    if (!view) return;
-    view.sprite.destroy();
-    view.label.destroy();
-    view.pillar?.destroy();
-    this.itemViews.delete(item);
   }
 
   /** 1 秒内吸到的灵石合并成一条提示。 */
@@ -1025,101 +899,31 @@ export class GameScene extends Phaser.Scene {
     if (this.pendingGold === 0) {
       this.time.delayedCall(GOLD_MERGE_MS, () => {
         this.hud.log(`+${this.pendingGold} 灵石`, 'gain');
-        this.floatText(this.world.player, `+${this.pendingGold}`, '#f0cf7a', 15);
+        this.effects.floatText(this.world.player, `+${this.pendingGold}`, '#f0cf7a', 15);
         this.pendingGold = 0;
       });
     }
     this.pendingGold += amount;
   }
 
-  private flyToPlayer(item: GroundItem): void {
-    const from = toScreen(item.cell);
-    const sprite = this.add.image(from.x, from.y, this.dropTexture(item)).setDepth(UI_DEPTH - 3);
-    const target = this.unitViews.get(this.world.player)!.sprite;
-    this.tweens.add({
-      targets: sprite,
-      x: target.x,
-      y: target.y - 24,
-      scale: 0.6,
-      duration: FLY_MS,
-      ease: 'Quad.easeIn',
-      onComplete: () => sprite.destroy(),
-    });
-  }
-
-  /** Boss 技能的地面预警，颜色越来越实，时间到时消失。 */
-  private showTelegraph(cells: Cell[], seconds: number, color: string): void {
-    const tint = Phaser.Display.Color.HexStringToColor(color).color;
-    const zone = this.add.graphics().setDepth(2).setAlpha(0.25);
-    zone.fillStyle(tint, 1);
-    for (const cell of cells) {
-      const { x, y } = toScreen(cell);
-      zone.fillPoints(diamond(x, y), true);
-    }
-    this.tweens.add({
-      targets: zone,
-      alpha: 0.75,
-      duration: seconds * 1000,
-      onComplete: () => zone.destroy(),
-    });
-  }
-
   private showBreakthrough(realm: string, success: boolean): void {
     this.audio.play(success ? 'levelUp' : 'death');
     if (!success) {
       this.hud.log('突破失败，材料已消耗', 'bad');
-      this.floatText(this.world.player, '突破失败', '#ff6a5a', 24);
+      this.effects.floatText(this.world.player, '突破失败', '#ff6a5a', 24);
       return;
     }
     this.hud.log(`突破成功，${realm}圆满！`, 'gain');
-    this.floatText(this.world.player, '突破成功！', '#ffd84a', 28);
+    this.effects.floatText(this.world.player, '突破成功！', '#ffd84a', 28);
     this.cameras.main.flash(300, 255, 240, 200);
   }
 
   private showLevelUp(level: number): void {
     this.audio.play('levelUp');
     this.hud.log(`升到了 ${level} 级！`, 'gain');
-    this.floatText(this.world.player, `升级！Lv.${level}`, '#ffd84a', 26);
+    this.effects.floatText(this.world.player, `升级！Lv.${level}`, '#ffd84a', 26);
     const { x, y } = toScreen(this.world.player.pos);
-    const ring = this.add.circle(x, y - 24, 12).setStrokeStyle(3, 0xffd84a).setDepth(UI_DEPTH - 3);
-    this.tweens.add({
-      targets: ring,
-      scale: 5,
-      alpha: 0,
-      duration: 600,
-      onComplete: () => ring.destroy(),
-    });
+    this.effects.ring(x, y - 24, 12, 0xffd84a, 5, 600);
   }
 
-  private floatText(unit: Unit, text: string, color: string, size: number): void {
-    const { x, y } = toScreen(unit.pos);
-    const label = this.add
-      .text(x + Phaser.Math.Between(-10, 10), y - 62, text, {
-        fontFamily: FONT,
-        fontSize: `${size}px`,
-        fontStyle: 'bold',
-        color,
-        stroke: '#000000',
-        strokeThickness: 4,
-      })
-      .setOrigin(0.5)
-      .setDepth(UI_DEPTH);
-    this.tweens.add({
-      targets: label,
-      y: label.y - 36,
-      alpha: 0,
-      duration: 750,
-      ease: 'Cubic.easeOut',
-      onComplete: () => label.destroy(),
-    });
-  }
-}
-
-function diamond(x: number, y: number): Phaser.Math.Vector2[] {
-  return [
-    new Phaser.Math.Vector2(x, y - TILE_H / 2),
-    new Phaser.Math.Vector2(x + TILE_W / 2, y),
-    new Phaser.Math.Vector2(x, y + TILE_H / 2),
-    new Phaser.Math.Vector2(x - TILE_W / 2, y),
-  ];
 }

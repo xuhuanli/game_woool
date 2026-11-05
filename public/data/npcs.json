@@ -849,6 +849,14 @@
         "x": 20,
         "y": 24,
         "cost": 1500
+      },
+      {
+        "name": "南疆坊市",
+        "map": "nanjiang-market",
+        "x": 20,
+        "y": 24,
+        "cost": 1500,
+        "requires": "ch8-duel"
       }
     ]
   },
@@ -898,5 +906,123 @@
     "y": 12,
     "color": "#8ad8c8",
     "greeting": "feng-remnant-greeting"
+  },
+  "fu-cheng": {
+    "id": "fu-cheng",
+    "name": "富成",
+    "map": "nanjiang-market",
+    "x": 20,
+    "y": 16,
+    "color": "#c8a06a",
+    "greeting": "fu-cheng-greeting"
+  },
+  "nanjiang-merchant": {
+    "id": "nanjiang-merchant",
+    "name": "南疆坊市掌柜",
+    "map": "nanjiang-market",
+    "x": 27,
+    "y": 20,
+    "color": "#c9a24a",
+    "greeting": "nanjiang-merchant-greeting",
+    "storage": true,
+    "shop": [
+      "big-potion",
+      "big-mana",
+      "huge-potion",
+      "huge-mana",
+      "refine-stone",
+      "recall-scroll",
+      "random-scroll",
+      "book-body-mingwang-2",
+      "book-spell-qingyuan-2",
+      "book-spirit-corrosion-2",
+      "book-body-brahma-2",
+      "book-spell-bixie-2",
+      "book-spirit-puppet-2",
+      "seed-huichun",
+      "seed-ningqi",
+      "seed-yangyuan",
+      "seed-juling",
+      "seed-jinyuan",
+      "seed-xuanyin"
+    ]
+  },
+  "nanjiang-guide": {
+    "id": "nanjiang-guide",
+    "name": "南疆传送阵执事",
+    "map": "nanjiang-market",
+    "x": 13,
+    "y": 20,
+    "color": "#9fd0ff",
+    "greeting": "nanjiang-guide-greeting",
+    "travel": [
+      {
+        "name": "万毒谷·阴阳窟",
+        "map": "yinyang-cave",
+        "x": 14,
+        "y": 14,
+        "cost": 1200
+      },
+      {
+        "name": "昆吾山",
+        "map": "kunwu-mountain",
+        "x": 12,
+        "y": 12,
+        "cost": 1400,
+        "requires": "ch9-seal"
+      },
+      {
+        "name": "镇魔塔",
+        "map": "zhenmo-tower",
+        "x": 12,
+        "y": 12,
+        "cost": 1600,
+        "requires": "ch9-tower"
+      },
+      {
+        "name": "晋西坊市",
+        "map": "jinxi-market",
+        "x": 20,
+        "y": 24,
+        "cost": 1500
+      }
+    ]
+  },
+  "ye-envoy": {
+    "id": "ye-envoy",
+    "name": "叶家修士",
+    "map": "nanjiang-market",
+    "x": 24,
+    "y": 26,
+    "color": "#d8b46a",
+    "greeting": "ye-envoy-greeting",
+    "requires": "ch9-yaksha"
+  },
+  "bai-yaoyi": {
+    "id": "bai-yaoyi",
+    "name": "白瑶怡",
+    "map": "yinyang-cave",
+    "x": 15,
+    "y": 12,
+    "color": "#e8c8e0",
+    "greeting": "bai-yaoyi-greeting"
+  },
+  "gui-ling": {
+    "id": "gui-ling",
+    "name": "圭灵",
+    "map": "kunwu-mountain",
+    "x": 15,
+    "y": 12,
+    "color": "#7ad8f0",
+    "greeting": "gui-ling-greeting"
+  },
+  "xueling": {
+    "id": "xueling",
+    "name": "雪玲",
+    "map": "zhenmo-tower",
+    "x": 15,
+    "y": 12,
+    "color": "#f0f0ff",
+    "greeting": "xueling-greeting"
   }
 }
