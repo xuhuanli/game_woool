@@ -4,6 +4,7 @@ import { equipmentName } from '../game/equipment';
 import { sameCell } from '../game/grid';
 import { FROST_TO_FREEZE } from '../game/monsterAbilities';
 import { questsForNpc, questStatus } from '../game/quests';
+import type { SettingsStore } from '../game/settings';
 import {
   TICK_SECONDS,
   type GameEvent,
@@ -96,12 +97,17 @@ export class GameScene extends Phaser.Scene {
   private holdRunning = false;
   private holdTimer = 0;
   private pendingGold = 0;
-  private readonly audio = new GameAudio();
+  private readonly audio: GameAudio;
   private hovered: UnitView | null = null;
   private tallDecor: Phaser.GameObjects.Image[] = [];
   private solidDecor: { image: Phaser.GameObjects.Image; foot: NonNullable<DecorDef['foot']> }[] = [];
   private fadeTimer = 0;
   private tileCursor!: Phaser.GameObjects.Graphics;
+  /** 野外的飘叶粒子，画质和飘叶开关都作用在它身上 */
+  private leaves: Phaser.GameObjects.Particles.ParticleEmitter | null = null;
+  /** 水面波光，低画质时停掉呼吸动画 */
+  private shimmer: Phaser.GameObjects.Image | null = null;
+  private shimmerTween: Phaser.Tweens.Tween | null = null;
 
   constructor(
     private readonly world: World,
@@ -112,8 +118,10 @@ export class GameScene extends Phaser.Scene {
     private readonly autoPanel: AutoPanel,
     private readonly sprites: SpriteManifests,
     private readonly props: PropManifest,
+    private readonly settings: SettingsStore,
   ) {
     super('game');
+    this.audio = new GameAudio(settings);
     this.drops = new DropViews(this, world.config);
   }
 
@@ -300,6 +308,10 @@ export class GameScene extends Phaser.Scene {
     window.addEventListener('pointerdown', unlockAudio, { once: true });
     window.addEventListener('keydown', unlockAudio, { once: true });
 
+    // 设置面板改音量之外的东西（画质、飘叶）时，这里立刻生效
+    const unsubscribe = this.settings.onChange(() => this.applyDisplaySettings());
+    this.events.once('shutdown', unsubscribe);
+
     this.hud.log(`来到${this.world.map.name}`);
   }
 
@@ -358,6 +370,10 @@ export class GameScene extends Phaser.Scene {
     this.npcViews = [];
     this.tallDecor = [];
     this.solidDecor = [];
+    this.leaves = null;
+    this.shimmer = null;
+    this.shimmerTween?.remove();
+    this.shimmerTween = null;
     for (const view of [...this.unitViews.values()]) {
       if ((view.unit as Monster).kind === 'monster') this.removeUnitView(view);
     }
@@ -426,7 +442,7 @@ export class GameScene extends Phaser.Scene {
       .setScale(2)
       .setDepth(0.5)
       .setAlpha(0.25);
-    this.tweens.add({ targets: shimmer, alpha: 0.75, duration: 1400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });
+    this.shimmer = shimmer;
     this.mapObjects.push(ground, shimmer);
 
     this.tallDecor = [];
@@ -463,23 +479,49 @@ export class GameScene extends Phaser.Scene {
       leaf.generateTexture('leaf', 10, 6);
       leaf.destroy();
     }
-    this.mapObjects.push(
-      this.add
-        .particles(0, 0, 'leaf', {
-          x: { min: 0, max: TONE_SIZE / 2 },
-          y: -20,
-          lifespan: 12000,
-          speedY: { min: 30, max: 60 },
-          speedX: { min: -40, max: 20 },
-          rotate: { start: 0, end: 540 },
-          scale: { min: 0.5, max: 1 },
-          alpha: { start: 0.85, end: 0 },
-          tint: [0xffb45a, 0xff8a4a, 0xe6c84a],
-          frequency: 500,
-        })
-        .setScrollFactor(0)
-        .setDepth(UI_DEPTH - 4),
-    );
+    this.leaves = this.add
+      .particles(0, 0, 'leaf', {
+        x: { min: 0, max: TONE_SIZE / 2 },
+        y: -20,
+        lifespan: 12000,
+        speedY: { min: 30, max: 60 },
+        speedX: { min: -40, max: 20 },
+        rotate: { start: 0, end: 540 },
+        scale: { min: 0.5, max: 1 },
+        alpha: { start: 0.85, end: 0 },
+        tint: [0xffb45a, 0xff8a4a, 0xe6c84a],
+        frequency: 500,
+      })
+      .setScrollFactor(0)
+      .setDepth(UI_DEPTH - 4);
+    this.mapObjects.push(this.leaves);
+    this.applyDisplaySettings();
+  }
+
+  /** 画质和飘叶开关：低画质关水面波光、飘叶间隔翻倍。 */
+  private applyDisplaySettings(): void {
+    const { leaves, quality } = this.settings.value;
+    const low = quality === 'low';
+    if (this.leaves) {
+      this.leaves.setVisible(leaves);
+      this.leaves.emitting = leaves;
+      this.leaves.frequency = low ? 1000 : 500;
+    }
+    if (this.shimmer) {
+      this.shimmerTween?.remove();
+      this.shimmerTween = null;
+      this.shimmer.setAlpha(low ? 0.3 : 0.25);
+      if (!low) {
+        this.shimmerTween = this.tweens.add({
+          targets: this.shimmer,
+          alpha: 0.75,
+          duration: 1400,
+          yoyo: true,
+          repeat: -1,
+          ease: 'Sine.easeInOut',
+        });
+      }
+    }
   }
 
   /** 人走到树和山后面时把它们变透明，免得看不见角色。 */

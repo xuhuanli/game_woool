@@ -1,17 +1,20 @@
 import Phaser from 'phaser';
 import { validateConfig, type GameConfig } from './game/config';
 import { assembleConfig } from './game/configLoader';
+import { SettingsStore } from './game/settings';
 import { World } from './game/world';
 import { GameScene } from './render/GameScene';
 import type { PropManifest, SpriteManifests } from './render/placeholders';
 import { AutoSaver } from './save/autoSaver';
-import { IndexedDbSaveStore } from './save/saveStore';
+import { loadSlots } from './save/saveSlots';
+import { clampSlot, clearRawSlot, IndexedDbSaveStore, readActiveSlot, SLOT_COUNT, writeActiveSlot, writeRawSlot } from './save/saveStore';
 import { AutoPanel } from './ui/autoPanel';
 import { Hud } from './ui/hud';
 import { NpcPanel } from './ui/npcPanel';
 import { showOfflineReport } from './ui/offlineDialog';
 import { Panels } from './ui/panels';
 import { SavePanel } from './ui/savePanel';
+import { SettingsPanel } from './ui/settingsPanel';
 import { CodexPanel } from './ui/codexPanel';
 import { GardenPanel } from './ui/gardenPanel';
 import { SkillPanel } from './ui/skillPanel';
@@ -76,8 +79,22 @@ try {
 boot.remove();
 const { config, sprites, props } = loaded;
 
-const store = new IndexedDbSaveStore();
-const start = await showStartScreen(config, store);
+const slots = await loadSlots().catch((error: unknown) => {
+  // 存储被禁用或数据库打不开时也要能进游戏，只是之后的保存会失败
+  const reason = error instanceof Error ? error.message : '未知错误';
+  return Array.from({ length: SLOT_COUNT }, (_, index) => ({
+    slot: index + 1,
+    save: null,
+    error: `读取存档失败：${reason}`,
+  }));
+});
+const start = await showStartScreen(config, slots, readActiveSlot(), {
+  clearSlot: clearRawSlot,
+  writeSlot: writeRawSlot,
+});
+const slot = clampSlot(start.slot);
+writeActiveSlot(slot);
+const store = new IndexedDbSaveStore(slot);
 const seed = Date.now();
 const world =
   start.kind === 'continue'
@@ -93,11 +110,13 @@ const saver = new AutoSaver(world, store, (error) => {
   console.error(error);
   hud.log('保存失败，请导出存档', 'bad');
 });
-new SavePanel(world, store, saver, hud);
+new SavePanel(world, store, saver, hud, slot);
 const autoPanel = new AutoPanel(world);
 new SkillPanel(world);
 new CodexPanel(world);
 new GardenPanel(world);
+const settings = new SettingsStore();
+new SettingsPanel(settings);
 void saver.saveNow();
 if (report) showOfflineReport(report);
 
@@ -111,7 +130,7 @@ const game = new Phaser.Game({
   parent: 'game',
   backgroundColor: '#17140f',
   scale: { mode: Phaser.Scale.RESIZE, width: '100%', height: '100%' },
-  scene: new GameScene(world, hud, panels, saver, npcPanel, autoPanel, sprites, props),
+  scene: new GameScene(world, hud, panels, saver, npcPanel, autoPanel, sprites, props, settings),
 });
 
 if (import.meta.env.DEV) {
