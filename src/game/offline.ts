@@ -6,12 +6,12 @@ export const OFFLINE_EFFICIENCY = 0.5;
 export const OFFLINE_MIN_SECONDS = 60;
 export const OFFLINE_MAX_EQUIPMENT = 10;
 /** 每杀一只怪在路上和拾取花的时间，大地图上怪物稀疏，路要走得久一些 */
-const TRAVEL_SECONDS = 4;
+const TRAVEL_SECONDS = 1.5;
 /** 和 world.ts 的灵力回复一致 */
 const MANA_REGEN_PER_SECOND = 0.03;
 /** 挂机时功法不会每次都在冷却结束就放，召唤物也会死，按模拟实测打折 */
-const SKILL_UPTIME = 0.7;
-const SUMMON_UPTIME = 0.2;
+const SKILL_UPTIME = 0.85;
+const SUMMON_UPTIME = 0.35;
 
 /** 估算收益要用到的角色数据。 */
 export interface Fighter {
@@ -32,6 +32,14 @@ export interface IncomeRates {
 
 /** 地面功法的持续时间里，怪站在上面的比例 */
 const FIELD_UPTIME = 0.4;
+/** 和 world.ts 的生命回复一致；挨的打要花时间回血或回城补药，按一半折算成停下来的时间 */
+const REGEN_PER_SECOND = 0.02;
+/**
+ * 按模拟校准的倍数：上面只算一对一，群攻、毒和召唤物同时打几只怪的部分没算进去，
+ * 估算平均只有挂机实测的七成左右（npm run sim 的闭关对比表）
+ */
+const CALIBRATION = 1.4;
+const RECOVERY_WEIGHT = 0.12;
 
 function average(range: { min: number; max: number }): number {
   return (range.min + range.max) / 2;
@@ -90,6 +98,20 @@ function damagePerSecond(config: GameConfig, fighter: Fighter, monster: MonsterD
   return basic * Math.max(0, 1 - busy) + skillDamage * SKILL_UPTIME + summon * SUMMON_UPTIME;
 }
 
+/** 打一只怪时它对角色的每秒伤害：普攻、技能和毒。 */
+function damageTakenPerSecond(fighter: Fighter, monster: MonsterDef): number {
+  const { stats } = fighter;
+  const hit = hitChance(monster.stats, stats);
+  const strike = (multiplier: number) => Math.max(1, average(monster.stats.attack) * multiplier - average(stats.defense)) * hit;
+  let damage = strike(1) / monster.attackInterval;
+  for (const ability of monster.abilities ?? []) {
+    if (ability.summon) continue;
+    damage += strike(ability.multiplier) / ability.cooldown;
+    if (ability.poison) damage += (ability.poison.damage * ability.poison.duration * hit) / ability.cooldown;
+  }
+  return damage;
+}
+
 /** 估算在这张地图挂机的每秒收益，不算 Boss。 */
 export function estimateIncome(config: GameConfig, map: MapDef, fighter: Fighter): IncomeRates {
   let seconds = 0;
@@ -100,7 +122,9 @@ export function estimateIncome(config: GameConfig, map: MapDef, fighter: Fighter
   for (const spawn of map.spawns) {
     const monster = config.monsters[spawn.monster];
     if (!monster || monster.boss) continue;
-    seconds += monster.stats.maxHp / damagePerSecond(config, fighter, monster) + TRAVEL_SECONDS;
+    const fight = monster.stats.maxHp / damagePerSecond(config, fighter, monster);
+    const recovery = (damageTakenPerSecond(fighter, monster) * fight) / (fighter.stats.maxHp * REGEN_PER_SECOND);
+    seconds += fight + TRAVEL_SECONDS + recovery * RECOVERY_WEIGHT;
     exp += monster.exp;
     kills += 1;
     for (const entry of monsterDrops(config, monster)) {
@@ -115,6 +139,7 @@ export function estimateIncome(config: GameConfig, map: MapDef, fighter: Fighter
     return { expPerSecond: 0, goldPerSecond: 0, killsPerSecond: 0, equipmentPerKill: {} };
   }
   for (const item of Object.keys(equipment)) equipment[item]! /= kills;
+  seconds /= CALIBRATION;
   return {
     expPerSecond: exp / seconds,
     goldPerSecond: gold / seconds,

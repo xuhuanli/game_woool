@@ -15,7 +15,7 @@ import type {
   PortalDef,
   SkillDef,
 } from './config';
-import { isBound, monsterDrops } from './config';
+import { isBound, monsterDrops, SKILL_SLOTS } from './config';
 import { equipmentName, EQUIP_SLOTS, rollEquipment, type Equipment } from './equipment';
 import { cellDistance, Grid, sameCell } from './grid';
 import { Inventory } from './inventory';
@@ -30,7 +30,7 @@ import {
 import { findPath } from './pathfinding';
 import { emptyQuestState, questStatus, recordObjective } from './quests';
 import { breakthroughChance, pendingBreakthrough } from './realm';
-import { nextPortal } from './navigation';
+import { nextStep } from './navigation';
 import { Rng } from './rng';
 import { SAVE_VERSION, type SaveData } from '../save/saveData';
 import { needsTarget, skillArea } from './skills';
@@ -70,6 +70,8 @@ const SUMMON_FOLLOW_DISTANCE = 2;
 const SUMMON_TELEPORT_DISTANCE = 12;
 const NOTICE_SECONDS = 3;
 const TALK_RANGE = 2;
+/** 怪物和召唤物寻路最多展开的格数，目标被围住时不搜整张图 */
+const MONSTER_SEARCH_LIMIT = 1500;
 const INTERACT_RANGE = 4;
 
 export class World {
@@ -78,6 +80,8 @@ export class World {
   readonly player: Player;
   readonly inventory: Inventory;
   readonly garden: Garden;
+  /** 寻路时已经走去找过的传送 NPC，再走不到就放弃 */
+  private travelWalkedTo: NpcDef | null = null;
   readonly autoPlay: AutoPlay;
   readonly monsters: Monster[] = [];
   readonly summons: Summon[] = [];
@@ -458,6 +462,7 @@ export class World {
   navigate(target: RouteTarget): void {
     if (!this.canReach(target)) return;
     this.dropCurrentAction();
+    this.travelWalkedTo = null;
     this.player.route = target;
     this.followRoute();
   }
@@ -488,7 +493,7 @@ export class World {
 
   private canReach(target: RouteTarget): boolean {
     if (!this.player.hp) return false;
-    if (target.mapId === this.mapId || nextPortal(this, target.mapId)) return true;
+    if (target.mapId === this.mapId || nextStep(this, target.mapId)) return true;
     this.emit({ type: 'message', text: '暂时找不到去那里的路' });
     return false;
   }
@@ -527,9 +532,32 @@ export class World {
       this.arrive(route);
       return;
     }
-    const portal = nextPortal(this, route.mapId);
-    if (portal) this.walkTo(portal);
-    else player.route = null;
+    const step = nextStep(this, route.mapId);
+    if (step?.kind === 'portal') {
+      this.walkTo(step.portal);
+    } else if (step?.kind === 'travel') {
+      this.takeTravel(step.npc, step.index);
+    } else {
+      player.route = null;
+    }
+  }
+
+  /** 寻路经过传送 NPC：先走到身边，到了就付灵石传送，走不到或付不起就停下。 */
+  private takeTravel(npc: NpcDef, index: number): void {
+    const { player } = this;
+    if (!this.isNear(npc)) {
+      if (this.travelWalkedTo === npc) {
+        player.route = null;
+        return;
+      }
+      this.travelWalkedTo = npc;
+      this.walkTo(npc);
+      return;
+    }
+    this.travelWalkedTo = null;
+    const mapId = this.mapId;
+    this.travel(npc, index);
+    if (this.mapId === mapId) player.route = null;
   }
 
   private walkTo(cell: Cell): void {
@@ -612,6 +640,20 @@ export class World {
       }
     }
     return { equipment, soldGold, soldCount };
+  }
+
+  /** 把丹药或符箓放进快捷栏，只放后两格丹药格，前面是功法格。 */
+  setHotbarItem(slot: number, itemId: string): void {
+    const item = this.config.items[itemId];
+    if (!item || (item.kind !== 'potion' && item.kind !== 'scroll') || item.scroll === 'fly') {
+      this.emit({ type: 'message', text: '只有丹药和符箓能放进快捷栏' });
+      return;
+    }
+    if (slot < SKILL_SLOTS || slot >= HOTBAR_SIZE) {
+      this.emit({ type: 'message', text: '丹药和符箓放在最后两格' });
+      return;
+    }
+    this.player.hotbar[slot] = { kind: 'item', id: itemId };
   }
 
   useHotbar(slot: number, target: Monster | null = null): void {
@@ -1800,6 +1842,7 @@ export class World {
       unit.cell,
       goal,
       (cell) => sameCell(cell, goal) || this.isFree(cell, unit),
+      unit === this.player ? Infinity : MONSTER_SEARCH_LIMIT,
     );
     if (!path) {
       unit.path = [];

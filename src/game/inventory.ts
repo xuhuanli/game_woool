@@ -1,5 +1,5 @@
 import type { GameConfig, ItemDef, SpecialDef } from './config';
-import { slotsFor, type EquipSlot, type Equipment } from './equipment';
+import { EQUIP_SLOTS, slotsFor, type EquipSlot, type Equipment } from './equipment';
 import type { Rng } from './rng';
 import { refreshStats } from './stats';
 import type { GameEvent, Player } from './types';
@@ -231,6 +231,27 @@ export class Inventory {
       this.equip(equipment.uid);
     }
     return true;
+  }
+
+  /** 整理背包：法器按栏位、等级、品阶排，丹药符箓在前、功法书和材料在后。 */
+  sortBag(): void {
+    const { player, config } = this;
+    const grades = config.affixes.grades.map((grade) => grade.id);
+    const slotOrder = (itemId: string) => EQUIP_SLOTS.indexOf(slotsFor(config.items[itemId]!)[0] ?? 'weapon');
+    player.equipBag.sort(
+      (a, b) =>
+        slotOrder(a.itemId) - slotOrder(b.itemId) ||
+        (config.items[b.itemId]?.level ?? 1) - (config.items[a.itemId]?.level ?? 1) ||
+        grades.indexOf(b.grade) - grades.indexOf(a.grade) ||
+        a.uid - b.uid,
+    );
+    const kinds = ['potion', 'scroll', 'book', 'material'];
+    const rank = (itemId: string) => {
+      const item = config.items[itemId];
+      return item ? kinds.indexOf(item.kind) * 1000 + (item.heal ?? item.mana ?? 0) / 1000 : Infinity;
+    };
+    const ids = Object.keys(player.bag).sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+    player.bag = Object.fromEntries(ids.map((id) => [id, player.bag[id]!]));
   }
 
   bagIsFull(): boolean {

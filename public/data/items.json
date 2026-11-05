@@ -1168,5 +1168,57 @@
     "name": "冯家密窟钥匙",
     "kind": "material",
     "bound": true
+  },
+  "boss-fangjian-armor": {
+    "id": "boss-fangjian-armor",
+    "name": "方尖魔铠",
+    "kind": "equip",
+    "slot": "armor",
+    "level": 46,
+    "bonus": {
+      "defense": 26,
+      "maxHp": 460,
+      "primary": 4
+    },
+    "price": 30000,
+    "boss": "fangjian-elder"
+  },
+  "boss-fangjian-ring": {
+    "id": "boss-fangjian-ring",
+    "name": "方尖魔戒",
+    "kind": "equip",
+    "slot": "ring",
+    "level": 46,
+    "bonus": {
+      "primary": 17,
+      "accuracy": 3
+    },
+    "price": 30000,
+    "boss": "fangjian-younger"
+  },
+  "boss-wufeng-feather": {
+    "id": "boss-wufeng-feather",
+    "name": "乌凤翎",
+    "kind": "equip",
+    "slot": "weapon",
+    "level": 48,
+    "bonus": {
+      "primary": 60,
+      "luck": 1
+    },
+    "price": 50000,
+    "boss": "kuzhu-elder"
+  },
+  "beast-fang": {
+    "id": "beast-fang",
+    "name": "岩角兽牙",
+    "kind": "material",
+    "price": 220
+  },
+  "demon-token": {
+    "id": "demon-token",
+    "name": "魔修令牌",
+    "kind": "material",
+    "price": 230
   }
 }

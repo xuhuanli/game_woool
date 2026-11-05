@@ -12,6 +12,8 @@ const BAG_MIN_CELLS = 40;
 const DRAG_START_PIXELS = 5;
 /** 选中会重建格子，双击自己按两次单击的间隔判断 */
 const DOUBLE_CLICK_MS = 400;
+/** 丢弃这个品阶及以上的法器前先确认 */
+const CONFIRM_GRADES = ['high', 'top'];
 
 interface Drag {
   ref: ItemRef;
@@ -208,10 +210,10 @@ export class Panels {
     const total = Math.max(BAG_MIN_CELLS, Math.ceil(refs.length / BAG_COLUMNS) * BAG_COLUMNS);
     for (let i = refs.length; i < total; i++) grid.append(el('div', 'bag-cell empty'));
 
-    const footer = el(
-      'div',
-      'bag-footer',
-      `法器 ${player.equipBag.length} / ${this.config.affixes.bagCapacity} · 灵石 ${player.gold}`,
+    const footer = el('div', 'bag-footer');
+    footer.append(
+      el('span', '', `法器 ${player.equipBag.length} / ${this.config.affixes.bagCapacity} · 灵石 ${player.gold}`),
+      this.action('整理', () => this.world.inventory.sortBag()),
     );
     this.bag.replaceChildren(this.titleBar('背包', this.bag), grid, footer, this.actionBar());
   }
@@ -293,9 +295,27 @@ export class Panels {
       if (drag.ref.kind === 'equipment') this.world.inventory.equip(drag.ref.uid);
       return;
     }
-    if (drag.ref.kind === 'equipment') this.world.discard(drag.ref.uid);
-    else this.world.discardStack(drag.ref.id);
-    if (sameRef(this.selection, drag.ref)) this.selection = null;
+    const slot = target?.closest('#hud-hotbar > button');
+    if (slot) {
+      if (drag.ref.kind === 'stack') this.world.setHotbarItem([...slot.parentElement!.children].indexOf(slot), drag.ref.id);
+      return;
+    }
+    this.discard(drag.ref);
+  }
+
+  /** 丢弃，上品以上的法器先确认。 */
+  private discard(ref: ItemRef): void {
+    if (ref.kind === 'stack') {
+      this.world.discardStack(ref.id);
+    } else {
+      const found = findEquipment(this.world, ref.uid);
+      if (!found || found.slot) return;
+      const { equipment } = found;
+      const name = equipmentName(equipment, this.config);
+      if (CONFIRM_GRADES.includes(equipment.grade) && !confirm(`确定丢弃${name}？`)) return;
+      this.world.discard(ref.uid);
+    }
+    if (sameRef(this.selection, ref)) this.selection = null;
   }
 
   private refItemId(ref: ItemRef): string | null {
@@ -311,7 +331,7 @@ export class Panels {
     const selection = this.selection;
     const { player, inventory } = this.world;
     if (!selection) {
-      box.append(el('div', 'detail-hint', '悬停看详情 · 双击或右键使用 · 拖到背包外丢弃'));
+      box.append(el('div', 'detail-hint', '悬停看详情 · 双击或右键使用 · 拖到快捷栏最后两格放丹药 · 拖到背包外丢弃'));
       return box;
     }
     const actions = el('div', 'detail-actions');
@@ -324,7 +344,7 @@ export class Panels {
       } else if (item.kind === 'book') {
         actions.append(this.action('研读', () => inventory.useItem(selection.id)));
       }
-      if (!isBound(item)) actions.append(this.action('丢弃', () => this.world.discardStack(selection.id)));
+      if (!isBound(item)) actions.append(this.action('丢弃', () => this.discard(selection)));
       box.append(actions);
       return box;
     }
@@ -340,7 +360,7 @@ export class Panels {
       actions.append(this.action('卸下', () => inventory.unequip(slot)));
     } else {
       actions.append(this.action('装备', () => inventory.equip(equipment.uid)));
-      if (!isBound(item)) actions.append(this.action('丢弃', () => this.world.discard(equipment.uid)));
+      if (!isBound(item)) actions.append(this.action('丢弃', () => this.discard(selection)));
     }
     if (item.slot === 'weapon') {
       const { goldCost, material } = this.config.affixes.refine;

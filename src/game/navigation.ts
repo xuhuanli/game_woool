@@ -1,23 +1,43 @@
-import { monsterDrops, type PortalDef, type QuestDef } from './config';
+import { monsterDrops, type NpcDef, type PortalDef, type QuestDef } from './config';
 import { questStatus } from './quests';
 import type { Player, RouteTarget } from './types';
 import type { World } from './world';
 
-/** 用广度优先搜索找到去目标地图要走的第一个传送点，跳过未解锁的传送点。 */
-export function nextPortal(world: World, targetMap: string): PortalDef | null {
-  const { maps } = world.config;
+/** 去下一张地图的走法：走进传送点，或者找传送 NPC 付灵石传过去。 */
+export type RouteStep = { kind: 'portal'; portal: PortalDef } | { kind: 'travel'; npc: NpcDef; index: number };
+
+/** 从这张地图出发、已经解锁的路：传送点和本地图 NPC 的传送。 */
+function exits(world: World, mapId: string): { toMap: string; step: RouteStep }[] {
+  const { config, player } = world;
+  const result: { toMap: string; step: RouteStep }[] = [];
+  for (const portal of config.maps[mapId]?.portals ?? []) {
+    if (portal.requires && !world.questDone(portal.requires)) continue;
+    result.push({ toMap: portal.toMap, step: { kind: 'portal', portal } });
+  }
+  for (const npc of Object.values(config.npcs)) {
+    if (npc.map !== mapId) continue;
+    npc.travel?.forEach((option, index) => {
+      if (option.requires && !world.questDone(option.requires)) return;
+      if ((option.level ?? 1) > player.level) return;
+      result.push({ toMap: option.map, step: { kind: 'travel', npc, index } });
+    });
+  }
+  return result;
+}
+
+/** 用广度优先搜索找到去目标地图要走的第一步，跳过未解锁的路。 */
+export function nextStep(world: World, targetMap: string): RouteStep | null {
   const visited = new Set([world.mapId]);
-  let frontier: { mapId: string; first: PortalDef | null }[] = [{ mapId: world.mapId, first: null }];
+  let frontier: { mapId: string; first: RouteStep | null }[] = [{ mapId: world.mapId, first: null }];
   while (frontier.length > 0) {
     const next: typeof frontier = [];
     for (const { mapId, first } of frontier) {
-      for (const portal of maps[mapId]?.portals ?? []) {
-        if (portal.requires && !world.questDone(portal.requires)) continue;
-        if (visited.has(portal.toMap)) continue;
-        const route = first ?? portal;
-        if (portal.toMap === targetMap) return route;
-        visited.add(portal.toMap);
-        next.push({ mapId: portal.toMap, first: route });
+      for (const { toMap, step } of exits(world, mapId)) {
+        if (visited.has(toMap)) continue;
+        const route = first ?? step;
+        if (toMap === targetMap) return route;
+        visited.add(toMap);
+        next.push({ mapId: toMap, first: route });
       }
     }
     frontier = next;

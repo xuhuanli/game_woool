@@ -1,7 +1,7 @@
 import type { DamageStat, GameConfig, QuestDef } from '../game/config';
 import { equipmentName } from '../game/equipment';
 import { cellDistance } from '../game/grid';
-import { questDestination } from '../game/navigation';
+import { nextStep, questDestination } from '../game/navigation';
 import { objectiveCount, questStatus } from '../game/quests';
 import { pendingBreakthrough, realmName } from '../game/realm';
 import type { RouteTarget } from '../game/types';
@@ -132,9 +132,15 @@ export class Hud {
       return [{ text, quest }];
     });
     if (lines.length === 0) {
-      const next = Object.values(this.config.quests).find(
-        (quest) => questStatus(quest, player.quests, player.level, player.bag) === 'available',
-      );
+      // 先推荐主线，再推荐走得到、等级最接近的，免得后期一直挂着第一章的支线
+      const reachable = (quest: QuestDef) => {
+        const map = this.config.npcs[quest.giver]?.map;
+        return !!map && (map === world.mapId || nextStep(world, map) !== null);
+      };
+      const next = Object.values(this.config.quests)
+        .filter((quest) => questStatus(quest, player.quests, player.level, player.bag) === 'available')
+        .filter(reachable)
+        .sort((a, b) => Number(!!b.main) - Number(!!a.main) || b.level - a.level)[0];
       if (next) lines.push({ text: `可接：${next.name}（${this.config.npcs[next.giver]?.name}）`, quest: next });
     }
     const clockUntil = (time: number) => {

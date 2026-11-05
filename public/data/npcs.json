@@ -160,6 +160,14 @@
         "cost": 300,
         "level": 21,
         "requires": "ch4-array"
+      },
+      {
+        "name": "天星城",
+        "map": "tianxing-city",
+        "x": 20,
+        "y": 24,
+        "cost": 500,
+        "requires": "ch4-abandon"
       }
     ]
   },
@@ -365,6 +373,21 @@
     "color": "#9fd0ff",
     "greeting": "star-gate-greeting",
     "travel": [
+      {
+        "name": "黄枫谷",
+        "map": "huangfeng-valley",
+        "x": 20,
+        "y": 24,
+        "cost": 500
+      },
+      {
+        "name": "落云宗",
+        "map": "luoyun-sect",
+        "x": 20,
+        "y": 24,
+        "cost": 500,
+        "requires": "ch5-return"
+      },
       {
         "name": "外星海",
         "map": "outer-sea",
@@ -697,6 +720,14 @@
         "y": 12,
         "cost": 1200,
         "requires": "ch7-hu"
+      },
+      {
+        "name": "晋西坊市",
+        "map": "jinxi-market",
+        "x": 20,
+        "y": 24,
+        "cost": 1500,
+        "requires": "ch7-beast"
       }
     ]
   },
@@ -736,5 +767,136 @@
     "y": 12,
     "color": "#b4c8ff",
     "greeting": "tiandao-envoy-greeting"
+  },
+  "cao-mengrong": {
+    "id": "cao-mengrong",
+    "name": "曹梦容",
+    "map": "jinxi-market",
+    "x": 20,
+    "y": 16,
+    "color": "#e8b4c8",
+    "greeting": "cao-mengrong-greeting"
+  },
+  "jinxi-merchant": {
+    "id": "jinxi-merchant",
+    "name": "晋西坊市掌柜",
+    "map": "jinxi-market",
+    "x": 27,
+    "y": 20,
+    "color": "#c9a24a",
+    "greeting": "jinxi-merchant-greeting",
+    "storage": true,
+    "shop": [
+      "big-potion",
+      "big-mana",
+      "huge-potion",
+      "huge-mana",
+      "refine-stone",
+      "recall-scroll",
+      "random-scroll",
+      "book-body-charge-2",
+      "book-spell-firewall-2",
+      "book-spirit-miasma-2",
+      "book-body-mingwang-2",
+      "book-spell-qingyuan-2",
+      "book-spirit-corrosion-2",
+      "book-body-brahma-2",
+      "book-spell-bixie-2",
+      "book-spirit-puppet-2",
+      "seed-huichun",
+      "seed-ningqi",
+      "seed-yangyuan",
+      "seed-juling",
+      "seed-jinyuan",
+      "seed-xuanyin"
+    ]
+  },
+  "jinxi-guide": {
+    "id": "jinxi-guide",
+    "name": "坊市传送阵执事",
+    "map": "jinxi-market",
+    "x": 13,
+    "y": 20,
+    "color": "#9fd0ff",
+    "greeting": "jinxi-guide-greeting",
+    "travel": [
+      {
+        "name": "方尖山",
+        "map": "fangjian-mountain",
+        "x": 14,
+        "y": 14,
+        "cost": 900
+      },
+      {
+        "name": "冯家密窟",
+        "map": "fengjia-cave",
+        "x": 12,
+        "y": 12,
+        "cost": 1100,
+        "requires": "ch8-ginseng"
+      },
+      {
+        "name": "苦竹岛",
+        "map": "kuzhu-island",
+        "x": 12,
+        "y": 12,
+        "cost": 1300,
+        "requires": "ch8-invite"
+      },
+      {
+        "name": "苍鹭部",
+        "map": "cangl-tribe",
+        "x": 20,
+        "y": 24,
+        "cost": 1500
+      }
+    ]
+  },
+  "ginseng-host": {
+    "id": "ginseng-host",
+    "name": "参王大会主事",
+    "map": "jinxi-market",
+    "x": 24,
+    "y": 26,
+    "color": "#d8b46a",
+    "greeting": "ginseng-host-greeting"
+  },
+  "xiao-laoer": {
+    "id": "xiao-laoer",
+    "name": "肖老儿",
+    "map": "jinxi-market",
+    "x": 16,
+    "y": 26,
+    "color": "#8a7a5a",
+    "greeting": "xiao-laoer-greeting",
+    "requires": "ch8-ginseng"
+  },
+  "kuzhu-servant": {
+    "id": "kuzhu-servant",
+    "name": "苦竹岛童子",
+    "map": "jinxi-market",
+    "x": 24,
+    "y": 14,
+    "color": "#7ad87a",
+    "greeting": "kuzhu-servant-greeting",
+    "requires": "ch8-lizards"
+  },
+  "jin-herbalist": {
+    "id": "jin-herbalist",
+    "name": "方尖山采药人",
+    "map": "fangjian-mountain",
+    "x": 15,
+    "y": 12,
+    "color": "#a8865a",
+    "greeting": "jin-herbalist-greeting"
+  },
+  "feng-remnant": {
+    "id": "feng-remnant",
+    "name": "冯家残魂",
+    "map": "fengjia-cave",
+    "x": 15,
+    "y": 12,
+    "color": "#8ad8c8",
+    "greeting": "feng-remnant-greeting"
   }
 }

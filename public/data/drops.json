@@ -1625,5 +1625,290 @@
       "chance": 0.08,
       "firstKill": true
     }
+  ],
+  "jin-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 140,
+      "max": 200
+    },
+    {
+      "item": "huge-potion",
+      "chance": 0.12
+    },
+    {
+      "item": "huge-mana",
+      "chance": 0.1
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.028
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.017
+    },
+    {
+      "item": "sword-44",
+      "chance": 0.0023450000000000003
+    },
+    {
+      "item": "robe-44",
+      "chance": 0.0035
+    },
+    {
+      "item": "crown-44",
+      "chance": 0.0035
+    },
+    {
+      "item": "pendant-44",
+      "chance": 0.0035
+    },
+    {
+      "item": "bracelet-44",
+      "chance": 0.0035
+    },
+    {
+      "item": "ring-44",
+      "chance": 0.0035
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    }
+  ],
+  "fengjia-band": [
+    {
+      "item": "gold",
+      "chance": 0.95,
+      "min": 140,
+      "max": 200
+    },
+    {
+      "item": "huge-potion",
+      "chance": 0.12
+    },
+    {
+      "item": "huge-mana",
+      "chance": 0.1
+    },
+    {
+      "item": "refine-stone",
+      "chance": 0.028
+    },
+    {
+      "item": "skill-tome",
+      "chance": 0.017
+    },
+    {
+      "item": "sword-44",
+      "chance": 0.0023450000000000003
+    },
+    {
+      "item": "robe-44",
+      "chance": 0.0035
+    },
+    {
+      "item": "crown-44",
+      "chance": 0.0035
+    },
+    {
+      "item": "pendant-44",
+      "chance": 0.0035
+    },
+    {
+      "item": "bracelet-44",
+      "chance": 0.0035
+    },
+    {
+      "item": "ring-44",
+      "chance": 0.0035
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.004
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.004
+    }
+  ],
+  "fangjian-elder": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 7000,
+      "max": 10000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 4
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-44",
+      "chance": 0.15
+    },
+    {
+      "item": "robe-44",
+      "chance": 0.15
+    },
+    {
+      "item": "crown-44",
+      "chance": 0.15
+    },
+    {
+      "item": "pendant-44",
+      "chance": 0.15
+    },
+    {
+      "item": "bracelet-44",
+      "chance": 0.15
+    },
+    {
+      "item": "ring-44",
+      "chance": 0.15
+    },
+    {
+      "item": "boss-fangjian-armor",
+      "chance": 0.08,
+      "firstKill": true
+    }
+  ],
+  "fangjian-younger": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 7000,
+      "max": 10000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 4
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-44",
+      "chance": 0.15
+    },
+    {
+      "item": "robe-44",
+      "chance": 0.15
+    },
+    {
+      "item": "crown-44",
+      "chance": 0.15
+    },
+    {
+      "item": "pendant-44",
+      "chance": 0.15
+    },
+    {
+      "item": "bracelet-44",
+      "chance": 0.15
+    },
+    {
+      "item": "ring-44",
+      "chance": 0.15
+    },
+    {
+      "item": "boss-fangjian-ring",
+      "chance": 0.08,
+      "firstKill": true
+    }
+  ],
+  "kuzhu-elder": [
+    {
+      "item": "gold",
+      "chance": 1,
+      "min": 12000,
+      "max": 16000
+    },
+    {
+      "item": "refine-stone",
+      "chance": 1,
+      "min": 3,
+      "max": 4
+    },
+    {
+      "item": "skill-tome",
+      "chance": 1
+    },
+    {
+      "item": "sword-44",
+      "chance": 0.3
+    },
+    {
+      "item": "robe-44",
+      "chance": 0.3
+    },
+    {
+      "item": "crown-44",
+      "chance": 0.3
+    },
+    {
+      "item": "pendant-44",
+      "chance": 0.3
+    },
+    {
+      "item": "bracelet-44",
+      "chance": 0.3
+    },
+    {
+      "item": "ring-44",
+      "chance": 0.3
+    },
+    {
+      "item": "stun-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "revive-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "guard-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "blink-ring",
+      "chance": 0.15
+    },
+    {
+      "item": "boss-wufeng-feather",
+      "chance": 0.08,
+      "firstKill": true
+    }
   ]
 }

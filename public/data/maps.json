@@ -343,5 +343,65 @@
       "alpha": 0.08
     },
     "music": "tianlan"
+  },
+  "jinxi-market": {
+    "id": "jinxi-market",
+    "name": "晋西坊市",
+    "safe": true,
+    "tiled": "jinxi-market.tmj",
+    "respawn": {
+      "map": "jinxi-market",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#f0e0c0",
+      "alpha": 0.04
+    }
+  },
+  "fangjian-mountain": {
+    "id": "fangjian-mountain",
+    "name": "方尖山",
+    "tiled": "fangjian-mountain.tmj",
+    "respawn": {
+      "map": "jinxi-market",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#c8d0b0",
+      "alpha": 0.08
+    },
+    "music": "jin"
+  },
+  "fengjia-cave": {
+    "id": "fengjia-cave",
+    "name": "冯家密窟",
+    "tiled": "fengjia-cave.tmj",
+    "respawn": {
+      "map": "jinxi-market",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#7a8aa8",
+      "alpha": 0.22
+    },
+    "music": "jin"
+  },
+  "kuzhu-island": {
+    "id": "kuzhu-island",
+    "name": "苦竹岛",
+    "tiled": "kuzhu-island.tmj",
+    "respawn": {
+      "map": "jinxi-market",
+      "x": 20,
+      "y": 24
+    },
+    "tone": {
+      "color": "#c8e8c0",
+      "alpha": 0.08
+    },
+    "music": "jin"
   }
 }

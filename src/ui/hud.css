@@ -475,6 +475,9 @@ body,
 }
 
 .bag-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin: 8px 0;
   font-size: 12px;
   color: #a79c84;

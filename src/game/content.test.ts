@@ -1515,6 +1515,30 @@ describe('自动寻路', () => {
     return { world, target: questDestination(world, config.quests['ch1-herbs']!, world.player)! };
   };
 
+  it('寻路能经过传送 NPC，跨章节回到早期地图', () => {
+    const world = new World(config, 'cangl-tribe', 'body', 1);
+    world.player.level = 45;
+    world.player.gold = 5000;
+    world.player.quests.completed.push('ch4-abandon', 'ch5-return', 'ch6-invite');
+    world.navigate({ mapId: 'starter-field', cell: { x: 10, y: 10 } });
+    const visited = new Set<string>();
+    run(world, 600, () => {
+      visited.add(world.mapId);
+      return world.mapId === 'starter-field';
+    });
+    expect(world.mapId).toBe('starter-field');
+    expect([...visited]).toEqual(expect.arrayContaining(['luoyun-sect', 'tianxing-city', 'huangfeng-valley']));
+  });
+
+  it('付不起传送费就停下寻路', () => {
+    const world = new World(config, 'tianxing-city', 'body', 1);
+    world.player.gold = 0;
+    world.navigate({ mapId: 'huangfeng-valley', cell: { x: 10, y: 10 } });
+    run(world, 60, () => world.player.route === null);
+    expect(world.player.route).toBeNull();
+    expect(world.mapId).toBe('tianxing-city');
+  });
+
   it('点任务寻路立刻放下正在打的怪', () => {
     const world = new World(config, 'starter-field', 'body', 1);
     world.attack(world.monsters[0]!);
@@ -1577,6 +1601,30 @@ describe('丢弃物品', () => {
     expect(world.items.find((item) => item.def.id === 'small-potion')).toMatchObject({ amount: 5, discarded: true });
     run(world, 2);
     expect(world.player.bag['small-potion']).toBeUndefined();
+  });
+
+  it('整理背包：丹药在材料前，法器按栏位和等级排', () => {
+    const world = new World(config, 'starter-field', 'body', 1);
+    world.player.equipBag.length = 0;
+    world.player.bag = { 'ape-fur': 2, 'small-potion': 3, 'recall-scroll': 1 };
+    const add = (uid: number, itemId: string) =>
+      world.player.equipBag.push({ uid, itemId, grade: 'low', affixes: [], luck: 0 } as Equipment);
+    add(1, 'ring-14');
+    add(2, 'sword-14');
+    add(3, 'sword-27');
+    world.inventory.sortBag();
+    expect(Object.keys(world.player.bag)).toEqual(['small-potion', 'recall-scroll', 'ape-fur']);
+    expect(world.player.equipBag.map((equipment) => equipment.itemId)).toEqual(['sword-27', 'sword-14', 'ring-14']);
+  });
+
+  it('丹药只能拖进快捷栏最后两格', () => {
+    const world = new World(config, 'starter-field', 'body', 1);
+    world.setHotbarItem(0, 'mid-potion');
+    expect(world.player.hotbar[0]?.kind).not.toBe('item');
+    world.setHotbarItem(7, 'mid-potion');
+    expect(world.player.hotbar[7]).toEqual({ kind: 'item', id: 'mid-potion' });
+    world.setHotbarItem(8, 'flying-boots');
+    expect(world.player.hotbar[8]?.id).not.toBe('flying-boots');
   });
 
   it('绑定物品和 Boss 专属法器丢不掉', () => {
@@ -2021,6 +2069,60 @@ describe('第 7 章 天澜草原', () => {
     const world = new World(config, 'tianlan-grass', 'body', 1);
     for (const piece of config.sets['tianlan']!.pieces) {
       expect(itemSources(config, world.player, piece).length, piece).toBeGreaterThan(0);
+    }
+  });
+});
+
+describe('第 8 章 大晋', () => {
+  const chain = Object.values(config.quests).filter((quest) => quest.id.startsWith('ch8-'));
+
+  it('第 7 章结局漂进大晋，主线接在后面，任务经验约占 45～50 级的四成', () => {
+    expect(config.quests['ch7-beast']!.rewards.teleport?.map).toBe('jinxi-market');
+    expect(chain[0]!.prev).toBe('ch7-beast');
+    for (const quest of chain) expect(quest.main, quest.id).toBe(true);
+    const levels = config.levels.expToNext.slice(44, 49).reduce((sum, exp) => sum + exp, 0);
+    const quests = chain.reduce((sum, quest) => sum + quest.rewards.exp, 0);
+    expect(quests / levels).toBeGreaterThan(0.3);
+    expect(quests / levels).toBeLessThan(0.5);
+  });
+
+  it('按顺序做完第 8 章主线，传送阵跟着任务开放', () => {
+    const world = new World(config, 'jinxi-market', 'body', 1);
+    const { player } = world;
+    player.level = 49;
+    player.quests.completed.push(...Object.keys(config.quests).filter((id) => !id.startsWith('ch8-')));
+    const guide = config.npcs['jinxi-guide']!;
+    const option = (map: string) => guide.travel!.find((candidate) => candidate.map === map)!;
+    expect(option('fengjia-cave').requires).toBe('ch8-ginseng');
+    expect(option('kuzhu-island').requires).toBe('ch8-invite');
+    for (const quest of chain) {
+      expect(questStatus(quest, player.quests, player.level, player.bag), quest.id).toBe('available');
+      world.acceptQuest(quest.id);
+      const progress = player.quests.active.find((active) => active.id === quest.id)!;
+      progress.counts = quest.objectives.map((objective) => objective.count);
+      world.turnInQuest(quest.id);
+      expect(player.quests.completed, quest.id).toContain(quest.id);
+    }
+  });
+
+  it('方尖山二魔同在山顶，Boss 离 NPC 足够远', () => {
+    const spawns = config.maps['fangjian-mountain']!.spawns;
+    const elder = spawns.find((spawn) => spawn.monster === 'fangjian-elder')!;
+    const younger = spawns.find((spawn) => spawn.monster === 'fangjian-younger')!;
+    expect(Math.hypot(elder.x - younger.x, elder.y - younger.y)).toBeLessThan(10);
+    expect(config.quests['ch8-twins']!.objectives.map((objective) => objective.target)).toEqual([
+      'fangjian-elder',
+      'fangjian-younger',
+    ]);
+    for (const [mapId, bossId] of [
+      ['fangjian-mountain', 'fangjian-elder'],
+      ['fangjian-mountain', 'yin-mo'],
+      ['kuzhu-island', 'kuzhu-elder'],
+    ] as const) {
+      const boss = config.maps[mapId]!.spawns.find((spawn) => spawn.monster === bossId)!;
+      for (const npc of Object.values(config.npcs).filter((candidate) => candidate.map === mapId)) {
+        expect(Math.hypot(npc.x - boss.x, npc.y - boss.y) - 2, npc.id).toBeGreaterThan(config.monsters[bossId]!.aggroRange);
+      }
     }
   });
 });

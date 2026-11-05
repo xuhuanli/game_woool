@@ -2690,7 +2690,7 @@
       "gold": 15000,
       "items": [],
       "teleport": {
-        "map": "cangl-tribe",
+        "map": "jinxi-market",
         "x": 20,
         "y": 24
       }
@@ -2861,5 +2861,446 @@
     "offer": "side-ch7-arrows-offer",
     "finish": "side-ch7-arrows-finish",
     "prev": "ch7-archers"
+  },
+  "ch8-wake": {
+    "id": "ch8-wake",
+    "name": "醒于大晋",
+    "giver": "cao-mengrong",
+    "level": 45,
+    "summary": "伤势初愈，去坊市见参王大会的主事。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "ginseng-host",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 43000,
+      "gold": 3000,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch8-wake-offer",
+    "finish": "ch8-wake-finish",
+    "prev": "ch7-beast",
+    "main": true
+  },
+  "ch8-mountain": {
+    "id": "ch8-mountain",
+    "name": "方尖山",
+    "giver": "ginseng-host",
+    "level": 45,
+    "summary": "去方尖山找采药人，打听山里的情形。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "jin-herbalist",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 43000,
+      "gold": 3000,
+      "items": [],
+      "teleport": {
+        "map": "fangjian-mountain",
+        "x": 14,
+        "y": 14
+      }
+    },
+    "offer": "ch8-mountain-offer",
+    "finish": "ch8-mountain-finish",
+    "prev": "ch8-wake",
+    "main": true
+  },
+  "ch8-beasts": {
+    "id": "ch8-beasts",
+    "name": "岩角妖兽",
+    "giver": "jin-herbalist",
+    "level": 45,
+    "summary": "击败 12 只岩角妖兽。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "rock-beast",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 119000,
+      "gold": 5600,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch8-beasts-offer",
+    "finish": "ch8-beasts-finish",
+    "prev": "ch8-mountain",
+    "main": true
+  },
+  "ch8-ogres": {
+    "id": "ch8-ogres",
+    "name": "山魈",
+    "giver": "jin-herbalist",
+    "level": 46,
+    "summary": "击败 12 只山魈。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "mountain-ogre",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 124000,
+      "gold": 5800,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch8-ogres-offer",
+    "finish": "ch8-ogres-finish",
+    "prev": "ch8-beasts",
+    "main": true
+  },
+  "ch8-demons": {
+    "id": "ch8-demons",
+    "name": "大晋魔修",
+    "giver": "jin-herbalist",
+    "level": 46,
+    "summary": "击败 12 名在山里截杀采药人的魔修。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "jin-demon",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 127500,
+      "gold": 6000,
+      "items": [
+        {
+          "item": "huge-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch8-demons-offer",
+    "finish": "ch8-demons-finish",
+    "prev": "ch8-ogres",
+    "main": true
+  },
+  "ch8-yin": {
+    "id": "ch8-yin",
+    "name": "殷姓魔修",
+    "giver": "jin-herbalist",
+    "level": 47,
+    "summary": "找出魔修的头目殷姓魔修，击败他。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "yin-mo",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 97000,
+      "gold": 6000,
+      "items": [
+        {
+          "item": "skill-tome",
+          "count": 1
+        }
+      ]
+    },
+    "offer": "ch8-yin-offer",
+    "finish": "ch8-yin-finish",
+    "prev": "ch8-demons",
+    "main": true
+  },
+  "ch8-twins": {
+    "id": "ch8-twins",
+    "name": "方尖山二魔",
+    "giver": "jin-herbalist",
+    "level": 47,
+    "summary": "击败盘踞山顶的方尖大魔和方尖二魔。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "fangjian-elder",
+        "count": 1
+      },
+      {
+        "type": "kill",
+        "target": "fangjian-younger",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 183500,
+      "gold": 12000,
+      "items": []
+    },
+    "offer": "ch8-twins-offer",
+    "finish": "ch8-twins-finish",
+    "prev": "ch8-yin",
+    "main": true
+  },
+  "ch8-ginseng": {
+    "id": "ch8-ginseng",
+    "name": "参王大会",
+    "giver": "jin-herbalist",
+    "level": 47,
+    "summary": "带着山里采来的灵药，回坊市赴参王大会。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "ginseng-host",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 43000,
+      "gold": 3000,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch8-ginseng-offer",
+    "finish": "ch8-ginseng-finish",
+    "prev": "ch8-twins",
+    "main": true
+  },
+  "ch8-cave": {
+    "id": "ch8-cave",
+    "name": "冯家密窟",
+    "giver": "cao-mengrong",
+    "level": 48,
+    "summary": "带着枫岳给的钥匙去冯家密窟。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "feng-remnant",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 43000,
+      "gold": 3000,
+      "items": [],
+      "teleport": {
+        "map": "fengjia-cave",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch8-cave-offer",
+    "finish": "ch8-cave-finish",
+    "prev": "ch8-ginseng",
+    "main": true
+  },
+  "ch8-puppets": {
+    "id": "ch8-puppets",
+    "name": "禁制傀儡",
+    "giver": "feng-remnant",
+    "level": 48,
+    "summary": "击毁 12 尊守窟的禁制傀儡。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "ward-puppet",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 129500,
+      "gold": 6200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 3
+        }
+      ]
+    },
+    "offer": "ch8-puppets-offer",
+    "finish": "ch8-puppets-finish",
+    "prev": "ch8-cave",
+    "main": true
+  },
+  "ch8-ghosts": {
+    "id": "ch8-ghosts",
+    "name": "冯家阴魂",
+    "giver": "feng-remnant",
+    "level": 48,
+    "summary": "超度 12 道困在密窟里的冯家阴魂。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "feng-ghost",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 132000,
+      "gold": 6400,
+      "items": [
+        {
+          "item": "huge-mana",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch8-ghosts-offer",
+    "finish": "ch8-ghosts-finish",
+    "prev": "ch8-puppets",
+    "main": true
+  },
+  "ch8-lizards": {
+    "id": "ch8-lizards",
+    "name": "守窟石蜥",
+    "giver": "feng-remnant",
+    "level": 49,
+    "summary": "击败密窟深处的 12 只守窟石蜥。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "cave-lizard",
+        "count": 12
+      }
+    ],
+    "rewards": {
+      "exp": 135000,
+      "gold": 6600,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 10
+        }
+      ]
+    },
+    "offer": "ch8-lizards-offer",
+    "finish": "ch8-lizards-finish",
+    "prev": "ch8-ghosts",
+    "main": true
+  },
+  "ch8-invite": {
+    "id": "ch8-invite",
+    "name": "苦竹之约",
+    "giver": "kuzhu-servant",
+    "level": 49,
+    "summary": "苦竹老人听说了你的名头，约你上苦竹岛比试。",
+    "objectives": [
+      {
+        "type": "talk",
+        "target": "kuzhu-servant",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 43000,
+      "gold": 3000,
+      "items": [],
+      "teleport": {
+        "map": "kuzhu-island",
+        "x": 12,
+        "y": 12
+      }
+    },
+    "offer": "ch8-invite-offer",
+    "finish": "ch8-invite-finish",
+    "prev": "ch8-lizards",
+    "main": true
+  },
+  "ch8-duel": {
+    "id": "ch8-duel",
+    "name": "苦竹老人",
+    "giver": "kuzhu-servant",
+    "level": 49,
+    "summary": "在苦竹岛和苦竹老人比试，逼他认输。",
+    "objectives": [
+      {
+        "type": "kill",
+        "target": "kuzhu-elder",
+        "count": 1
+      }
+    ],
+    "rewards": {
+      "exp": 216000,
+      "gold": 18000,
+      "items": []
+    },
+    "offer": "ch8-duel-offer",
+    "finish": "ch8-duel-finish",
+    "prev": "ch8-invite",
+    "main": true
+  },
+  "side-ch8-fangs": {
+    "id": "side-ch8-fangs",
+    "name": "岩角兽牙",
+    "giver": "jinxi-merchant",
+    "level": 45,
+    "summary": "收集 6 枚岩角兽牙交给坊市掌柜。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "beast-fang",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 80000,
+      "gold": 5000,
+      "items": [
+        {
+          "item": "huge-potion",
+          "count": 5
+        }
+      ]
+    },
+    "offer": "side-ch8-fangs-offer",
+    "finish": "side-ch8-fangs-finish",
+    "prev": "ch8-mountain"
+  },
+  "side-ch8-xiao": {
+    "id": "side-ch8-xiao",
+    "name": "肖老儿",
+    "giver": "xiao-laoer",
+    "level": 47,
+    "summary": "收集 6 块魔修令牌交给肖老儿。",
+    "objectives": [
+      {
+        "type": "collect",
+        "target": "demon-token",
+        "count": 6
+      }
+    ],
+    "rewards": {
+      "exp": 85000,
+      "gold": 5200,
+      "items": [
+        {
+          "item": "refine-stone",
+          "count": 4
+        }
+      ]
+    },
+    "offer": "side-ch8-xiao-offer",
+    "finish": "side-ch8-xiao-finish",
+    "prev": "ch8-ginseng"
   }
 }
