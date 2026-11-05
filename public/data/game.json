@@ -13,5 +13,11 @@
     "goldRadius": 6,
     "itemRadius": 2,
     "equipmentRadius": 6
-  }
+  },
+  "globalDrops": [
+    {
+      "item": "flying-boots",
+      "chance": 0.01
+    }
+  ]
 }

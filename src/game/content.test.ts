@@ -1506,6 +1506,89 @@ describe('自动寻路', () => {
     world.player.bag['ape-fur'] = 3;
     expect(questDestination(world, config.quests['ape-fur']!, world.player)?.npc?.id).toBe('herb-keeper');
   });
+
+  const herbQuest = () => {
+    const world = town();
+    world.player.level = 3;
+    world.player.quests.completed.push('ch1-enter', 'join-sect');
+    world.acceptQuest('ch1-herbs');
+    return { world, target: questDestination(world, config.quests['ch1-herbs']!, world.player)! };
+  };
+
+  it('点任务寻路立刻放下正在打的怪', () => {
+    const world = new World(config, 'starter-field', 'body', 1);
+    world.attack(world.monsters[0]!);
+    world.navigate({ mapId: 'qixuan-gate', cell: { x: 5, y: 5 } });
+    expect(world.player.order?.type).toBe('move');
+    expect(world.player.route?.mapId).toBe('qixuan-gate');
+  });
+
+  it('寻路到刷怪地图后自动挂机，优先打任务要的怪', () => {
+    const { world, target } = herbQuest();
+    expect(target.hunt).toBeDefined();
+    world.player.auto.enabled = false;
+    world.navigate(target);
+    run(world, 300, () => world.mapId === target.mapId && world.player.route === null);
+    expect(world.mapId).toBe(target.mapId);
+    expect(world.player.auto.enabled).toBe(true);
+    expect(world.autoPlay.hunt).toBe(target.hunt);
+  });
+
+  it('飞行靴直接飞到任务目的地并开始挂机，没有靴子就不动', () => {
+    const { world, target } = herbQuest();
+    world.player.bag['flying-boots'] = 0;
+    world.flyTo(target);
+    expect(world.mapId).toBe('huangfeng-valley');
+    world.player.bag['flying-boots'] = 2;
+    world.flyTo(target);
+    expect(world.mapId).toBe(target.mapId);
+    expect(world.player.bag['flying-boots']).toBe(1);
+    expect(world.player.auto.enabled).toBe(true);
+    expect(cellDistance(world.player.cell, target.cell)).toBeLessThanOrEqual(3);
+  });
+
+  it('任务完成后飞行靴飞回交任务的 NPC 并对话', () => {
+    const world = new World(config, 'starter-field', 'body', 1);
+    world.player.bag['flying-boots'] = 1;
+    const npc = config.npcs[config.quests['ch1-enter']!.giver]!;
+    world.flyTo({ mapId: npc.map, cell: { x: npc.x, y: npc.y }, npc });
+    expect(world.mapId).toBe(npc.map);
+    expect(world.player.order).toMatchObject({ type: 'talk', npc });
+  });
+
+  it('所有怪都有 1% 掉飞行靴，前期任务也送', () => {
+    for (const monster of Object.values(config.monsters)) {
+      expect(monsterDrops(config, monster)).toContainEqual({ item: 'flying-boots', chance: 0.01 });
+    }
+    const gifts = Object.values(config.quests)
+      .flatMap((quest) => quest.rewards.items)
+      .filter((reward) => reward.item === 'flying-boots')
+      .reduce((sum, reward) => sum + reward.count, 0);
+    expect(gifts).toBeGreaterThanOrEqual(10);
+  });
+});
+
+describe('丢弃物品', () => {
+  it('整叠丹药丢到脚边，不会被自动吸回', () => {
+    const world = new World(config, 'starter-field', 'body', 1);
+    world.player.bag['small-potion'] = 5;
+    world.discardStack('small-potion');
+    expect(world.player.bag['small-potion']).toBeUndefined();
+    expect(world.items.find((item) => item.def.id === 'small-potion')).toMatchObject({ amount: 5, discarded: true });
+    run(world, 2);
+    expect(world.player.bag['small-potion']).toBeUndefined();
+  });
+
+  it('绑定物品和 Boss 专属法器丢不掉', () => {
+    const world = new World(config, 'starter-field', 'body', 1);
+    world.player.bag['fengjia-key'] = 1;
+    world.discardStack('fengjia-key');
+    expect(world.player.bag['fengjia-key']).toBe(1);
+    const boss = Object.values(config.items).find((item) => item.boss)!;
+    world.player.equipBag.push({ uid: 900, itemId: boss.id, grade: 'low', affixes: [], luck: 0 } as Equipment);
+    world.discard(900);
+    expect(world.player.equipBag.some((equipment) => equipment.uid === 900)).toBe(true);
+  });
 });
 
 

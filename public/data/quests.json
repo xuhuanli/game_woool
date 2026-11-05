@@ -20,6 +20,10 @@
         {
           "item": "small-potion",
           "count": 5
+        },
+        {
+          "item": "flying-boots",
+          "count": 5
         }
       ]
     },
@@ -46,6 +50,10 @@
       "items": [
         {
           "item": "small-mana",
+          "count": 3
+        },
+        {
+          "item": "flying-boots",
           "count": 3
         }
       ]
@@ -150,7 +158,12 @@
     "rewards": {
       "exp": 1000,
       "gold": 100,
-      "items": []
+      "items": [
+        {
+          "item": "flying-boots",
+          "count": 3
+        }
+      ]
     },
     "offer": "ch1-report-offer",
     "finish": "ch1-report-finish",
@@ -180,6 +193,10 @@
         },
         {
           "item": "small-potion",
+          "count": 5
+        },
+        {
+          "item": "flying-boots",
           "count": 5
         }
       ],
@@ -242,6 +259,10 @@
         {
           "item": "small-mana",
           "count": 5
+        },
+        {
+          "item": "flying-boots",
+          "count": 5
         }
       ],
       "teleport": {
@@ -271,7 +292,12 @@
     "rewards": {
       "exp": 4000,
       "gold": 200,
-      "items": []
+      "items": [
+        {
+          "item": "flying-boots",
+          "count": 3
+        }
+      ]
     },
     "offer": "ch2-market-offer",
     "finish": "ch2-market-finish",

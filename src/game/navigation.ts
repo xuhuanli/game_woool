@@ -28,7 +28,7 @@ export function nextPortal(world: World, targetMap: string): PortalDef | null {
 function mapWithMonster(world: World, monsterId: string): RouteTarget | null {
   for (const map of Object.values(world.config.maps)) {
     const spawn = map.spawns.find((candidate) => candidate.monster === monsterId);
-    if (spawn) return { mapId: map.id, cell: { x: spawn.x, y: spawn.y } };
+    if (spawn) return { mapId: map.id, cell: { x: spawn.x, y: spawn.y }, hunt: monsterId };
   }
   return null;
 }

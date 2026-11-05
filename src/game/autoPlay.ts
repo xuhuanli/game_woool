@@ -18,6 +18,8 @@ export class AutoPlay {
   private thinkLeft = 0;
   private pauseLeft = 0;
   private readonly unreachable = new Set<number>();
+  /** 任务寻路到达后要刷的怪，是 Boss 也会打 */
+  hunt: string | null = null;
 
   constructor(private readonly world: World) {}
 
@@ -50,7 +52,7 @@ export class AutoPlay {
 
     const target = this.currentTarget();
     if (target) this.useSkills(target, health);
-    if (player.order) return;
+    if (player.order || player.route) return;
 
     const item = this.nearestWantedItem();
     if (item) {
@@ -136,7 +138,7 @@ export class AutoPlay {
     let best: GroundItem | null = null;
     let bestDistance = PICKUP_RADIUS + 1;
     for (const item of world.items) {
-      if (this.unreachable.has(item.id)) continue;
+      if (this.unreachable.has(item.id) || item.discarded) continue;
       if (item.equipment) {
         const rank = grades.findIndex((grade) => grade.id === item.equipment?.grade);
         if (bagFull || rank < lowest) continue;
@@ -151,11 +153,13 @@ export class AutoPlay {
   }
 
   private nearestMonster(): Monster | null {
-    const { world } = this;
+    const { world, hunt } = this;
+    const hunted = hunt !== null && world.monsters.some((monster) => monster.hp > 0 && monster.def.id === hunt);
     let best: Monster | null = null;
     let bestDistance = Infinity;
     for (const monster of world.monsters) {
-      if (!monster.hp || monster.def.boss) continue;
+      if (!monster.hp) continue;
+      if (hunted ? monster.def.id !== hunt : monster.def.boss) continue;
       const distance = cellDistance(world.player.cell, monster.cell);
       if (distance < bestDistance) {
         best = monster;

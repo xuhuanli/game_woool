@@ -15,7 +15,7 @@ import type {
   PortalDef,
   SkillDef,
 } from './config';
-import { monsterDrops } from './config';
+import { isBound, monsterDrops } from './config';
 import { equipmentName, EQUIP_SLOTS, rollEquipment, type Equipment } from './equipment';
 import { cellDistance, Grid, sameCell } from './grid';
 import { Inventory } from './inventory';
@@ -54,6 +54,8 @@ export * from './types';
 
 export const TICK_SECONDS = 0.05;
 export const HOTBAR_SIZE = 9;
+/** 飞行靴：点任务旁的图标直接飞到任务目的地 */
+export const FLYING_BOOTS = 'flying-boots';
 
 const REPATH_SECONDS = 0.3;
 const RESPAWN_SECONDS = 3;
@@ -233,6 +235,7 @@ export class World {
     player.order = null;
     player.path = [];
     this.fields = [];
+    this.autoPlay.hunt = null;
     this.loadMap(mapId);
     const arrival = this.grid.nearest(cell, (c) => this.isFree(c, player)) ?? cell;
     player.cell = { ...arrival };
@@ -451,15 +454,68 @@ export class World {
     this.teleportRandomly();
   }
 
-  /** 自动寻路到目的地，跨地图时沿传送点走，能接上后续对话。 */
+  /** 自动寻路到目的地，跨地图时沿传送点走，能接上后续对话。正在打的怪直接放下。 */
   navigate(target: RouteTarget): void {
-    if (!this.player.hp) return;
-    if (target.mapId !== this.mapId && !nextPortal(this, target.mapId)) {
-      this.emit({ type: 'message', text: '暂时找不到去那里的路' });
-      return;
-    }
+    if (!this.canReach(target)) return;
+    this.dropCurrentAction();
     this.player.route = target;
     this.followRoute();
+  }
+
+  /** 飞行靴：消耗一双，直接落到目的地，再接上对话或挂机。 */
+  flyTo(target: RouteTarget): void {
+    const { player } = this;
+    const boots = this.config.items[FLYING_BOOTS];
+    if (!boots || !this.canReach(target)) return;
+    if (!player.bag[FLYING_BOOTS]) {
+      this.emit({ type: 'message', text: `没有${boots.name}了` });
+      return;
+    }
+    this.inventory.removeFromBag(FLYING_BOOTS);
+    this.dropCurrentAction();
+    player.route = null;
+    const landing = target.npc ? { x: target.npc.x + 1, y: target.npc.y + 1 } : target.cell;
+    if (target.mapId === this.mapId) {
+      const cell = this.grid.nearest(landing, (c) => this.isFree(c, player)) ?? player.cell;
+      player.cell = { ...cell };
+      player.pos = { ...cell };
+      this.emit({ type: 'teleported' });
+    } else {
+      this.changeMap(target.mapId, landing);
+    }
+    this.arrive(target);
+  }
+
+  private canReach(target: RouteTarget): boolean {
+    if (!this.player.hp) return false;
+    if (target.mapId === this.mapId || nextPortal(this, target.mapId)) return true;
+    this.emit({ type: 'message', text: '暂时找不到去那里的路' });
+    return false;
+  }
+
+  private dropCurrentAction(): void {
+    const { player } = this;
+    player.order = null;
+    player.path = [];
+    player.windupLeft = 0;
+    player.pending = null;
+    player.queuedSkill = null;
+  }
+
+  /** 到达任务地图：找 NPC 对话，或去刷怪点并开启挂机。 */
+  private arrive(route: RouteTarget): void {
+    if (route.npc) {
+      this.talkTo(route.npc);
+      return;
+    }
+    this.walkTo(route.cell);
+    if (route.hunt && !this.map.safe) {
+      this.autoPlay.hunt = route.hunt;
+      if (!this.player.auto.enabled) {
+        this.player.auto.enabled = true;
+        this.emit({ type: 'message', text: '已到达，开始挂机' });
+      }
+    }
   }
 
   private followRoute(): void {
@@ -468,8 +524,7 @@ export class World {
     if (!route || player.order) return;
     if (route.mapId === this.mapId) {
       player.route = null;
-      if (route.npc) this.talkTo(route.npc);
-      else this.walkTo(route.cell);
+      this.arrive(route);
       return;
     }
     const portal = nextPortal(this, route.mapId);
@@ -590,15 +645,40 @@ export class World {
     player.repathLeft = 0;
   }
 
-  /** 把背包里的法器丢到脚边，丢弃后仍可捡回。 */
+  /** 把背包里的法器丢到脚边，丢弃后仍可捡回。绑定的东西丢不掉。 */
   discard(uid: number): void {
     const player = this.player;
     const equipment = player.equipBag.find((candidate) => candidate.uid === uid);
     const item = equipment && this.config.items[equipment.itemId];
-    const cell = this.grid.nearest(player.cell, (c) => this.canDropAt(c) && !sameCell(c, player.cell));
-    if (!player.hp || !equipment || !item || !cell) return;
+    if (!equipment || !item || !this.canDiscard(item)) return;
+    const cell = this.dropCell();
+    if (!cell) return;
     player.equipBag.splice(player.equipBag.indexOf(equipment), 1);
     this.spawnItem(item, 1, equipment, cell).discarded = true;
+  }
+
+  /** 把一整叠丹药材料丢到脚边，不会被自动吸回来。 */
+  discardStack(itemId: string): void {
+    const { player } = this;
+    const item = this.config.items[itemId];
+    const count = player.bag[itemId] ?? 0;
+    if (!item || count <= 0 || !this.canDiscard(item)) return;
+    const cell = this.dropCell();
+    if (!cell) return;
+    delete player.bag[itemId];
+    this.spawnItem(item, count, null, cell).discarded = true;
+  }
+
+  private canDiscard(item: ItemDef): boolean {
+    if (!this.player.hp) return false;
+    if (!isBound(item)) return true;
+    this.emit({ type: 'message', text: `${item.name}已绑定，不能丢弃` });
+    return false;
+  }
+
+  private dropCell(): Cell | null {
+    const { player } = this;
+    return this.grid.nearest(player.cell, (c) => this.canDropAt(c) && !sameCell(c, player.cell));
   }
 
   // ---- NPC、商店、任务 ----
@@ -1628,7 +1708,7 @@ export class World {
     const { player } = this;
     const { goldRadius, itemRadius } = this.config.game.pickup;
     for (const item of [...this.items]) {
-      if (item.equipment) continue;
+      if (item.equipment || item.discarded) continue;
       const radius = item.def.kind === 'gold' ? goldRadius : itemRadius;
       if (cellDistance(player.cell, item.cell) > radius) continue;
       this.removeItem(item);

@@ -4,9 +4,13 @@ import { cellDistance } from '../game/grid';
 import { questDestination } from '../game/navigation';
 import { objectiveCount, questStatus } from '../game/quests';
 import { pendingBreakthrough, realmName } from '../game/realm';
-import { HOTBAR_SIZE, type World } from '../game/world';
+import type { RouteTarget } from '../game/types';
+import { FLYING_BOOTS, HOTBAR_SIZE, type World } from '../game/world';
 import { iconUrl } from './icons';
+import { itemDetail } from './itemInfo';
 import { Minimap } from './minimap';
+import { skillDetail } from './skillInfo';
+import { attachTooltip } from './tooltip';
 
 const LOG_LINES = 7;
 const BOSS_BAR_DISTANCE = 12;
@@ -69,6 +73,12 @@ export class Hud {
       icon.hidden = true;
       button.append(icon, key, label, cooldown);
       button.addEventListener('click', () => this.onSlot(slot));
+      attachTooltip(button, () => {
+        const entry = world.player.hotbar[slot];
+        const skill = entry?.kind === 'skill' && world.config.skills[entry.id];
+        if (skill) return skillDetail(world, skill);
+        return entry?.kind === 'item' ? itemDetail(world, { kind: 'stack', id: entry.id }) : [];
+      });
       hotbar.append(button);
       this.slots.push({ button, icon, label, cooldown });
     }
@@ -140,25 +150,51 @@ export class Hud {
     this.quests.replaceChildren(
       ...lines.map(({ text, quest }) => {
         const row = document.createElement('div');
-        row.textContent = text;
-        if (quest) {
-          row.className = 'quest-link';
-          row.title = '点击自动寻路';
-          row.addEventListener('click', () => this.navigateTo(world, quest));
+        if (!quest) {
+          row.textContent = text;
+          return row;
         }
+        row.className = 'quest-row';
+        const link = document.createElement('span');
+        link.className = 'quest-link';
+        link.textContent = text;
+        link.title = '点击自动寻路';
+        // 战斗中任务行经常重建，按下就触发，免得点击落空
+        link.addEventListener('pointerdown', (event) => {
+          if (event.button !== 0) return;
+          const target = this.questTarget(world, quest);
+          if (target) world.navigate(target);
+        });
+        const boots = document.createElement('button');
+        const count = player.bag[FLYING_BOOTS] ?? 0;
+        boots.className = 'quest-fly';
+        boots.classList.toggle('unusable', count === 0);
+        boots.title = `飞行靴（剩 ${count}）：直接飞到任务目的地`;
+        const icon = document.createElement('img');
+        icon.src = iconUrl(FLYING_BOOTS);
+        icon.alt = '飞行靴';
+        icon.draggable = false;
+        const label = document.createElement('span');
+        label.textContent = String(count);
+        boots.append(icon, label);
+        boots.addEventListener('pointerdown', (event) => {
+          if (event.button !== 0) return;
+          const target = this.questTarget(world, quest);
+          if (target) world.flyTo(target);
+        });
+        row.append(link, boots);
         return row;
       }),
     );
   }
 
-  private navigateTo(world: World, quest: QuestDef): void {
+  /** 没接的任务去找发任务的人，接了的去任务目的地，完成了回交任务的人。 */
+  private questTarget(world: World, quest: QuestDef): RouteTarget | null {
     const available = !world.player.quests.active.some((progress) => progress.id === quest.id);
     const giver = this.config.npcs[quest.giver];
-    const target =
-      available && giver
-        ? { mapId: giver.map, cell: { x: giver.x, y: giver.y }, npc: giver }
-        : questDestination(world, quest, world.player);
-    if (target) world.navigate(target);
+    return available && giver
+      ? { mapId: giver.map, cell: { x: giver.x, y: giver.y }, npc: giver }
+      : questDestination(world, quest, world.player);
   }
 
   private updateBoss(world: World): void {
@@ -178,18 +214,15 @@ export class Hud {
     this.slots.forEach((view, slot) => {
       const entry = player.hotbar[slot];
       let label = '';
-      let title = '';
       let usable = false;
       let cooldown = 0;
       if (entry?.kind === 'skill') {
         const skill = this.config.skills[entry.id];
-        title = skill?.name ?? '';
         const left = player.skillCooldowns[entry.id] ?? 0;
         cooldown = skill ? left / skill.cooldown : 0;
         usable = !!skill && left <= 0 && player.mp >= skill.mpCost;
       } else if (entry?.kind === 'item') {
         const count = player.bag[entry.id] ?? 0;
-        title = this.config.items[entry.id]?.name ?? '';
         label = `×${count}`;
         usable = count > 0;
       }
@@ -199,7 +232,6 @@ export class Hud {
         view.icon.hidden = !iconId;
         if (iconId) view.icon.src = iconUrl(iconId);
       }
-      view.button.title = title;
       view.label.textContent = label;
       view.button.classList.toggle('unusable', !usable);
       view.cooldown.style.height = `${cooldown * 100}%`;

@@ -1,6 +1,8 @@
 import type { SkillDef, SkillEffect } from '../game/config';
 import type { World } from '../game/world';
 import { iconImage } from './icons';
+import { skillDetail } from './skillInfo';
+import { attachTooltip, hideOrphanTooltip, hideTooltip } from './tooltip';
 
 function describeEffect(effect: SkillEffect, range: number): string {
   const reach = range > 1 ? `，射程 ${range}` : '';
@@ -53,6 +55,7 @@ export class SkillPanel {
   private toggle(): void {
     this.panel.hidden = !this.panel.hidden;
     if (!this.panel.hidden) this.render();
+    else hideTooltip();
   }
 
   private render(): void {
@@ -66,6 +69,7 @@ export class SkillPanel {
       .filter((skill) => skill.classId === player.def.id && !advanced.has(skill.id))
       .sort((a, b) => a.level - b.level);
     this.panel.replaceChildren(title, ...skills.map((skill) => this.row(skill)));
+    hideOrphanTooltip();
   }
 
   private row(skill: SkillDef): HTMLElement {
@@ -86,6 +90,7 @@ export class SkillPanel {
     const detail = document.createElement('small');
     detail.textContent = `${describeEffect(skill.effect, skill.range)}，冷却 ${skill.cooldown} 秒`;
     row.append(name, state, detail);
+    attachTooltip(row, () => skillDetail(this.world, skill));
     const { maxLevel, goldCost, material } = this.world.config.game.skillUpgrade;
     if (learned && level < maxLevel) {
       const upgrade = document.createElement('button');

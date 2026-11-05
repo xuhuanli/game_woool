@@ -1,33 +1,24 @@
-import type { BonusStat, DamageStat, GameConfig, SetDef, SpecialDef } from '../game/config';
-import {
-  EQUIP_SLOTS,
-  equipmentBonuses,
-  equipmentColor,
-  equipmentName,
-  SLOT_NAMES,
-  slotsFor,
-  type EquipSlot,
-  type Equipment,
-} from '../game/equipment';
-import { itemSources } from '../game/sources';
+import { isBound, type DamageStat, type GameConfig } from '../game/config';
+import { EQUIP_SLOTS, equipmentColor, equipmentName, SLOT_NAMES, type EquipSlot } from '../game/equipment';
 import { breakthroughChance, pendingBreakthrough, realmName } from '../game/realm';
 import type { World } from '../game/world';
 import { iconImage } from './icons';
+import { findEquipment, itemDetail, type ItemRef } from './itemInfo';
+import { attachTooltip, hideOrphanTooltip, hideTooltip } from './tooltip';
 
-const STAT_NAMES: Record<Exclude<BonusStat, 'primary'>, string> = {
-  maxHp: '生命',
-  maxMp: '灵力',
-  attack: '攻击',
-  magic: '魔法',
-  dao: '道术',
-  defense: '防御',
-  magicDefense: '魔防',
-  accuracy: '命中',
-  evasion: '闪避',
-  luck: '幸运',
-};
+const BAG_COLUMNS = 8;
+const BAG_MIN_CELLS = 40;
+/** 按下后移动超过这么多像素才算拖动，免得点击被当成拖动 */
+const DRAG_START_PIXELS = 5;
+/** 选中会重建格子，双击自己按两次单击的间隔判断 */
+const DOUBLE_CLICK_MS = 400;
 
-type Selection = { kind: 'equipment'; uid: number } | { kind: 'stack'; id: string } | null;
+interface Drag {
+  ref: ItemRef;
+  startX: number;
+  startY: number;
+  ghost: HTMLImageElement | null;
+}
 
 function el<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -40,11 +31,19 @@ function el<K extends keyof HTMLElementTagNameMap>(
   return element;
 }
 
-/** 角色与背包面板。只在内容变化时重建 DOM。 */
+const sameRef = (a: ItemRef | null, b: ItemRef) =>
+  !!a && (a.kind === 'equipment' ? b.kind === 'equipment' && a.uid === b.uid : b.kind === 'stack' && a.id === b.id);
+
+/**
+ * 角色与背包面板。背包是图标网格：悬停看详情，单击选中，双击或右键使用，
+ * 拖到背包外丢弃。只在内容变化时重建 DOM。
+ */
 export class Panels {
   private readonly character = el('section', 'panel panel-character');
   private readonly bag = el('section', 'panel panel-bag');
-  private selection: Selection = null;
+  private selection: ItemRef | null = null;
+  private drag: Drag | null = null;
+  private lastClick: { ref: ItemRef; at: number } | null = null;
   private signature = '';
 
   constructor(
@@ -65,6 +64,8 @@ export class Panels {
       else if (event.key === 'b' || event.key === 'B') this.toggle(this.bag);
       else if (event.key === 'Escape') this.closeAll();
     });
+    window.addEventListener('pointermove', (event) => this.moveDrag(event));
+    window.addEventListener('pointerup', (event) => this.endDrag(event));
   }
 
   update(): void {
@@ -88,21 +89,20 @@ export class Panels {
     this.signature = signature;
     this.renderCharacter();
     this.renderBag();
+    hideOrphanTooltip();
   }
 
   private toggle(panel: HTMLElement): void {
     panel.hidden = !panel.hidden;
     if (panel.hidden && this.character.hidden && this.bag.hidden) this.selection = null;
+    hideTooltip();
   }
 
   private closeAll(): void {
     this.character.hidden = true;
     this.bag.hidden = true;
     this.selection = null;
-  }
-
-  private select(selection: Selection): void {
-    this.selection = selection;
+    hideTooltip();
   }
 
   // ---- 角色面板 ----
@@ -181,11 +181,14 @@ export class Panels {
     }
     row.append(name);
     if (equipment) {
-      row.classList.toggle('selected', this.isSelected(equipment));
+      const ref: ItemRef = { kind: 'equipment', uid: equipment.uid };
+      row.classList.toggle('selected', sameRef(this.selection, ref));
       row.addEventListener('click', () => {
         this.bag.hidden = false;
-        this.select({ kind: 'equipment', uid: equipment.uid });
+        if (this.isDoubleClick(ref)) this.world.inventory.unequip(slot);
+        else this.selection = ref;
       });
+      attachTooltip(row, () => itemDetail(this.world, ref));
     }
     return row;
   }
@@ -194,193 +197,192 @@ export class Panels {
 
   private renderBag(): void {
     const { player } = this.world;
+    const refs: ItemRef[] = [
+      ...player.equipBag.map((equipment): ItemRef => ({ kind: 'equipment', uid: equipment.uid })),
+      ...Object.keys(player.bag)
+        .filter((id) => (player.bag[id] ?? 0) > 0)
+        .map((id): ItemRef => ({ kind: 'stack', id })),
+    ];
     const grid = el('div', 'bag-grid');
-    for (const equipment of player.equipBag) {
-      const cell = el('button', 'bag-cell', equipmentName(equipment, this.config));
-      cell.prepend(iconImage(equipment.itemId));
-      cell.style.color = equipmentColor(equipment, this.config);
-      cell.classList.toggle('selected', this.isSelected(equipment));
-      cell.addEventListener('click', () => this.select({ kind: 'equipment', uid: equipment.uid }));
-      grid.append(cell);
-    }
-    for (const [id, count] of Object.entries(player.bag)) {
-      const label = `${this.config.items[id]?.name ?? id}×${count}`;
-      const cell = el('button', 'bag-cell', label);
-      cell.prepend(iconImage(id));
-      const selected = this.selection?.kind === 'stack' && this.selection.id === id;
-      cell.classList.toggle('selected', selected);
-      cell.addEventListener('click', () => this.select({ kind: 'stack', id }));
-      grid.append(cell);
-    }
+    for (const ref of refs) grid.append(this.bagCell(ref));
+    const total = Math.max(BAG_MIN_CELLS, Math.ceil(refs.length / BAG_COLUMNS) * BAG_COLUMNS);
+    for (let i = refs.length; i < total; i++) grid.append(el('div', 'bag-cell empty'));
 
     const footer = el(
       'div',
       'bag-footer',
       `法器 ${player.equipBag.length} / ${this.config.affixes.bagCapacity} · 灵石 ${player.gold}`,
     );
-    this.bag.replaceChildren(this.titleBar('背包', this.bag), grid, footer, this.detail());
+    this.bag.replaceChildren(this.titleBar('背包', this.bag), grid, footer, this.actionBar());
   }
 
-  private titleBar(title: string, panel: HTMLElement): HTMLElement {
-    const bar = el('header', 'panel-title');
-    const close = el('button', 'panel-close', '×');
-    close.addEventListener('click', () => this.toggle(panel));
-    bar.append(el('span', '', title), close);
-    return bar;
-  }
-
-  private isSelected(equipment: Equipment): boolean {
-    return this.selection?.kind === 'equipment' && this.selection.uid === equipment.uid;
-  }
-
-  // ---- 物品详情 ----
-
-  private detail(): HTMLElement {
-    const box = el('div', 'detail');
+  private bagCell(ref: ItemRef): HTMLElement {
     const { player } = this.world;
-    const selection = this.selection;
+    const cell = el('button', 'bag-cell');
+    if (ref.kind === 'equipment') {
+      const equipment = player.equipBag.find((candidate) => candidate.uid === ref.uid)!;
+      cell.append(iconImage(equipment.itemId));
+      cell.style.borderColor = equipmentColor(equipment, this.config);
+      const item = this.config.items[equipment.itemId];
+      if (item && (item.level ?? 1) > player.level) cell.classList.add('too-high');
+    } else {
+      cell.append(iconImage(ref.id));
+      const count = player.bag[ref.id] ?? 0;
+      if (count > 1) cell.append(el('span', 'bag-count', String(count)));
+    }
+    cell.classList.toggle('selected', sameRef(this.selection, ref));
+    cell.addEventListener('click', () => {
+      if (this.isDoubleClick(ref)) this.useRef(ref);
+      else this.selection = ref;
+    });
+    cell.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+      this.useRef(ref);
+    });
+    cell.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0) return;
+      this.drag = { ref, startX: event.clientX, startY: event.clientY, ghost: null };
+    });
+    attachTooltip(cell, () => itemDetail(this.world, ref));
+    return cell;
+  }
 
-    if (selection?.kind === 'stack') {
+  private isDoubleClick(ref: ItemRef): boolean {
+    const now = performance.now();
+    const double = !!this.lastClick && sameRef(this.lastClick.ref, ref) && now - this.lastClick.at < DOUBLE_CLICK_MS;
+    this.lastClick = double ? null : { ref, at: now };
+    return double;
+  }
+
+  /** 双击或右键：法器装备，丹药符箓使用，功法书研读。 */
+  private useRef(ref: ItemRef): void {
+    const { inventory } = this.world;
+    if (ref.kind === 'equipment') {
+      inventory.equip(ref.uid);
+    } else {
+      const item = this.config.items[ref.id];
+      if (item && (item.kind === 'potion' || item.kind === 'scroll' || item.kind === 'book')) inventory.useItem(ref.id);
+    }
+    hideTooltip();
+  }
+
+  // ---- 拖动丢弃 ----
+
+  private moveDrag(event: PointerEvent): void {
+    const drag = this.drag;
+    if (!drag) return;
+    if (!drag.ghost) {
+      if (Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY) < DRAG_START_PIXELS) return;
+      drag.ghost = iconImage(this.refItemId(drag.ref) ?? '');
+      drag.ghost.className = 'drag-ghost';
+      document.body.append(drag.ghost);
+      hideTooltip();
+    }
+    drag.ghost.style.left = `${event.clientX}px`;
+    drag.ghost.style.top = `${event.clientY}px`;
+  }
+
+  private endDrag(event: PointerEvent): void {
+    const drag = this.drag;
+    this.drag = null;
+    if (!drag?.ghost) return;
+    drag.ghost.remove();
+    const target = document.elementFromPoint(event.clientX, event.clientY);
+    if (target && this.bag.contains(target)) return;
+    if (target && this.character.contains(target)) {
+      if (drag.ref.kind === 'equipment') this.world.inventory.equip(drag.ref.uid);
+      return;
+    }
+    if (drag.ref.kind === 'equipment') this.world.discard(drag.ref.uid);
+    else this.world.discardStack(drag.ref.id);
+    if (sameRef(this.selection, drag.ref)) this.selection = null;
+  }
+
+  private refItemId(ref: ItemRef): string | null {
+    if (ref.kind === 'stack') return ref.id;
+    return findEquipment(this.world, ref.uid)?.equipment.itemId ?? null;
+  }
+
+  // ---- 选中物品的操作 ----
+
+  /** 选中物品的名字和操作按钮，详细说明看悬停浮窗，面板不会被长说明撑高。 */
+  private actionBar(): HTMLElement {
+    const box = el('div', 'bag-actions');
+    const selection = this.selection;
+    const { player, inventory } = this.world;
+    if (!selection) {
+      box.append(el('div', 'detail-hint', '悬停看详情 · 双击或右键使用 · 拖到背包外丢弃'));
+      return box;
+    }
+    const actions = el('div', 'detail-actions');
+    if (selection.kind === 'stack') {
       const item = this.config.items[selection.id];
       if (!item || !player.bag[selection.id]) return box;
-      box.append(el('div', 'detail-name', item.name));
-      if (item.heal) box.append(el('div', '', `回复 ${item.heal} 点生命`));
-      if (item.mana) box.append(el('div', '', `回复 ${item.mana} 点灵力`));
-      if (item.id === this.config.affixes.refine.material) box.append(el('div', '', '用于祭炼武器'));
-      else if (item.id === this.config.game.skillUpgrade.material) box.append(el('div', '', '用于修炼功法'));
-      else if (this.questsCollecting(item.id).length) {
-        box.append(el('div', '', `任务材料：${this.questsCollecting(item.id).join('、')}`));
-      }
-      if (item.scroll) box.append(el('div', '', item.scroll === 'recall' ? '回到主城' : '在当前地图随机传送'));
-      const skill = this.config.skills[item.skill ?? ''];
-      if (item.kind === 'book' && skill) {
-        const owner = this.config.classes[skill.classId]?.name ?? '';
-        box.append(el('div', '', `${owner}功法，${skill.level} 级可研读`));
-      }
-      box.append(this.sourceInfo(item.id));
-      if (item.kind === 'potion' || item.kind === 'scroll') {
-        box.append(this.action('使用', () => this.world.inventory.useItem(selection.id)));
+      box.append(el('div', 'detail-name', `${item.name} ×${player.bag[selection.id]}`));
+      if (item.kind === 'potion' || (item.kind === 'scroll' && item.scroll !== 'fly')) {
+        actions.append(this.action('使用', () => inventory.useItem(selection.id)));
       } else if (item.kind === 'book') {
-        box.append(this.action('研读', () => this.world.inventory.useItem(selection.id)));
+        actions.append(this.action('研读', () => inventory.useItem(selection.id)));
       }
-      return box;
-    }
-    if (selection?.kind !== 'equipment') {
-      box.append(el('div', 'detail-hint', '点法器或物品查看详情'));
+      if (!isBound(item)) actions.append(this.action('丢弃', () => this.world.discardStack(selection.id)));
+      box.append(actions);
       return box;
     }
 
-    const wornSlot = EQUIP_SLOTS.find((slot) => player.equipment[slot]?.uid === selection.uid);
-    const equipment = wornSlot
-      ? player.equipment[wornSlot]
-      : player.equipBag.find((candidate) => candidate.uid === selection.uid);
-    const item = equipment && this.config.items[equipment.itemId];
-    if (!equipment || !item) return box;
-
+    const found = findEquipment(this.world, selection.uid);
+    const item = found && this.config.items[found.equipment.itemId];
+    if (!found || !item) return box;
+    const { equipment, slot } = found;
     const name = el('div', 'detail-name', equipmentName(equipment, this.config));
     name.style.color = equipmentColor(equipment, this.config);
-    box.append(name, el('div', '', `需要等级 ${item.level ?? 1}`));
-    for (const bonus of equipmentBonuses(equipment, item)) {
-      box.append(el('div', '', `${this.bonusName(bonus.stat)} +${bonus.value}`));
-    }
-    if (item.special) box.append(el('div', 'detail-special', this.specialText(item.special)));
-    const boss = item.boss && this.config.monsters[item.boss];
-    if (boss) box.append(el('div', 'detail-special', `${boss.name}专属，首次击败必掉`));
-    const set = Object.values(this.config.sets).find((candidate) => candidate.pieces.includes(item.id));
-    if (set) box.append(this.setInfo(set));
-    box.append(this.sourceInfo(item.id));
-    if (!wornSlot) box.append(this.comparison(equipment));
-
-    const actions = el('div', 'detail-actions');
-    if (wornSlot) {
-      actions.append(this.action('卸下', () => this.world.inventory.unequip(wornSlot)));
+    box.append(name);
+    if (slot) {
+      actions.append(this.action('卸下', () => inventory.unequip(slot)));
     } else {
-      actions.append(this.action('装备', () => this.world.inventory.equip(equipment.uid)));
-      actions.append(this.action('丢弃', () => this.world.discard(equipment.uid)));
+      actions.append(this.action('装备', () => inventory.equip(equipment.uid)));
+      if (!isBound(item)) actions.append(this.action('丢弃', () => this.world.discard(equipment.uid)));
     }
     if (item.slot === 'weapon') {
       const { goldCost, material } = this.config.affixes.refine;
       const stones = player.bag[material] ?? 0;
-      actions.append(this.action('祭炼', () => this.world.inventory.refine(equipment.uid)));
-      box.append(el('div', 'detail-hint', `祭炼消耗祭炼石 1（有 ${stones}）、灵石 ${goldCost}`));
+      actions.append(this.action('祭炼', () => inventory.refine(equipment.uid)));
+      box.append(actions, el('div', 'detail-hint', `祭炼消耗祭炼石 1（有 ${stones}）、灵石 ${goldCost}`));
+      return box;
     }
     box.append(actions);
     return box;
   }
 
-  private questsCollecting(itemId: string): string[] {
-    return Object.values(this.config.quests)
-      .filter((quest) => quest.objectives.some((objective) => objective.type === 'collect' && objective.target === itemId))
-      .map((quest) => quest.name);
-  }
+  // ---- 通用 ----
 
-  private sourceInfo(itemId: string): HTMLElement {
-    const sources = itemSources(this.config, this.world.player, itemId);
-    const box = el('div', 'detail-source');
-    box.append(el('div', '', sources.length ? '来源：' : '来源：暂无'));
-    for (const source of sources) box.append(el('div', '', `· ${source}`));
-    return box;
-  }
-
-  private specialText(special: SpecialDef): string {
-    switch (special.kind) {
-      case 'stun':
-        return `攻击时 ${Math.round(special.chance * 100)}% 概率定身 ${special.seconds} 秒`;
-      case 'revive':
-        return `致命伤时原地复活，冷却 ${special.seconds} 秒`;
-      case 'manaShield':
-        return `${Math.round(special.ratio * 100)}% 伤害由灵力承担`;
-      case 'teleport':
-        return `按 T 随机传送，冷却 ${special.seconds} 秒`;
-    }
-  }
-
-  private setInfo(set: SetDef): HTMLElement {
-    const wornItems = Object.values(this.world.player.equipment).map((worn) => worn.itemId);
-    const count = set.pieces.filter((piece) => wornItems.includes(piece)).length;
-    const box = el('div', 'detail-set');
-    box.append(el('div', '', `${set.name}（已穿 ${count}/${set.pieces.length}）`));
-    for (const tier of set.bonuses) {
-      const bonus = Object.entries(tier.bonus)
-        .map(([stat, value]) => `${this.bonusName(stat as BonusStat)} +${value}`)
-        .join('，');
-      box.append(el('div', count >= tier.count ? '' : 'detail-hint', `${tier.count} 件：${bonus}`));
-    }
-    return box;
-  }
-
-  /** 和同栏位已穿的法器对比，戒指和手镯取第一个栏位。 */
-  private comparison(equipment: Equipment): HTMLElement {
-    const { items } = this.config;
-    const item = items[equipment.itemId]!;
-    const slots = slotsFor(item);
-    const worn = slots.map((slot) => this.world.player.equipment[slot]).find(Boolean);
-    const box = el('div', 'detail-compare');
-    if (!worn) {
-      box.textContent = '该栏位未穿戴';
-      return box;
-    }
-    const total = (target: Equipment) => {
-      const sum = new Map<BonusStat, number>();
-      for (const { stat, value } of equipmentBonuses(target, items[target.itemId]!)) {
-        sum.set(stat, (sum.get(stat) ?? 0) + value);
-      }
-      return sum;
-    };
-    const next = total(equipment);
-    const current = total(worn);
-    box.append(el('div', 'detail-hint', `对比 ${equipmentName(worn, this.config)}`));
-    for (const stat of new Set([...next.keys(), ...current.keys()])) {
-      const change = (next.get(stat) ?? 0) - (current.get(stat) ?? 0);
-      if (change === 0) continue;
-      const text = `${this.bonusName(stat)} ${change > 0 ? '+' : ''}${change}`;
-      box.append(el('div', change > 0 ? 'detail-better' : 'detail-missing', text));
-    }
-    return box;
-  }
-
-  private bonusName(stat: BonusStat): string {
-    return STAT_NAMES[stat === 'primary' ? this.world.player.def.primaryStat : stat];
+  /** 标题栏可以拖动整个面板。 */
+  private titleBar(title: string, panel: HTMLElement): HTMLElement {
+    const bar = el('header', 'panel-title draggable');
+    const close = el('button', 'panel-close', '×');
+    close.addEventListener('click', () => this.toggle(panel));
+    bar.append(el('span', '', title), close);
+    bar.addEventListener('pointerdown', (event) => {
+      if (event.button !== 0 || event.target === close) return;
+      const rect = panel.getBoundingClientRect();
+      const parent = panel.offsetParent?.getBoundingClientRect() ?? { left: 0, top: 0 };
+      const offsetX = event.clientX - rect.left;
+      const offsetY = event.clientY - rect.top;
+      const move = (moveEvent: PointerEvent) => {
+        const left = Math.min(Math.max(0, moveEvent.clientX - offsetX), innerWidth - 60);
+        const top = Math.min(Math.max(0, moveEvent.clientY - offsetY), innerHeight - 40);
+        panel.style.left = `${left - parent.left}px`;
+        panel.style.top = `${top - parent.top}px`;
+        panel.style.right = 'auto';
+      };
+      const stop = () => {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', stop);
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', stop);
+      event.preventDefault();
+    });
+    return bar;
   }
 
   private action(label: string, run: () => void): HTMLElement {

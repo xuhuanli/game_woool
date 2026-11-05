@@ -291,7 +291,7 @@ body,
 
 #hud .panel-bag {
   right: 12px;
-  width: 300px;
+  width: auto;
 }
 
 #hud .panel-bag {
@@ -345,8 +345,7 @@ body,
   color: #a79c84;
 }
 
-.slot-row.selected,
-.bag-cell.selected {
+.slot-row.selected {
   border-color: #f0cf7a;
 }
 
@@ -369,23 +368,110 @@ body,
 
 .bag-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4px;
+  grid-template-columns: repeat(8, 36px);
+  grid-auto-rows: 36px;
+  gap: 3px;
+  max-height: calc(6 * 39px);
+  overflow-y: auto;
+  padding: 4px;
+  background: #15110a;
+  border: 1px solid #4a3c22;
+  border-radius: 4px;
 }
 
 .bag-cell {
-  display: flex;
-  align-items: center;
-  min-height: 34px;
-  padding: 4px 6px;
-  font: 12px/1.3 inherit;
-  font-family: inherit;
-  color: #efe6d0;
-  text-align: left;
+  position: relative;
+  padding: 2px;
   cursor: pointer;
   background: #2b2418;
-  border: 1px solid transparent;
-  border-radius: 4px;
+  border: 1px solid #3a3020;
+  border-radius: 3px;
+  touch-action: none;
+}
+
+.bag-cell .item-icon {
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+.bag-cell.empty {
+  cursor: default;
+  background: #1d180f;
+}
+
+.bag-cell.too-high .item-icon {
+  filter: saturate(0.3) brightness(0.7);
+}
+
+.bag-cell:not(.empty):hover {
+  background: #3b3020;
+}
+
+.bag-cell.selected {
+  outline: 2px solid #f0cf7a;
+  outline-offset: -1px;
+}
+
+.bag-count {
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  font-size: 11px;
+  color: #fff;
+  text-shadow: 0 0 2px #000, 0 0 2px #000;
+  pointer-events: none;
+}
+
+.bag-actions {
+  min-height: 46px;
+  padding-top: 6px;
+  border-top: 1px solid #4a3c22;
+}
+
+.panel-title.draggable {
+  cursor: move;
+  user-select: none;
+}
+
+.drag-ghost {
+  position: fixed;
+  z-index: 1000;
+  width: 36px;
+  height: 36px;
+  opacity: 0.8;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.tooltip {
+  position: fixed;
+  z-index: 999;
+  max-width: 280px;
+  padding: 8px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #efe6d0;
+  pointer-events: none;
+  background: rgba(16, 12, 6, 0.96);
+  border: 1px solid #8a6a2a;
+  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+.tooltip[hidden] {
+  display: none;
+}
+
+.tooltip-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f0cf7a;
+}
+
+.tooltip-hint {
+  color: #a79c84;
 }
 
 .bag-footer {
@@ -506,6 +592,52 @@ body,
 .quest-link:hover {
   color: #fff;
   text-decoration: underline;
+}
+
+.quest-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.quest-row .quest-link {
+  flex: 1;
+}
+
+.quest-fly {
+  position: relative;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid #8a6a2a;
+  border-radius: 4px;
+  background: rgba(20, 14, 6, 0.8);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.quest-fly img {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.quest-fly span {
+  position: absolute;
+  right: -2px;
+  bottom: -4px;
+  font-size: 10px;
+  color: #fff;
+  text-shadow: 0 0 2px #000;
+}
+
+.quest-fly:hover {
+  border-color: #ffd27a;
+}
+
+.quest-fly.unusable img {
+  filter: grayscale(1) brightness(0.6);
 }
 
 .quests {

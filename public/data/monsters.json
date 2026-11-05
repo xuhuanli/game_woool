@@ -3504,11 +3504,11 @@
     "id": "grass-beast",
     "name": "草原妖兽",
     "stats": {
-      "maxHp": 760,
+      "maxHp": 950,
       "maxMp": 0,
       "attack": {
-        "min": 38,
-        "max": 48
+        "min": 30,
+        "max": 38
       },
       "magic": {
         "min": 0,
@@ -3523,8 +3523,8 @@
         "max": 24
       },
       "magicDefense": {
-        "min": 17,
-        "max": 20
+        "min": 13,
+        "max": 16
       },
       "accuracy": 52,
       "evasion": 11,
@@ -3569,11 +3569,11 @@
     "id": "tuwu-rider",
     "name": "突兀骑兵",
     "stats": {
-      "maxHp": 820,
+      "maxHp": 1020,
       "maxMp": 0,
       "attack": {
-        "min": 40,
-        "max": 50
+        "min": 32,
+        "max": 40
       },
       "magic": {
         "min": 0,
@@ -3588,8 +3588,8 @@
         "max": 26
       },
       "magicDefense": {
-        "min": 18,
-        "max": 21
+        "min": 14,
+        "max": 17
       },
       "accuracy": 53,
       "evasion": 11,
@@ -3628,11 +3628,11 @@
     "id": "tuwu-archer",
     "name": "突兀射手",
     "stats": {
-      "maxHp": 640,
+      "maxHp": 800,
       "maxMp": 0,
       "attack": {
-        "min": 42,
-        "max": 53
+        "min": 34,
+        "max": 42
       },
       "magic": {
         "min": 0,
@@ -3647,8 +3647,8 @@
         "max": 20
       },
       "magicDefense": {
-        "min": 20,
-        "max": 23
+        "min": 16,
+        "max": 19
       },
       "accuracy": 55,
       "evasion": 14,
@@ -3679,7 +3679,7 @@
         "range": 6,
         "shape": "line",
         "size": 6,
-        "multiplier": 1.2
+        "multiplier": 1.1
       }
     ],
     "extraDrops": [
@@ -3693,11 +3693,11 @@
     "id": "tuwu-shaman",
     "name": "突兀巫师",
     "stats": {
-      "maxHp": 680,
+      "maxHp": 850,
       "maxMp": 0,
       "attack": {
-        "min": 43,
-        "max": 54
+        "min": 29,
+        "max": 37
       },
       "magic": {
         "min": 0,
@@ -3712,8 +3712,8 @@
         "max": 21
       },
       "magicDefense": {
-        "min": 23,
-        "max": 26
+        "min": 19,
+        "max": 22
       },
       "accuracy": 55,
       "evasion": 13,
@@ -3746,7 +3746,7 @@
         "size": 1,
         "multiplier": 1.1,
         "poison": {
-          "damage": 16,
+          "damage": 10,
           "duration": 5
         }
       }
@@ -3756,11 +3756,11 @@
     "id": "totem-golem",
     "name": "图腾傀儡",
     "stats": {
-      "maxHp": 1050,
+      "maxHp": 1310,
       "maxMp": 0,
       "attack": {
-        "min": 41,
-        "max": 51
+        "min": 28,
+        "max": 35
       },
       "magic": {
         "min": 0,
@@ -3775,8 +3775,8 @@
         "max": 30
       },
       "magicDefense": {
-        "min": 24,
-        "max": 27
+        "min": 20,
+        "max": 23
       },
       "accuracy": 52,
       "evasion": 8,
@@ -3814,11 +3814,11 @@
     "id": "tuwu-acolyte",
     "name": "仙师弟子",
     "stats": {
-      "maxHp": 720,
+      "maxHp": 900,
       "maxMp": 0,
       "attack": {
-        "min": 45,
-        "max": 56
+        "min": 31,
+        "max": 38
       },
       "magic": {
         "min": 0,
@@ -3833,8 +3833,8 @@
         "max": 23
       },
       "magicDefense": {
-        "min": 24,
-        "max": 27
+        "min": 20,
+        "max": 23
       },
       "accuracy": 57,
       "evasion": 14,
@@ -3865,7 +3865,7 @@
         "range": 6,
         "shape": "circle",
         "size": 1,
-        "multiplier": 1.25
+        "multiplier": 1.1
       }
     ]
   },

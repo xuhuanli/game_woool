@@ -171,8 +171,10 @@ const mean = (values: number[]) => values.reduce((sum, value) => sum + value, 0)
 const round = (value: number) => Math.round(value).toLocaleString('en-US');
 
 console.log(`模拟：挂机到 ${TARGET_LEVEL} 级，最多 ${MAX_HOURS} 小时，每职业 ${SEEDS.length} 个种子。\n`);
-console.log('| 职业 | 到 13 级 | 到 26 级 | 到 30 级 | 到 34 级 | 到 37 级 | 到 40 级 | 死亡 | 回城 | 法器 | 经验/时 | 灵石/时 |');
-console.log('| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |');
+/** 表里列出的等级：各章节的分界，挂到 40 级以上时补上新章节的 */
+const MARKS = [13, 26, 30, 34, 37, 40, 43, 45, 48, 50, 53, 55].filter((level) => level <= TARGET_LEVEL);
+console.log(`| 职业 | ${MARKS.map((level) => `到 ${level} 级`).join(' | ')} | 死亡 | 回城 | 法器 | 经验/时 | 灵石/时 |`);
+console.log(`|${' --- |'.repeat(MARKS.length + 6)}`);
 const rows: Result[][] = [];
 for (const classId of Object.keys(config.classes)) {
   const runs = SEEDS.map((seed) => simulate(classId, seed));
@@ -182,7 +184,7 @@ for (const classId of Object.keys(config.classes)) {
     return times.length === runs.length ? `${(mean(times) / 3600).toFixed(1)} 时` : '未到';
   };
   console.log(
-    `| ${config.classes[classId]!.name} | ${at(13)} | ${at(26)} | ${at(30)} | ${at(34)} | ${at(37)} | ${at(40)} | ` +
+    `| ${config.classes[classId]!.name} | ${MARKS.map(at).join(' | ')} | ` +
       `${round(mean(runs.map((run) => run.deaths)))} | ${round(mean(runs.map((run) => run.recalls)))} | ` +
       `${round(mean(runs.map((run) => run.equipment)))} | ${round(mean(runs.map((run) => run.expPerHour)))} | ` +
       `${round(mean(runs.map((run) => run.goldPerHour)))} |`,

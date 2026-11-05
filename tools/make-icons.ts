@@ -122,6 +122,7 @@ const GLYPHS: Record<string, string> = {
   'ape-blood': 'droplets',
   'serpent-scale': 'scales',
   'recall-scroll': 'scroll-unfurled',
+  'flying-boots': 'boots',
   'random-scroll': 'magic-portal',
   'skill-tome': 'tied-scroll',
   'ascension-token': 'token',
@@ -222,6 +223,7 @@ function render(glyph: string, look: Theme, scale = 0.78): string {
 function itemTheme(item: ItemDef): Theme {
   if (item.kind === 'gold') return GOLD;
   if (item.kind === 'potion') return item.heal ? HEAL : MANA;
+  if (item.scroll === 'fly') return SPECIAL;
   if (item.kind === 'scroll') return SCROLL;
   if (item.kind === 'equip') {
     if (item.special) return SPECIAL;

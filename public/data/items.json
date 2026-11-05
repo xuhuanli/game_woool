@@ -363,6 +363,13 @@
     "scroll": "recall",
     "price": 30
   },
+  "flying-boots": {
+    "id": "flying-boots",
+    "name": "飞行靴",
+    "kind": "scroll",
+    "scroll": "fly",
+    "price": 200
+  },
   "random-scroll": {
     "id": "random-scroll",
     "name": "随机传送符",
@@ -441,12 +448,14 @@
   "ascension-token": {
     "id": "ascension-token",
     "name": "升仙令",
-    "kind": "material"
+    "kind": "material",
+    "bound": true
   },
   "jinzhu-brush": {
     "id": "jinzhu-brush",
     "name": "金竺笔",
-    "kind": "material"
+    "kind": "material",
+    "bound": true
   },
   "jade-marrow": {
     "id": "jade-marrow",
@@ -469,7 +478,8 @@
   "great-transfer-token": {
     "id": "great-transfer-token",
     "name": "大挪移令",
-    "kind": "material"
+    "kind": "material",
+    "bound": true
   },
   "big-potion": {
     "id": "big-potion",
@@ -488,12 +498,14 @@
   "xutian-map": {
     "id": "xutian-map",
     "name": "虚天残图",
-    "kind": "material"
+    "kind": "material",
+    "bound": true
   },
   "xutian-cauldron": {
     "id": "xutian-cauldron",
     "name": "虚天鼎",
-    "kind": "material"
+    "kind": "material",
+    "bound": true
   },
   "book-body-pierce": {
     "id": "book-body-pierce",
@@ -1154,6 +1166,7 @@
   "fengjia-key": {
     "id": "fengjia-key",
     "name": "冯家密窟钥匙",
-    "kind": "material"
+    "kind": "material",
+    "bound": true
   }
 }

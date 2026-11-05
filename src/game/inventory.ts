@@ -66,6 +66,10 @@ export class Inventory {
       this.emit({ type: 'message', text: `没有${item.name}了` });
       return;
     }
+    if (item.scroll === 'fly') {
+      this.emit({ type: 'message', text: `点任务栏右侧的靴子图标使用${item.name}` });
+      return;
+    }
     if (item.kind === 'scroll') {
       this.removeFromBag(itemId);
       this.useScroll(item);

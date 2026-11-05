@@ -170,12 +170,14 @@ export interface ItemDef {
   kind: 'gold' | 'potion' | 'material' | 'equip' | 'scroll' | 'book';
   /** 功法书学会的功法 */
   skill?: string;
-  scroll?: 'recall' | 'random';
+  scroll?: 'recall' | 'random' | 'fly';
   special?: SpecialDef;
   /** Boss 专属法器，填掉落它的 Boss */
   boss?: string;
   /** 种子种出的灵药 */
   seed?: string;
+  /** 绑定物品不能丢弃，Boss 专属法器总是绑定 */
+  bound?: boolean;
   heal?: number;
   mana?: number;
   slot?: 'weapon' | 'armor' | 'helmet' | 'necklace' | 'bracelet' | 'ring';
@@ -387,6 +389,8 @@ export interface GameSettings {
   weakSeconds: number;
   skillUpgrade: { material: string; goldCost: number; maxLevel: number; powerPerLevel: number };
   pickup: { goldRadius: number; itemRadius: number; equipmentRadius: number };
+  /** 所有怪物都会掉的东西，比如飞行靴 */
+  globalDrops: DropEntry[];
 }
 
 export interface GameConfig {
@@ -431,13 +435,24 @@ export const CONFIG_FILES = [
 ] as const;
 
 /** 一种怪的全部掉落：共用掉落表加上它自己的专属掉落。 */
+export function isBound(item: ItemDef): boolean {
+  return !!item.bound || !!item.boss;
+}
+
 export function monsterDrops(config: GameConfig, monster: MonsterDef): DropEntry[] {
-  return [...(config.drops[monster.dropTable] ?? []), ...(monster.extraDrops ?? [])];
+  return [
+    ...(config.drops[monster.dropTable] ?? []),
+    ...(monster.extraDrops ?? []),
+    ...config.game.globalDrops,
+  ];
 }
 
 /** 返回配置表中所有悬空引用，空数组表示配置有效。 */
 export function validateConfig(config: GameConfig): string[] {
   const errors: string[] = [];
+  for (const { item } of config.game.globalDrops) {
+    if (!config.items[item]) errors.push(`通用掉落 ${item} 不存在`);
+  }
   for (const monster of Object.values(config.monsters)) {
     if (!config.drops[monster.dropTable]) {
       errors.push(`怪物 ${monster.id} 的掉落表 ${monster.dropTable} 不存在`);

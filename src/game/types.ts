@@ -110,6 +110,8 @@ export interface RouteTarget {
   cell: Cell;
   /** 到达后与这个 NPC 对话 */
   npc?: NpcDef;
+  /** 到达后开启挂机，优先打这种怪 */
+  hunt?: string;
 }
 
 export interface AutoSettings {
@@ -196,7 +198,7 @@ export interface GroundItem {
   equipment: Equipment | null;
   cell: Cell;
   expiresAt: number;
-  /** 玩家丢弃的法器，一键拾取时跳过 */
+  /** 玩家丢弃的东西，一键拾取、自动吸取和挂机都跳过 */
   discarded?: boolean;
 }
 
