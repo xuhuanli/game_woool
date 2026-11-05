@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+<defs>
+  <radialGradient id="aura" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#7cf0ad" stop-opacity="0.42"/>
+    <stop offset="58%" stop-color="#7cf0ad" stop-opacity="0.12"/>
+    <stop offset="100%" stop-color="#7cf0ad" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="shadow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#000" stop-opacity="0.5"/><stop offset="100%" stop-color="#000" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+     <stop offset="0%" stop-color="#ffe9a8"/><stop offset="48%" stop-color="#e0b757"/><stop offset="100%" stop-color="#7d5a1f"/>
+   </linearGradient>
+  <radialGradient id="body" cx="34%" cy="26%" r="86%">
+     <stop offset="0%" stop-color="#f2fff8"/><stop offset="30%" stop-color="#8fe3b3"/>
+     <stop offset="76%" stop-color="#22553f"/><stop offset="100%" stop-color="#000"/>
+   </radialGradient>
+  <linearGradient id="flat" x1="0.1" y1="0" x2="0.9" y2="1">
+     <stop offset="0%" stop-color="#f2fff8"/><stop offset="38%" stop-color="#8fe3b3"/>
+     <stop offset="100%" stop-color="#22553f"/>
+   </linearGradient>
+</defs>
+<ellipse cx="60" cy="100" rx="26" ry="5" fill="url(#shadow)"/>
+<circle cx="60" cy="58" r="50" fill="url(#aura)"/>
+<g transform="translate(60 60) rotate(3) scale(0.985) translate(-60 -60)">
+<g stroke="#1b1408" stroke-width="2.2" stroke-linejoin="round"><g transform="rotate(-30 60 60)">
+    <path d="M60 14 L66 32 L64 84 L56 84 L54 32 Z" fill="url(#body)"/>
+    <path d="M60 16 L60 82" stroke="#fff" stroke-opacity="0.55" stroke-width="1.1" fill="none"/>
+    <path d="M40 46 L30 54 M44 62 L32 70" stroke="#1b1408" stroke-opacity="0.28" stroke-width="2" fill="none"/>
+      <circle cx="60" cy="8" r="2.6" fill="#fff" fill-opacity="0.7"/>
+    <rect x="44" y="85" width="32" height="6.5" rx="3" fill="url(#gold)"/>
+    <rect x="55.6" y="92" width="8.8" height="17" rx="4" fill="#3a2614"/>
+    <circle cx="60" cy="112" r="4.6" fill="url(#gold)"/>
+  </g></g>
+</g>
+</svg>

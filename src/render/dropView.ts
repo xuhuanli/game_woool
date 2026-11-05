@@ -7,6 +7,8 @@ import { toScreen } from './iso';
 
 const PILLAR_HEIGHT = 150;
 const FLY_MS = 260;
+/** 掉落图标显示尺寸，和 GameScene 里 SVG 图标的加载尺寸一致 */
+const ICON_SIZE = 28;
 
 interface ItemView {
   sprite: Phaser.GameObjects.Image;
@@ -47,6 +49,8 @@ export class DropViews {
     const sprite = scene.add
       .image(x, y - 26, this.texture(item))
       .setOrigin(0.5, 0.75)
+      // 高清图标是 256 的位图，SVG 图标加载时就已经是 28，统一按 28 显示
+      .setDisplaySize(ICON_SIZE, ICON_SIZE)
       .setDepth(y - 1);
     const label = scene.add
       .text(x, y - 22, this.label(item), {

@@ -16,7 +16,7 @@ import {
 import type { AutoSaver } from '../save/autoSaver';
 import type { AutoPanel } from '../ui/autoPanel';
 import type { Hud } from '../ui/hud';
-import { iconUrl } from '../ui/icons';
+import { iconUrl, isHdIcon } from '../ui/icons';
 import type { NpcPanel } from '../ui/npcPanel';
 import type { Panels } from '../ui/panels';
 import { GameAudio } from './audio';
@@ -120,7 +120,9 @@ export class GameScene extends Phaser.Scene {
   preload(): void {
     this.queueAssets(this.currentAssets());
     for (const id of Object.keys(this.world.config.items)) {
-      this.load.svg(`icon-${id}`, iconUrl(id), { width: DROP_ICON_SIZE, height: DROP_ICON_SIZE });
+      // 高清图标是 jpg，SVG 加载器解析位图会抛错，整条加载队列会断在这里
+      if (isHdIcon(id)) this.load.image(`icon-${id}`, iconUrl(id));
+      else this.load.svg(`icon-${id}`, iconUrl(id), { width: DROP_ICON_SIZE, height: DROP_ICON_SIZE });
     }
     this.showLoadProgress();
   }

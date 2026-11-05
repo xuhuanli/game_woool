@@ -1075,9 +1075,9 @@ describe('40 级内容', () => {
 });
 
 describe('图标', () => {
-  it('每个功法和物品都生成了图标', () => {
+  it('每个功法和物品都有新图标：手绘位图或新矢量图', () => {
     const ids = [...Object.keys(config.skills), ...Object.keys(config.items)];
-    const missing = ids.filter((id) => !existsSync(`public/assets/icons/${id}.svg`));
+    const missing = ids.filter((id) => !HD_ICON_IDS.has(id) && !VECTOR_ICON_IDS.has(id));
     expect(missing).toEqual([]);
   });
 

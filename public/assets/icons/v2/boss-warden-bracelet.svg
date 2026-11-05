@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+<defs>
+  <radialGradient id="aura" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#ff998a" stop-opacity="0.42"/>
+    <stop offset="58%" stop-color="#ff998a" stop-opacity="0.12"/>
+    <stop offset="100%" stop-color="#ff998a" stop-opacity="0"/>
+  </radialGradient>
+  <radialGradient id="shadow" cx="50%" cy="50%" r="50%">
+    <stop offset="0%" stop-color="#000" stop-opacity="0.5"/><stop offset="100%" stop-color="#000" stop-opacity="0"/>
+  </radialGradient>
+  <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+     <stop offset="0%" stop-color="#ffe9a8"/><stop offset="48%" stop-color="#e0b757"/><stop offset="100%" stop-color="#7d5a1f"/>
+   </linearGradient>
+  <radialGradient id="body" cx="34%" cy="26%" r="86%">
+     <stop offset="0%" stop-color="#fff0ec"/><stop offset="30%" stop-color="#d9604e"/>
+     <stop offset="76%" stop-color="#4a140c"/><stop offset="100%" stop-color="#000"/>
+   </radialGradient>
+  <linearGradient id="flat" x1="0.1" y1="0" x2="0.9" y2="1">
+     <stop offset="0%" stop-color="#fff0ec"/><stop offset="38%" stop-color="#d9604e"/>
+     <stop offset="100%" stop-color="#4a140c"/>
+   </linearGradient>
+</defs>
+<ellipse cx="60" cy="100" rx="26" ry="5" fill="url(#shadow)"/>
+<circle cx="60" cy="58" r="50" fill="url(#aura)"/>
+<g transform="translate(60 60) rotate(-1) scale(1.045) translate(-60 -60)">
+<g stroke="#1b1408" stroke-width="2.2" stroke-linejoin="round"><circle cx="60" cy="58" r="30" fill="none" stroke="#1b1408" stroke-width="9"/>
+    <circle cx="60" cy="58" r="30" fill="none" stroke="url(#flat)" stroke-width="6.5"/>
+    <path d="M60 28 L60 88" stroke="#1b1408" stroke-opacity="0.35" stroke-width="1.6"/>
+    <path d="M42 36 L78 80" stroke="#1b1408" stroke-opacity="0.2" stroke-width="1.4"/>
+    <circle cx="60" cy="28" r="6" fill="url(#gold)"/></g>
+</g>
+</svg>
