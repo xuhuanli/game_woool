@@ -4,6 +4,8 @@ const WIDTH = 190;
 const HEIGHT = 110;
 const MARGIN = 6;
 const WATER_TILE = 6;
+/** 崖外，小地图上直接留空 */
+const VOID_TILE = 10;
 /** 地形编号的颜色：泥路、岩石、水面、河岸、木桥、石板 */
 const TERRAIN_COLORS: Record<number, string> = {
   4: '#94805a',
@@ -63,6 +65,7 @@ export class Minimap {
       for (let x = 0; x < grid.width; x++) {
         const { px, py } = this.project({ x, y });
         const tile = world.map.ground?.[y * grid.width + x] ?? 0;
+        if (tile === VOID_TILE) continue;
         const walkable = grid.isWalkable({ x, y });
         const open = walkable || tile === WATER_TILE;
         context.fillStyle = open ? (TERRAIN_COLORS[tile] ?? '#4f6038') : '#2b2a26';

@@ -4,7 +4,19 @@ import { Rng } from '../game/rng';
 import { TILE_H, TILE_W, toScreen } from './iso';
 
 /** 地形编号，和 tools/make-map.ts 一致。 */
-const TILE = { grassA: 1, grassB: 2, grassC: 3, dirt: 4, stone: 5, water: 6, sand: 7, bridge: 8, paved: 9 } as const;
+const TILE = {
+  grassA: 1,
+  grassB: 2,
+  grassC: 3,
+  dirt: 4,
+  stone: 5,
+  water: 6,
+  sand: 7,
+  bridge: 8,
+  paved: 9,
+  /** 崖外，不画地面 */
+  void: 10,
+} as const;
 
 const GRASS: Record<number, string> = {
   [TILE.grassA]: '#55663a',
@@ -143,6 +155,69 @@ function paintPaved(context: CanvasRenderingContext2D, painter: Painter, rng: Rn
   });
 }
 
+/**
+ * 崖壁：崖外没有地面，正面两条边向下拉出一段岩壁，地图看起来是一块高地而不是一张纸。
+ * 高度沿崖线缓慢起伏，避免出现整齐的围边。
+ */
+function paintCliff(context: CanvasRenderingContext2D, painter: Painter): void {
+  const { map, offsetX, offsetY } = painter;
+  const tileAt = (x: number, y: number) =>
+    x < 0 || y < 0 || x >= map.width || y >= map.height ? TILE.void : (map.ground?.[y * map.width + x] ?? TILE.void);
+
+  const face = (ax: number, ay: number, bx: number, by: number, drop: number) => {
+    const top = Math.min(ay, by);
+    const bottom = Math.max(ay, by) + drop;
+    const gradient = context.createLinearGradient(0, top, 0, bottom);
+    gradient.addColorStop(0, 'rgba(74, 66, 54, 1)');
+    gradient.addColorStop(0.5, 'rgba(44, 38, 30, 1)');
+    gradient.addColorStop(0.85, 'rgba(24, 20, 15, 0.85)');
+    gradient.addColorStop(1, 'rgba(12, 10, 8, 0)');
+    context.fillStyle = gradient;
+    context.beginPath();
+    context.moveTo(ax, ay);
+    context.lineTo(bx, by);
+    context.lineTo(bx, by + drop);
+    context.lineTo(ax, ay + drop);
+    context.closePath();
+    context.fill();
+    // 岩层纹理
+    context.strokeStyle = 'rgba(14, 12, 9, 0.22)';
+    context.lineWidth = 1;
+    for (let i = 1; i <= 2; i++) {
+      const t = i / 3;
+      context.beginPath();
+      context.moveTo(ax, ay + drop * t);
+      context.lineTo(bx, by + drop * t);
+      context.stroke();
+    }
+    // 崖口的一道亮边
+    context.strokeStyle = 'rgba(126, 116, 96, 0.45)';
+    context.lineWidth = 1.5;
+    context.beginPath();
+    context.moveTo(ax, ay);
+    context.lineTo(bx, by);
+    context.stroke();
+  };
+
+  for (let y = 0; y < map.height; y++) {
+    for (let x = 0; x < map.width; x++) {
+      const tile = tileAt(x, y);
+      // 水面没有崖壁，直接暗下去
+      if (tile === TILE.void || tile === TILE.water) continue;
+      const front = tileAt(x + 1, y) === TILE.void;
+      const side = tileAt(x, y + 1) === TILE.void;
+      if (!front && !side) continue;
+      const { x: sx, y: sy } = toScreen({ x, y });
+      const px = sx + offsetX;
+      const py = sy + offsetY;
+      const wave = Math.sin(x * 0.31 + y * 0.17) + Math.sin(x * 0.11 - y * 0.37);
+      const drop = 64 + wave * 10;
+      if (front) face(px + TILE_W / 2, py, px, py + TILE_H / 2, drop);
+      if (side) face(px - TILE_W / 2, py, px, py + TILE_H / 2, drop);
+    }
+  }
+}
+
 function paintShimmer(painter: Painter, rng: Rng): HTMLCanvasElement {
   const shimmer = createCanvas(Math.ceil(painter.width / 2), Math.ceil(painter.height / 2));
   const { context } = shimmer;
@@ -218,7 +293,8 @@ function paintDecorShadows(
   const painter: Painter = {
     map,
     width: span * (TILE_W / 2),
-    height: span * (TILE_H / 2) + TILE_H * 2,
+    // 底部多留一段，崖壁要画到地图外面
+    height: span * (TILE_H / 2) + TILE_H * 2 + 96,
     offsetX: map.height * (TILE_W / 2),
     offsetY: TILE_H,
   };
@@ -226,6 +302,8 @@ function paintDecorShadows(
   const { canvas, context } = createCanvas(painter.width, painter.height);
 
   forEachTile(painter, (tile, sx, sy) => {
+    // 崖外没有地面，留空露出背景
+    if (tile === TILE.void) return;
     diamondPath(context, sx, sy, 1);
     context.fillStyle = GRASS[tile] ?? GRASS[TILE.grassA]!;
     context.fill();
@@ -245,6 +323,9 @@ function paintDecorShadows(
   softLayer(context, painter, [TILE.water, TILE.bridge], '#2f6e8c', 4, 2);
   softLayer(context, painter, [TILE.water, TILE.bridge], '#25597a', 9, -8);
   paintBridge(context, painter);
+  // 崖口内侧压一层暗影，让地面和崖外自然过渡
+  softLayer(context, painter, [TILE.void], 'rgba(10, 8, 6, 0.5)', 7, 1);
+  paintCliff(context, painter);
   if (shadowWidth) paintDecorShadows(context, painter, map, shadowWidth);
 
   scene.textures.addCanvas(key, canvas);

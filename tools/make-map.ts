@@ -4,11 +4,23 @@
  * 用法：npx tsx tools/make-map.ts
  * 重新生成会覆盖在 Tiled 里做的手工修改。
  */
-import { writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { Rng } from '../src/game/rng';
 
-const GROUND = { grassA: 1, grassB: 2, grassC: 3, dirt: 4, stone: 5, water: 6, sand: 7, bridge: 8, paved: 9 } as const;
-const TILE_COUNT = 9;
+const GROUND = {
+  grassA: 1,
+  grassB: 2,
+  grassC: 3,
+  dirt: 4,
+  stone: 5,
+  water: 6,
+  sand: 7,
+  bridge: 8,
+  paved: 9,
+  /** 崖外，不外露地面，渲染时留空 */
+  void: 10,
+} as const;
+const TILE_COUNT = 10;
 
 type Point = [number, number];
 
@@ -79,6 +91,8 @@ interface MapPlan {
   required?: Point[];
   /** outcrops 是石坡的噪声阈值，越小石坡越多，0 表示没有 */
   edge: { base: number; spread: number; outcrops: number };
+  /** 崖线深浅，1 是默认，0 保留方阵（有城墙的主城用） */
+  rim?: number;
   /** 树的密度：factor 随噪声变化，least 是最低密度 */
   forest: { factor: number; least?: number; denseArea?: Circle };
   foliage: number[];
@@ -1312,6 +1326,21 @@ interface Decor {
   foot?: Rect;
 }
 
+/** 已经配好的 NPC 位置，切崖线时让开，免得人站在崖外。 */
+const NPC_CELLS: { map: string; x: number; y: number }[] = (() => {
+  try {
+    const data = JSON.parse(readFileSync(new URL('../public/data/npcs.json', import.meta.url), 'utf8')) as Record<
+      string,
+      { map?: string; x?: number; y?: number }
+    >;
+    return Object.values(data)
+      .filter((npc) => typeof npc.map === 'string' && Number.isFinite(npc.x) && Number.isFinite(npc.y))
+      .map((npc) => ({ map: npc.map!, x: npc.x!, y: npc.y! }));
+  } catch {
+    return [];
+  }
+})();
+
 function generate(plan: MapPlan): void {
   const { size: SIZE } = plan;
   const OUTPUT = `public/maps/${plan.id}.tmj`;
@@ -1475,6 +1504,65 @@ function generate(plan: MapPlan): void {
     }
   }
 
+  /** 建筑周围留两格地面，免得墙脚悬在崖外 */
+  const nearBuilt = (x: number, y: number) => {
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        if (inside(x + dx, y + dy) && built.has(index(x + dx, y + dy))) return true;
+      }
+    }
+    return false;
+  };
+
+  // 崖线：按噪声削掉最外圈，地图轮廓从规整的菱形变成带着海湾和岬角的山崖。
+  // 先只记掩码，等树石和怪位排完再落地，这样已有的随机序列完全不受影响。
+  const rimScale = plan.rim ?? (SIZE <= 40 ? 0 : 1);
+  const voidMask = new Uint8Array(SIZE * SIZE);
+  if (rimScale > 0) {
+    // 传送点、任务点、怪区、空地、道路、建筑和 NPC 所在的位置不切，免得把内容切掉
+    const reserved = new Uint8Array(SIZE * SIZE);
+    const reserve = (cx: number, cy: number, r: number) => {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (inside(cx + dx, cy + dy)) reserved[index(cx + dx, cy + dy)] = 1;
+        }
+      }
+    };
+    for (const [x, y] of [plan.start, ...(plan.required ?? []), ...plan.portals.map((portal) => portal.cell)]) reserve(x, y, 3);
+    for (const zone of plan.zones ?? []) reserve(zone.x, zone.y, zone.radius + 2);
+    for (const clearing of plan.clearings) reserve(clearing.x, clearing.y, clearing.radius + 1);
+    for (const cell of built) reserved[cell] = 1;
+    for (let i = 0; i < SIZE * SIZE; i++) if (roadDistance[i]! <= 3) reserved[i] = 1;
+    for (const npc of NPC_CELLS) if (npc.map === plan.id) reserve(npc.x, npc.y, 3);
+
+    for (let y = 0; y < SIZE; y++) {
+      for (let x = 0; x < SIZE; x++) {
+        const cell = index(x, y);
+        if (reserved[cell] || nearBuilt(x, y)) continue;
+        if (ground[cell] === GROUND.bridge) continue;
+        const wave = noise(x + 17, y + 29, 9) * 0.55 + noise(x + 61, y + 7, 23) * 0.45;
+        const depth = 0.6 + wave * 13 * rimScale;
+        if (edgeDistance(x, y) >= depth) continue;
+        // 深湾只削石头和草，路面和水面保持原样，免得路断在水里
+        if (ground[cell] === GROUND.dirt || ground[cell] === GROUND.paved) continue;
+        voidMask[cell] = 1;
+      }
+    }
+  }
+
+  // 崖外没有地面，也走不过去。这里先只算掩码，等树石排完再并进障碍层，
+  // 免得打乱随机序列把已有地图的树和怪位全挪一遍。
+
+  /** 靠近崖口的石头，用来沿崖线摆山，把切边藏进山影里 */
+  const nearRim = (x: number, y: number) => {
+    for (let dy = -2; dy <= 2; dy++) {
+      for (let dx = -2; dx <= 2; dx++) {
+        if (inside(x + dx, y + dy) && voidMask[index(x + dx, y + dy)]) return true;
+      }
+    }
+    return false;
+  };
+
   // 树石
   const pick = (options: string[]) => options[rng.int(0, options.length - 1)]!;
   const pickTint = (options: number[]) => options[rng.int(0, options.length - 1)]!;
@@ -1541,6 +1629,19 @@ function generate(plan: MapPlan): void {
     }
   }
 
+  // 落地崖线：崖外既没有地面也走不过去。清掉落在崖外的树石，再沿崖口补一圈山。
+  for (let i = 0; i < voidMask.length; i++) {
+    if (!voidMask[i]) continue;
+    ground[i] = GROUND.void;
+    blocked[i] = true;
+  }
+  for (let i = decor.length - 1; i >= 0; i--) {
+    const item = decor[i]!;
+    const cx = Math.floor(item.x);
+    const cy = Math.floor(item.y);
+    if (inside(cx, cy) && voidMask[index(cx, cy)]) decor.splice(i, 1);
+  }
+
   // 校验并放置怪物
   const reachable = new Set<number>([index(...plan.start)]);
   const queue: Point[] = [plan.start];
@@ -1575,6 +1676,21 @@ function generate(plan: MapPlan): void {
       placed += 1;
     }
     if (placed < zone.count) throw new Error(`${zone.monster} 只放下了 ${placed} 只`);
+  }
+
+  // 崖口补山：沿崖线摆一圈山石，把切边藏进山影里。草地也摆，
+  // 崖线切进草里时同样有一道石岸挡着。
+  if (rimScale > 0) {
+    for (let y = 0; y < SIZE; y += 1) {
+      for (let x = 0; x < SIZE; x += 1) {
+        const cell = index(x, y);
+        const tile = ground[cell];
+        if (tile === GROUND.void || tile === GROUND.water || tile === GROUND.bridge || built.has(cell)) continue;
+        if (!nearRim(x, y)) continue;
+        if (!rng.chance(0.82)) continue;
+        add(pick(['peak-1', 'peak-2', 'peak-3', 'peak-4', 'peak-5']), x, y, 0.6 + rng.next() * 0.45, pickTint(ROCK_TINT));
+      }
+    }
   }
 
   // 输出 Tiled 文件
@@ -1715,4 +1831,8 @@ function smooth(points: Point[]): Point[] {
   return result;
 }
 
-for (const plan of MAPS) generate(plan);
+/** 调参时只重生成一张：MAP_ONLY=map-id npx tsx tools/make-map.ts */
+const only = process.env.MAP_ONLY;
+for (const plan of MAPS) {
+  if (!only || plan.id === only) generate(plan);
+}

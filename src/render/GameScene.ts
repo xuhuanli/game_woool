@@ -393,6 +393,8 @@ export class GameScene extends Phaser.Scene {
       for (let x = 0; x < grid.width; x++) {
         const { x: sx, y: sy } = toScreen({ x, y });
         const tile = tiles?.[y * grid.width + x];
+        // 10 是崖外，没有地面
+        if (tile === 10) continue;
         ground.fillStyle(palette[tile ? tile - 1 : (x * 7 + y * 13) % 3] ?? DIRT_COLOR, 1);
         ground.fillPoints(diamond(sx, sy), true);
         const isNpc = this.world.npcs.some((npc) => npc.x === x && npc.y === y);

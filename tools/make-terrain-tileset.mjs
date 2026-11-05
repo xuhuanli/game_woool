@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** 生成 Tiled 用的地形图块 public/maps/terrain.png：三种草地、泥路、岩石、水面、河岸、木桥、石板。 */
+/** 生成 Tiled 用的地形图块 public/maps/terrain.png：三种草地、泥路、岩石、水面、河岸、木桥、石板、崖外。 */
 import { writeFileSync } from 'node:fs';
 import { deflateSync, crc32 } from 'node:zlib';
 
@@ -15,6 +15,7 @@ const COLORS = [
   [0xb8, 0xa8, 0x7a],
   [0x7a, 0x55, 0x33],
   [0x8f, 0x8b, 0x80],
+  [0x0d, 0x0b, 0x08],
 ];
 
 const width = TILE_W * COLORS.length;
